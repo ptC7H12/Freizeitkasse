@@ -193,7 +193,7 @@ class RulesetParserService {
     };
   }
 
-  static List<String> _validateAgeGroups(List ageGroups) {
+  static List<String> _validateAgeGroups(List<dynamic> ageGroups) {
     final errors = <String>[];
 
     for (var i = 0; i < ageGroups.length; i++) {

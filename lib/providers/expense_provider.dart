@@ -58,10 +58,10 @@ final expenseStatisticsProvider = FutureProvider<Map<String, dynamic>>((ref) asy
   final currentEvent = ref.watch(currentEventProvider);
 
   if (currentEvent == null) {
-    return {
+    return <String, dynamic>{
       'total': 0.0,
       'count': 0,
-      'byCategory': {},
+      'byCategory': <String, dynamic>{},
       'mostExpensiveCategory': null,
       'mostExpensiveCategoryAmount': 0.0,
       'averageExpense': 0.0,

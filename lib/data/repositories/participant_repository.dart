@@ -348,9 +348,9 @@ class ParticipantRepository {
     try {
       // TODO: Implement JSON parsing
       // Für jetzt: Return leere Struktur
-      return {};
+      return <String, dynamic>{};
     } catch (e) {
-      return {};
+      return <String, dynamic>{};
     }
   }
 

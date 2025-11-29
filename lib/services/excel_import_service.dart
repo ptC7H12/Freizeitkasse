@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:excel/excel.dart';
-import '../data/database/app_database.dart';
 import '../data/repositories/participant_repository.dart';
 
 class ExcelImportService {

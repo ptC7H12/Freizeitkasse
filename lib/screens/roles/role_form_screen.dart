@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/repositories/role_repository.dart';
 import '../../providers/role_provider.dart';
 import '../../providers/current_event_provider.dart';
 

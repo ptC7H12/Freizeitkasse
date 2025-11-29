@@ -168,7 +168,6 @@ class CashStatusScreen extends ConsumerWidget {
                   data: (totalIncomes) => totalExpensesAsync.when(
                     data: (totalExpenses) {
                       final balance = totalIncomes - totalExpenses;
-                      final expectedBalance = totalPayments - totalExpenses;
                       final outstanding = totalPayments - totalIncomes;
 
                       return Column(

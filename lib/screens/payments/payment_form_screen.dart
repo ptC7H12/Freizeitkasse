@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/database/app_database.dart';
 import '../../providers/payment_provider.dart';
 import '../../providers/current_event_provider.dart';
-import '../../providers/database_provider.dart';
 import '../../providers/participant_provider.dart';
 import '../../providers/family_provider.dart';
 import '../../utils/validators.dart';
