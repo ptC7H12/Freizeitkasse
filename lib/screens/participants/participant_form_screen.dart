@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
-import '../../data/database/app_database.dart';
+import '../../data/database/app_database.dart' as db;
 import '../../providers/participant_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
@@ -82,8 +82,8 @@ class _ParticipantFormScreenState
           _cityController.text = participant.city ?? '';
           _phoneController.text = participant.phone ?? '';
           _emailController.text = participant.email ?? '';
-          _emergencyContactController.text = participant.emergencyContact ?? '';
-          _emergencyPhoneController.text = participant.emergencyPhone ?? '';
+          _emergencyContactController.text = participant.emergencyContactName ?? '';
+          _emergencyPhoneController.text = participant.emergencyContactPhone ?? '';
           _medicalNotesController.text = participant.medicalNotes ?? '';
           _allergiesController.text = participant.allergies ?? '';
           _dietaryRestrictionsController.text =
@@ -458,7 +458,7 @@ class _ParticipantFormScreenState
       return const SizedBox.shrink();
     }
 
-    return StreamBuilder<List<Family>>(
+    return StreamBuilder<List<db.Family>>(
       stream: (database.select(database.families)
             ..where((tbl) => tbl.eventId.equals(eventId)))
           .watch(),
@@ -479,7 +479,7 @@ class _ParticipantFormScreenState
             ...families.map(
               (family) => DropdownMenuItem(
                 value: family.id,
-                child: Text(family.familyName),
+                child: Text(family.familyName ?? ''),
               ),
             ),
           ],

@@ -59,7 +59,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
     final income = await ref.read(incomeByIdProvider(widget.incomeId!).future);
     if (income != null && mounted) {
       setState(() {
-        _selectedSource = income.source;
+        _selectedSource = income.source ?? 'Teilnehmerbeitrag';
         _amountController.text = income.amount.toStringAsFixed(2);
         _selectedDate = income.incomeDate;
         _descriptionController.text = income.description ?? '';
