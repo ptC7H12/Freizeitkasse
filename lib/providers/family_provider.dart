@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/repositories/family_repository.dart';
-import '../data/database/app_database.dart';
+import '../data/database/app_database.dart' as db;
 import 'database_provider.dart';
 import 'current_event_provider.dart';
 
@@ -11,7 +11,7 @@ final familyRepositoryProvider = Provider<FamilyRepository>((ref) {
 });
 
 /// Provider für Familien-Liste des aktuellen Events
-final familiesProvider = StreamProvider<List<Family>>((ref) {
+final familiesProvider = StreamProvider<List<db.Family>>((ref) {
   final repository = ref.watch(familyRepositoryProvider);
   final eventId = ref.watch(currentEventIdProvider);
 
@@ -23,7 +23,7 @@ final familiesProvider = StreamProvider<List<Family>>((ref) {
 });
 
 /// Provider für einzelne Familie
-final familyProvider = StreamProvider.family<Family?, int>((ref, familyId) {
+final familyProvider = StreamProvider.family<db.Family?, int>((ref, familyId) {
   final database = ref.watch(databaseProvider);
   return (database.select(database.families)
         ..where((tbl) => tbl.id.equals(familyId)))

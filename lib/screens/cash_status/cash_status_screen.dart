@@ -36,20 +36,16 @@ class CashStatusScreen extends ConsumerWidget {
             icon: const Icon(Icons.download),
             onPressed: () async {
               final pdfService = ref.read(pdfExportServiceProvider);
-              final totalIncomesAsync = ref.read(totalIncomesProvider);
-              final totalExpensesAsync = ref.read(totalExpensesProvider);
-              final expensesByCategoryAsync = ref.read(expensesByCategoryProvider);
-              final incomesBySourceAsync = ref.read(incomesBySourceProvider);
-
               final payments = await (database.select(database.payments)
-                    ..where((t) => t.eventId.equals(currentEvent.id) & t.isActive.equals(true)))
+                    ..where((t) => t.eventId.equals(currentEvent.id))
+                    ..where((t) => t.isActive.equals(true)))
                   .get();
               final totalPayments = payments.fold<double>(0, (sum, p) => sum + p.amount);
 
-              final totalIncomes = await totalIncomesAsync.future;
-              final totalExpenses = await totalExpensesAsync.future;
-              final expensesByCategory = await expensesByCategoryAsync.future;
-              final incomesBySource = await incomesBySourceAsync.future;
+              final totalIncomes = await ref.read(totalIncomesProvider.future);
+              final totalExpenses = await ref.read(totalExpensesProvider.future);
+              final expensesByCategory = await ref.read(expensesByCategoryProvider.future);
+              final incomesBySource = await ref.read(incomesBySourceProvider.future);
 
               try {
                 final filePath = await pdfService.exportFinancialReport(
