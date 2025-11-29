@@ -58,10 +58,10 @@ final incomeStatisticsProvider = FutureProvider<Map<String, dynamic>>((ref) asyn
   final currentEvent = ref.watch(currentEventProvider);
 
   if (currentEvent == null) {
-    return {
+    return <String, dynamic>{
       'total': 0.0,
       'count': 0,
-      'bySource': {},
+      'bySource': <String, dynamic>{},
       'largestSource': null,
       'largestSourceAmount': 0.0,
       'averageIncome': 0.0,

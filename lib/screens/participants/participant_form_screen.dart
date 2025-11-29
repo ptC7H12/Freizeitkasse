@@ -436,7 +436,7 @@ class _ParticipantFormScreenState
             ...roles.map(
               (role) => DropdownMenuItem(
                 value: role.id,
-                child: Text(role.displayName ?? ''),
+                child: Text(role.displayName),
               ),
             ),
           ],
@@ -479,7 +479,7 @@ class _ParticipantFormScreenState
             ...families.map(
               (family) => DropdownMenuItem(
                 value: family.id,
-                child: Text(family.familyName ?? ''),
+                child: Text(family.familyName),
               ),
             ),
           ],

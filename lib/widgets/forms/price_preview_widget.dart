@@ -4,7 +4,6 @@ import 'package:drift/drift.dart' as drift;
 import '../../services/price_calculator_service.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
-import '../../data/database/app_database.dart';
 import '../../utils/date_utils.dart';
 
 /// Live-Preisberechnung Widget

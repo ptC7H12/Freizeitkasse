@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../data/repositories/ruleset_repository.dart';
 import '../../providers/ruleset_provider.dart';
 import '../../providers/current_event_provider.dart';
 

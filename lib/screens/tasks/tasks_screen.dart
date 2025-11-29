@@ -5,7 +5,6 @@ import '../../data/database/app_database.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/participant_provider.dart';
-import '../../data/repositories/task_repository.dart';
 
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
