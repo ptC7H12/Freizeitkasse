@@ -7,6 +7,7 @@ import '../../providers/database_provider.dart';
 import '../../utils/validators.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/forms/price_preview_widget.dart';
+import '../../widgets/responsive_form_container.dart';
 
 /// Teilnehmer-Formular (Create/Edit)
 ///
@@ -157,9 +158,9 @@ class _ParticipantFormScreenState
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveFormContainer(
+          child: ListView(
+            children: [
             // Persönliche Daten
             _buildSectionHeader('Persönliche Daten'),
             _buildTextField(
@@ -314,6 +315,7 @@ class _ParticipantFormScreenState
             const SizedBox(height: 16),
           ],
         ),
+      ),
       ),
     );
   }

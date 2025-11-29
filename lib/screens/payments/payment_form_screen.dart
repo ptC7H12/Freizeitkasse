@@ -6,6 +6,7 @@ import '../../providers/participant_provider.dart';
 import '../../providers/family_provider.dart';
 import '../../utils/validators.dart';
 import '../../utils/date_utils.dart';
+import '../../widgets/responsive_form_container.dart';
 
 /// Zahlungs-Formular (Create/Edit)
 class PaymentFormScreen extends ConsumerStatefulWidget {
@@ -114,9 +115,9 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveFormContainer(
+          child: ListView(
+            children: [
             // Betrag
             TextFormField(
               controller: _amountController,
@@ -246,6 +247,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
             const SizedBox(height: 16),
           ],
         ),
+      ),
       ),
     );
   }

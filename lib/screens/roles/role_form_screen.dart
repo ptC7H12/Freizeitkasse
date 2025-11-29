@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/role_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../widgets/responsive_form_container.dart';
 
 class RoleFormScreen extends ConsumerStatefulWidget {
   final int? roleId;
@@ -188,9 +189,9 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveFormContainer(
+          child: ListView(
+            children: [
             // Info Card
             Card(
               color: Colors.blue[50],
@@ -298,6 +299,7 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
             const SizedBox(height: 16),
           ],
         ),
+      ),
       ),
     );
   }

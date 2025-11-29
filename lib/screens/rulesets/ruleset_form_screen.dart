@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/ruleset_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../widgets/responsive_form_container.dart';
 
 class RulesetFormScreen extends ConsumerStatefulWidget {
   final int? rulesetId;
@@ -288,9 +289,9 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveFormContainer(
+          child: ListView(
+            children: [
             // Basic Information
             Card(
               child: Padding(
@@ -487,6 +488,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
             const SizedBox(height: 16),
           ],
         ),
+      ),
       ),
     );
   }

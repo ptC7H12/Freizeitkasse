@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/family_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../utils/validators.dart';
+import '../../widgets/responsive_form_container.dart';
 
 /// Familien-Formular (Create/Edit)
 class FamilyFormScreen extends ConsumerStatefulWidget {
@@ -99,9 +100,9 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveFormContainer(
+          child: ListView(
+            children: [
             // Familienname
             TextFormField(
               controller: _familyNameController,
@@ -216,6 +217,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
             const SizedBox(height: 16),
           ],
         ),
+      ),
       ),
     );
   }

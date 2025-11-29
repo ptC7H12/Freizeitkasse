@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/income_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../widgets/responsive_form_container.dart';
 
 class IncomeFormScreen extends ConsumerStatefulWidget {
   final int? incomeId;
@@ -245,9 +246,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveFormContainer(
+          child: ListView(
+            children: [
             // Source selection
             Card(
               child: Padding(
@@ -476,6 +477,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
             const SizedBox(height: 16),
           ],
         ),
+      ),
       ),
     );
   }

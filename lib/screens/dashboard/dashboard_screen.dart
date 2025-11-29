@@ -13,6 +13,7 @@ import '../rulesets/rulesets_list_screen.dart';
 import '../cash_status/cash_status_screen.dart';
 import '../roles/roles_list_screen.dart';
 import '../tasks/tasks_screen.dart';
+import '../settings/settings_screen.dart';
 
 /// Dashboard Screen
 ///
@@ -48,8 +49,13 @@ class DashboardScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
+            tooltip: 'Einstellungen',
             onPressed: () {
-              // TODO: Settings Screen
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
             },
           ),
         ],
@@ -67,35 +73,60 @@ class DashboardScreen extends ConsumerWidget {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF2196F3), // Material Blue
+                  Color(0xFF1976D2), // Darker Blue
+                ],
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Icon(
-                  Icons.event,
-                  size: 48,
-                  color: Colors.white,
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.event,
+                    size: 40,
+                    color: Colors.white,
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 const Text(
                   'MGB Freizeitplaner',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
                   ),
                 ),
-                if (currentEvent != null)
-                  Text(
-                    currentEvent.name,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
+                if (currentEvent != null) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      currentEvent.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
+                ],
               ],
             ),
           ),
