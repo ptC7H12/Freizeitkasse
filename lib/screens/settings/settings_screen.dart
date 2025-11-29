@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../utils/constants.dart';
+import 'categories_management_screen.dart';
 
 /// Einstellungen-Screen
 ///
@@ -64,6 +66,31 @@ class SettingsScreen extends ConsumerWidget {
                       const SnackBar(
                         content: Text('Dark Mode kommt bald!'),
                         duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Categories Section
+          _buildSectionHeader(context, 'Kategorien'),
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.category_outlined),
+                  title: const Text('Kategorien verwalten'),
+                  subtitle: const Text('Ausgaben- und Einnahmen-Kategorien'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const CategoriesManagementScreen(),
                       ),
                     );
                   },

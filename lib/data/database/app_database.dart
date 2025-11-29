@@ -186,6 +186,32 @@ class Tasks extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+@DataClassName('ExpenseCategory')
+class ExpenseCategories extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get eventId => integer().references(Events, #id)();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
+  TextColumn get description => text().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  BoolColumn get isSystem => boolean().withDefault(const Constant(false))();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+@DataClassName('IncomeSource')
+class IncomeSources extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get eventId => integer().references(Events, #id)();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
+  TextColumn get description => text().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  BoolColumn get isSystem => boolean().withDefault(const Constant(false))();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
 // ============================================================================
 // DATABASE CLASS
 // ============================================================================
@@ -197,6 +223,8 @@ class Tasks extends Table {
   Payments,
   Expenses,
   Incomes,
+  ExpenseCategories,
+  IncomeSources,
   Roles,
   Rulesets,
   Settings,
