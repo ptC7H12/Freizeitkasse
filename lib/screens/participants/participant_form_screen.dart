@@ -602,10 +602,10 @@ class _ParticipantFormScreenState
           city: _cityController.text.isNotEmpty ? _cityController.text : null,
           phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
           email: _emailController.text.isNotEmpty ? _emailController.text : null,
-          emergencyContact: _emergencyContactController.text.isNotEmpty
+          emergencyContactName: _emergencyContactController.text.isNotEmpty
               ? _emergencyContactController.text
               : null,
-          emergencyPhone: _emergencyPhoneController.text.isNotEmpty
+          emergencyContactPhone: _emergencyPhoneController.text.isNotEmpty
               ? _emergencyPhoneController.text
               : null,
           medicalNotes: _medicalNotesController.text.isNotEmpty
@@ -646,10 +646,10 @@ class _ParticipantFormScreenState
           city: _cityController.text.isNotEmpty ? _cityController.text : null,
           phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
           email: _emailController.text.isNotEmpty ? _emailController.text : null,
-          emergencyContact: _emergencyContactController.text.isNotEmpty
+          emergencyContactName: _emergencyContactController.text.isNotEmpty
               ? _emergencyContactController.text
               : null,
-          emergencyPhone: _emergencyPhoneController.text.isNotEmpty
+          emergencyContactPhone: _emergencyPhoneController.text.isNotEmpty
               ? _emergencyPhoneController.text
               : null,
           medicalNotes: _medicalNotesController.text.isNotEmpty
