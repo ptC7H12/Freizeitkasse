@@ -183,7 +183,9 @@ class ParticipantRepository {
     bool recalculatePrice = true,
   }) async {
     final existing = await getParticipantById(id);
-    if (existing == null) return false;
+    if (existing == null) {
+      return false;
+    }
 
     double? newCalculatedPrice;
 
@@ -292,7 +294,9 @@ class ParticipantRepository {
           ..where((tbl) => tbl.id.equals(eventId)))
         .getSingleOrNull();
 
-    if (event == null) return 0.0;
+    if (event == null) {
+      return 0.0;
+    }
 
     // Aktives Regelwerk für Event finden
     final ruleset = await (_db.select(_db.rulesets)
@@ -302,7 +306,9 @@ class ParticipantRepository {
           ..where((tbl) => tbl.validUntil.isBiggerOrEqualValue(event.startDate)))
         .getSingleOrNull();
 
-    if (ruleset == null) return 0.0;
+    if (ruleset == null) {
+      return 0.0;
+    }
 
     // Alter zum Event-Start berechnen
     final age = AppDateUtils.calculateAgeAtEventStart(birthDate, event.startDate);

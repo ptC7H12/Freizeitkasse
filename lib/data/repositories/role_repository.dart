@@ -66,7 +66,9 @@ class RoleRepository {
     String? description,
   }) async {
     final existing = await getRoleById(id);
-    if (existing == null) return false;
+    if (existing == null) {
+      return false;
+    }
 
     // Check if new name conflicts with another role
     if (name != null && name != existing.name) {

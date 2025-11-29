@@ -93,7 +93,9 @@ class RulesetRepository {
     String? description,
   }) async {
     final existing = await getRulesetById(id);
-    if (existing == null) return false;
+    if (existing == null) {
+      return false;
+    }
 
     // If YAML content is being updated, validate it
     if (yamlContent != null) {
@@ -119,7 +121,9 @@ class RulesetRepository {
   /// Soft delete a ruleset
   Future<bool> deleteRuleset(int id) async {
     final existing = await getRulesetById(id);
-    if (existing == null) return false;
+    if (existing == null) {
+      return false;
+    }
 
     return await (_database.update(_database.rulesets)
           ..where((t) => t.id.equals(id)))
@@ -148,7 +152,9 @@ class RulesetRepository {
   /// Get a ruleset with parsed data
   Future<Map<String, dynamic>?> getRulesetWithParsedData(int id) async {
     final ruleset = await getRulesetById(id);
-    if (ruleset == null) return null;
+    if (ruleset == null) {
+      return null;
+    }
 
     try {
       final parsedData = RulesetParserService.parseRuleset(ruleset.yamlContent);
@@ -171,7 +177,9 @@ class RulesetRepository {
     String? newName,
   }) async {
     final source = await getRulesetById(sourceId);
-    if (source == null) throw Exception('Quell-Regelwerk nicht gefunden');
+    if (source == null) {
+      throw Exception('Quell-Regelwerk nicht gefunden');
+    }
 
     final name = newName ?? '${source.name} (Kopie)';
 

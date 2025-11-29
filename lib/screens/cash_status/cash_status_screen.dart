@@ -320,7 +320,7 @@ class CashStatusScreen extends ConsumerWidget {
                       BarChartData(
                         alignment: BarChartAlignment.spaceAround,
                         maxY: (totalIncomes > totalExpenses ? totalIncomes : totalExpenses) * 1.2,
-                        barTouchData: BarTouchData(enabled: false),
+                        barTouchData: const BarTouchData(enabled: false),
                         titlesData: FlTitlesData(
                           show: true,
                           bottomTitles: AxisTitles(

@@ -278,7 +278,9 @@ class _TaskFormDialogState extends ConsumerState<_TaskFormDialog> {
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2100),
                   );
-                  if (picked != null) setState(() => _dueDate = picked);
+                  if (picked != null) {
+                    setState(() => _dueDate = picked);
+                  }
                 },
                 child: InputDecorator(
                   decoration: const InputDecoration(labelText: 'Fälligkeitsdatum', border: OutlineInputBorder()),
@@ -309,14 +311,18 @@ class _TaskFormDialogState extends ConsumerState<_TaskFormDialog> {
             onPressed: () async {
               final repo = ref.read(taskRepositoryProvider);
               await repo.deleteTask(widget.task!.id);
-              if (mounted) Navigator.pop(context);
+              if (mounted) {
+                Navigator.pop(context);
+              }
             },
             child: const Text('Löschen', style: TextStyle(color: Colors.red)),
           ),
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Abbrechen')),
         FilledButton(
           onPressed: () async {
-            if (!_formKey.currentState!.validate()) return;
+            if (!_formKey.currentState!.validate()) {
+              return;
+            }
             final repo = ref.read(taskRepositoryProvider);
             final event = ref.read(currentEventProvider)!;
 
@@ -341,7 +347,9 @@ class _TaskFormDialogState extends ConsumerState<_TaskFormDialog> {
                 assignedTo: _assignedTo,
               );
             }
-            if (mounted) Navigator.pop(context);
+            if (mounted) {
+              Navigator.pop(context);
+            }
           },
           child: const Text('Speichern'),
         ),

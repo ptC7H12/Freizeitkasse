@@ -115,7 +115,9 @@ class PaymentRepository {
           ..where((tbl) => tbl.id.equals(participantId)))
         .getSingleOrNull();
 
-    if (participant == null) return 0.0;
+    if (participant == null) {
+      return 0.0;
+    }
 
     final expectedPrice =
         participant.manualPriceOverride ?? participant.calculatedPrice;

@@ -119,7 +119,9 @@ class ExpenseRepository {
     String? notes,
   }) async {
     final existing = await getExpenseById(id);
-    if (existing == null) return false;
+    if (existing == null) {
+      return false;
+    }
 
     final companion = ExpensesCompanion(
       id: Value(id),
@@ -140,7 +142,9 @@ class ExpenseRepository {
   /// Soft delete an expense
   Future<bool> deleteExpense(int id) async {
     final existing = await getExpenseById(id);
-    if (existing == null) return false;
+    if (existing == null) {
+      return false;
+    }
 
     return await (_database.update(_database.expenses)
           ..where((t) => t.id.equals(id)))

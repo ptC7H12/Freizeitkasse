@@ -116,7 +116,9 @@ class IncomeRepository {
     String? notes,
   }) async {
     final existing = await getIncomeById(id);
-    if (existing == null) return false;
+    if (existing == null) {
+      return false;
+    }
 
     final companion = IncomesCompanion(
       id: Value(id),
@@ -136,7 +138,9 @@ class IncomeRepository {
   /// Soft delete an income
   Future<bool> deleteIncome(int id) async {
     final existing = await getIncomeById(id);
-    if (existing == null) return false;
+    if (existing == null) {
+      return false;
+    }
 
     return await (_database.update(_database.incomes)
           ..where((t) => t.id.equals(id)))

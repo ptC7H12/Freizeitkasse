@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart' as drift;
 import '../../data/database/app_database.dart' as db;
 import '../../providers/participant_provider.dart';
 import '../../providers/current_event_provider.dart';

@@ -115,7 +115,7 @@ class ExpensesListScreen extends ConsumerWidget {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           Text(
-                            '${NumberFormat.currency(locale: 'de_DE', symbol: '€').format(total)}',
+                            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(total),
                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.red[700],
