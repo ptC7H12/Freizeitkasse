@@ -1,0 +1,91 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/family_provider.dart';
+import '../../data/database/app_database.dart';
+import 'family_form_screen.dart';
+
+/// Families List Screen
+class FamiliesListScreen extends ConsumerWidget {
+  const FamiliesListScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final familiesAsync = ref.watch(familiesProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Familien'),
+      ),
+      body: familiesAsync.when(
+        data: (families) {
+          if (families.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.family_restroom, size: 100, color: Colors.grey),
+                  SizedBox(height: 24),
+                  Text(
+                    'Noch keine Familien',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Füge deine erste Familie hinzu.',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: families.length,
+            itemBuilder: (context, index) {
+              final family = families[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    child: Icon(Icons.family_restroom),
+                  ),
+                  title: Text(
+                    family.familyName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: family.contactPerson != null
+                      ? Text('Kontakt: ${family.contactPerson}')
+                      : null,
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => FamilyFormScreen(
+                          familyId: family.id,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Fehler: $error')),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const FamilyFormScreen(),
+            ),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Familie'),
+      ),
+    );
+  }
+}
