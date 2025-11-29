@@ -193,13 +193,13 @@ class _TaskListItem extends StatelessWidget {
 }
 
 class _PriorityBadge extends StatelessWidget {
-  final int priority;
+  final String priority;
   const _PriorityBadge({required this.priority});
 
   @override
   Widget build(BuildContext context) {
-    final color = priority == 3 ? Colors.red : (priority == 2 ? Colors.orange : Colors.grey);
-    final label = priority == 3 ? 'Hoch' : (priority == 2 ? 'Mittel' : 'Niedrig');
+    final color = priority == 'high' ? Colors.red : (priority == 'medium' ? Colors.orange : Colors.grey);
+    final label = priority == 'high' ? 'Hoch' : (priority == 'medium' ? 'Mittel' : 'Niedrig');
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
@@ -221,7 +221,7 @@ class _TaskFormDialogState extends ConsumerState<_TaskFormDialog> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
   late DateTime _dueDate;
-  late int _priority;
+  late String _priority;
   late String _status;
   int? _assignedTo;
 
@@ -231,7 +231,7 @@ class _TaskFormDialogState extends ConsumerState<_TaskFormDialog> {
     _titleController = TextEditingController(text: widget.task?.title);
     _descriptionController = TextEditingController(text: widget.task?.description);
     _dueDate = widget.task?.dueDate ?? DateTime.now().add(const Duration(days: 7));
-    _priority = widget.task?.priority ?? 1;
+    _priority = widget.task?.priority ?? 'medium';
     _status = widget.task?.status ?? 'pending';
     _assignedTo = widget.task?.assignedTo;
   }
@@ -260,13 +260,13 @@ class _TaskFormDialogState extends ConsumerState<_TaskFormDialog> {
                 maxLines: 3,
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<int>(
+              DropdownButtonFormField<String>(
                 initialValue: _priority,
                 decoration: const InputDecoration(labelText: 'Priorität', border: OutlineInputBorder()),
                 items: const [
-                  DropdownMenuItem(value: 1, child: Text('Niedrig')),
-                  DropdownMenuItem(value: 2, child: Text('Mittel')),
-                  DropdownMenuItem(value: 3, child: Text('Hoch')),
+                  DropdownMenuItem(value: 'low', child: Text('Niedrig')),
+                  DropdownMenuItem(value: 'medium', child: Text('Mittel')),
+                  DropdownMenuItem(value: 'high', child: Text('Hoch')),
                 ],
                 onChanged: (v) => setState(() => _priority = v!),
               ),

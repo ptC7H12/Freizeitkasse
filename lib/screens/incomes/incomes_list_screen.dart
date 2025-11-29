@@ -92,7 +92,7 @@ class IncomesListScreen extends ConsumerWidget {
           double total = 0.0;
 
           for (final income in incomes) {
-            incomesBySource.putIfAbsent(income.source, () => []).add(income);
+            incomesBySource.putIfAbsent(income.source ?? 'Sonstige', () => []).add(income);
             total += income.amount;
           }
 
@@ -234,8 +234,8 @@ class _IncomeListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sourceColor = _getSourceColor(income.source);
-    final sourceIcon = _getSourceIcon(income.source);
+    final sourceColor = _getSourceColor(income.source ?? 'Sonstige');
+    final sourceIcon = _getSourceIcon(income.source ?? 'Sonstige');
     final dateFormat = DateFormat('dd.MM.yyyy', 'de_DE');
 
     return Card(
@@ -275,7 +275,7 @@ class _IncomeListItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      income.source,
+                      income.source ?? 'Sonstige',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),

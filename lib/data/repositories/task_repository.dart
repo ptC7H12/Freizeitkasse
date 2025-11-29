@@ -92,7 +92,7 @@ class TaskRepository {
     required DateTime dueDate,
     String? description,
     String status = 'pending',
-    int priority = 1,
+    String priority = 'medium',
     int? assignedTo,
   }) async {
     final companion = TasksCompanion(
@@ -116,7 +116,7 @@ class TaskRepository {
     String? title,
     String? description,
     String? status,
-    int? priority,
+    String? priority,
     DateTime? dueDate,
     int? assignedTo,
     bool? clearAssignment,

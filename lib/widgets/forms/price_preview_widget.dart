@@ -93,8 +93,8 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
       final ruleset = await (database.select(database.rulesets)
             ..where((tbl) => tbl.eventId.equals(eventId))
             ..where((tbl) => tbl.isActive.equals(true))
-            ..where((tbl) => tbl.validFrom.isSmallerOrEqual(event.startDate))
-            ..where((tbl) => tbl.validUntil.isBiggerOrEqual(event.startDate)))
+            ..where((tbl) => tbl.validFrom.isSmallerOrEqual(drift.Variable(event.startDate)))
+            ..where((tbl) => tbl.validUntil.isBiggerOrEqual(drift.Variable(event.startDate))))
           .getSingleOrNull();
 
       if (ruleset == null) {

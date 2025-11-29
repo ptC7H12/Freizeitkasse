@@ -120,8 +120,8 @@ class ParticipantRepository {
       city: Value(city),
       phone: Value(phone),
       email: Value(email),
-      emergencyContact: Value(emergencyContact),
-      emergencyPhone: Value(emergencyPhone),
+      emergencyContactName: Value(emergencyContact),
+      emergencyContactPhone: Value(emergencyPhone),
       medicalNotes: Value(medicalNotes),
       allergies: Value(allergies),
       dietaryRestrictions: Value(dietaryRestrictions),
@@ -200,9 +200,9 @@ class ParticipantRepository {
       city: city != null ? Value(city) : const Value.absent(),
       phone: phone != null ? Value(phone) : const Value.absent(),
       email: email != null ? Value(email) : const Value.absent(),
-      emergencyContact:
+      emergencyContactName:
           emergencyContact != null ? Value(emergencyContact) : const Value.absent(),
-      emergencyPhone:
+      emergencyContactPhone:
           emergencyPhone != null ? Value(emergencyPhone) : const Value.absent(),
       medicalNotes:
           medicalNotes != null ? Value(medicalNotes) : const Value.absent(),
