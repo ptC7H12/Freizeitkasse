@@ -315,7 +315,7 @@ class _RulesetListItem extends ConsumerWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              stats['error'],
+                              stats['error'] as String? ?? '',
                               style: const TextStyle(color: Colors.red, fontSize: 12),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -339,7 +339,7 @@ class _RulesetListItem extends ConsumerWidget {
                         Icons.discount,
                         '${stats['roleDiscountCount']} Rollenrabatte',
                       ),
-                      if (stats['hasFamilyDiscount'])
+                      if (stats['hasFamilyDiscount'] as bool? ?? false)
                         _buildStatChip(
                           context,
                           Icons.family_restroom,

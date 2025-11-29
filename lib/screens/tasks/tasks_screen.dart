@@ -55,7 +55,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     _buildStatItem(Icons.list_alt, 'Gesamt', '${stats['total']}', Colors.blue),
                     _buildStatItem(Icons.pending, 'Offen', '${stats['pending']}', Colors.orange),
                     _buildStatItem(Icons.check_circle, 'Erledigt', '${stats['completed']}', Colors.green),
-                    if (stats['overdue'] > 0)
+                    if ((stats['overdue'] as int) > 0)
                       _buildStatItem(Icons.warning, 'Überfällig', '${stats['overdue']}', Colors.red),
                   ],
                 ),
@@ -148,7 +148,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       case 'completed':
         return tasks.where((t) => t.status == 'completed').toList();
       case 'overdue':
-        return tasks.where((t) => t.status == 'pending' && t.dueDate.isBefore(now)).toList();
+        return tasks.where((t) => t.status == 'pending' && (t.dueDate?.isBefore(now) ?? false)).toList();
       default:
         return tasks;
     }
@@ -170,7 +170,7 @@ class _TaskListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isOverdue = task.status == 'pending' && task.dueDate.isBefore(DateTime.now());
+    final isOverdue = task.status == 'pending' && (task.dueDate?.isBefore(DateTime.now()) ?? false);
     return Card(
       child: ListTile(
         leading: Icon(
@@ -182,7 +182,7 @@ class _TaskListItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (task.description != null) Text(task.description!, maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text('Fällig: ${DateFormat('dd.MM.yyyy', 'de_DE').format(task.dueDate)}', style: TextStyle(color: isOverdue ? Colors.red : null)),
+            if (task.dueDate != null) Text('Fällig: ${DateFormat('dd.MM.yyyy', 'de_DE').format(task.dueDate!)}', style: TextStyle(color: isOverdue ? Colors.red : null)),
           ],
         ),
         trailing: _PriorityBadge(priority: task.priority),

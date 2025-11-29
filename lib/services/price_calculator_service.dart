@@ -84,7 +84,7 @@ class PriceCalculatorService {
 
       if (minAge <= age && age <= maxAge) {
         // Neues Format: base_price direkt aus age_group
-        if (group.containsKey('base_price')) {
+        if (group.containsKey('base_price') == true) {
           final price = (group['base_price'] as num).toDouble();
           developer.log(
             'Basispreis für Alter $age: $price€ (Gruppe $minAge-$maxAge)',
@@ -253,7 +253,7 @@ class PriceCalculatorService {
     breakdown['role_discount_amount'] =
         breakdown['base_price'] * (breakdown['role_discount_percent'] / 100);
 
-    if (breakdown['role_discount_percent'] > 0) {
+    if ((breakdown['role_discount_percent'] as num) > 0) {
       breakdown['has_discounts'] = true;
       breakdown['discount_reasons'].add(
         'Rollenrabatt ($roleDisplayName): ${breakdown['role_discount_percent'].toStringAsFixed(0)}%',
@@ -270,7 +270,7 @@ class PriceCalculatorService {
     breakdown['family_discount_amount'] =
         breakdown['base_price'] * (breakdown['family_discount_percent'] / 100);
 
-    if (breakdown['family_discount_percent'] > 0) {
+    if ((breakdown['family_discount_percent'] as num) > 0) {
       breakdown['has_discounts'] = true;
       breakdown['discount_reasons'].add(
         'Kinderzuschuss durch MGB ($familyChildrenCount. Kind): ${breakdown['family_discount_percent'].toStringAsFixed(0)}%',
@@ -300,7 +300,7 @@ class PriceCalculatorService {
     // Endpreis berechnen
     final finalPrice = breakdown['price_after_family_discount'] -
         breakdown['manual_discount_amount'];
-    breakdown['final_price'] = double.parse(finalPrice.toStringAsFixed(2));
+    breakdown['final_price'] = double.parse((finalPrice as num).toStringAsFixed(2));
 
     return breakdown;
   }

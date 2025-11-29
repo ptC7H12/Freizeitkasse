@@ -184,7 +184,7 @@ class _RoleListItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      role.name,
+                      role.name ?? '',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -192,7 +192,7 @@ class _RoleListItem extends StatelessWidget {
                     if (role.description != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        role.description!,
+                        role.description ?? '',
                         style: Theme.of(context).textTheme.bodyMedium,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

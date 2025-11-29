@@ -415,7 +415,7 @@ class _ParticipantFormScreenState
       return const SizedBox.shrink();
     }
 
-    return StreamBuilder<List<Role>>(
+    return StreamBuilder<List<db.Role>>(
       stream: (database.select(database.roles)
             ..where((tbl) => tbl.eventId.equals(eventId)))
           .watch(),
@@ -436,7 +436,7 @@ class _ParticipantFormScreenState
             ...roles.map(
               (role) => DropdownMenuItem(
                 value: role.id,
-                child: Text(role.displayName),
+                child: Text(role.displayName ?? ''),
               ),
             ),
           ],
