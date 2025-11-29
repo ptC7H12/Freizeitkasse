@@ -169,8 +169,8 @@ class ParticipantRepository {
     String? city,
     String? phone,
     String? email,
-    String? emergencyContact,
-    String? emergencyPhone,
+    String? emergencyContactName,
+    String? emergencyContactPhone,
     String? medicalNotes,
     String? allergies,
     String? dietaryRestrictions,
@@ -215,9 +215,9 @@ class ParticipantRepository {
       phone: phone != null ? Value(phone) : const Value.absent(),
       email: email != null ? Value(email) : const Value.absent(),
       emergencyContactName:
-          emergencyContact != null ? Value(emergencyContact) : const Value.absent(),
+          emergencyContactName != null ? Value(emergencyContactName) : const Value.absent(),
       emergencyContactPhone:
-          emergencyPhone != null ? Value(emergencyPhone) : const Value.absent(),
+          emergencyContactPhone != null ? Value(emergencyContactPhone) : const Value.absent(),
       medicalNotes:
           medicalNotes != null ? Value(medicalNotes) : const Value.absent(),
       allergies: allergies != null ? Value(allergies) : const Value.absent(),
