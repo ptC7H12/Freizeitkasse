@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drift/drift.dart' as drift;
 import '../../services/price_calculator_service.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
@@ -92,8 +93,8 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
       final ruleset = await (database.select(database.rulesets)
             ..where((tbl) => tbl.eventId.equals(eventId))
             ..where((tbl) => tbl.isActive.equals(true))
-            ..where((tbl) => tbl.validFrom.isSmallerOrEqualValue(event.startDate))
-            ..where((tbl) => tbl.validUntil.isBiggerOrEqualValue(event.startDate)))
+            ..where((tbl) => tbl.validFrom.isSmallerOrEqual(event.startDate))
+            ..where((tbl) => tbl.validUntil.isBiggerOrEqual(event.startDate)))
           .getSingleOrNull();
 
       if (ruleset == null) {
@@ -129,7 +130,7 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
         final siblings = await (database.select(database.participants)
               ..where((tbl) => tbl.familyId.equals(widget.familyId!))
               ..where((tbl) => tbl.isActive.equals(true))
-              ..orderBy([(tbl) => OrderingTerm.asc(tbl.birthDate)]))
+              ..orderBy([(tbl) => drift.OrderingTerm.asc(tbl.birthDate)]))
             .get();
 
         // TODO: Korrekte Position basierend auf Geburtsdatum berechnen

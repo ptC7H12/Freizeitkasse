@@ -32,15 +32,22 @@ class Participants extends Table {
   DateTimeColumn get birthDate => dateTime()();
   TextColumn get gender => text().withLength(max: 20).nullable()();
   TextColumn get street => text().withLength(max: 200).nullable()();
+  TextColumn get houseNumber => text().withLength(max: 20).nullable()();
   TextColumn get postalCode => text().withLength(max: 10).nullable()();
   TextColumn get city => text().withLength(max: 100).nullable()();
+  TextColumn get country => text().withLength(max: 100).nullable()();
   TextColumn get phone => text().withLength(max: 50).nullable()();
+  TextColumn get mobile => text().withLength(max: 50).nullable()();
   TextColumn get email => text().withLength(max: 100).nullable()();
-  TextColumn get emergencyContact => text().withLength(max: 200).nullable()();
-  TextColumn get emergencyPhone => text().withLength(max: 50).nullable()();
+  TextColumn get emergencyContactName => text().withLength(max: 200).nullable()();
+  TextColumn get emergencyContactPhone => text().withLength(max: 50).nullable()();
   TextColumn get medicalNotes => text().nullable()();
+  TextColumn get medicalInfo => text().nullable()();
+  TextColumn get medications => text().nullable()();
   TextColumn get allergies => text().nullable()();
   TextColumn get dietaryRestrictions => text().nullable()();
+  TextColumn get swimAbility => text().withLength(max: 50).nullable()();
+  TextColumn get notes => text().nullable()();
   BoolColumn get bildungUndTeilhabe => boolean().withDefault(const Constant(false))();
   RealColumn get calculatedPrice => real().withDefault(const Constant(0.0))();
   RealColumn get manualPriceOverride => real().nullable()();
@@ -81,6 +88,7 @@ class Payments extends Table {
   DateTimeColumn get paymentDate => dateTime()();
   TextColumn get paymentMethod => text().withLength(max: 50).nullable()();
   TextColumn get notes => text().nullable()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -94,6 +102,10 @@ class Expenses extends Table {
   DateTimeColumn get expenseDate => dateTime()();
   TextColumn get description => text().nullable()();
   TextColumn get receiptNumber => text().withLength(max: 100).nullable()();
+  TextColumn get vendor => text().withLength(max: 200).nullable()();
+  TextColumn get paymentMethod => text().withLength(max: 50).nullable()();
+  TextColumn get notes => text().nullable()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -106,6 +118,11 @@ class Incomes extends Table {
   RealColumn get amount => real()();
   DateTimeColumn get incomeDate => dateTime()();
   TextColumn get description => text().nullable()();
+  TextColumn get source => text().withLength(max: 200).nullable()();
+  TextColumn get paymentMethod => text().withLength(max: 50).nullable()();
+  TextColumn get referenceNumber => text().withLength(max: 100).nullable()();
+  TextColumn get notes => text().nullable()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -126,6 +143,7 @@ class Rulesets extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get eventId => integer().references(Events, #id)();
   TextColumn get name => text().withLength(min: 1, max: 200)();
+  TextColumn get description => text().nullable()();
   DateTimeColumn get validFrom => dateTime()();
   DateTimeColumn get validUntil => dateTime()();
   BoolColumn get isActive => boolean().withDefault(const Constant(false))();
@@ -160,7 +178,9 @@ class Tasks extends Table {
   IntColumn get eventId => integer().references(Events, #id)();
   TextColumn get title => text().withLength(min: 1, max: 200)();
   TextColumn get description => text().nullable()();
-  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+  TextColumn get status => text().withLength(max: 50).withDefault(const Constant('pending'))();
+  TextColumn get priority => text().withLength(max: 50).withDefault(const Constant('medium'))();
+  IntColumn get assignedTo => integer().references(Participants, #id).nullable()();
   DateTimeColumn get dueDate => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
@@ -186,7 +206,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   // ============================================================================
   // MIGRATION LOGIC (entspricht Alembic-Migrationen)
