@@ -243,169 +243,256 @@ class DashboardScreen extends ConsumerWidget {
     final currentEvent = ref.watch(currentEventProvider);
 
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
-          DrawerHeader(
+          // Weißer Header-Bereich
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF2196F3), // Material Blue
-                  Color(0xFF1976D2), // Darker Blue
-                ],
-              ),
+              color: Colors.white,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Container(
-                  padding: AppConstants.paddingAll8,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.event,
-                    size: 40,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: AppConstants.spacingM),
-                const Text(
-                  'MGB Freizeitplaner',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: AppConstants.paddingAll8,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2196F3),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.event,
+                        size: 28,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: AppConstants.spacingM),
+                    const Text(
+                      'Freizeitkasse',
+                      style: TextStyle(
+                        color: Color(0xFF2196F3),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
                 if (currentEvent != null) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppConstants.spacingM),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: const Color(0xFFE3F2FD),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
-                      currentEvent.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 14,
+                          color: Color(0xFF2196F3),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          currentEvent.name,
+                          style: const TextStyle(
+                            color: Color(0xFF2196F3),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ],
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.dashboard),
-            title: const Text('Dashboard'),
-            onTap: () => Navigator.of(context).pop(),
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('Teilnehmer & Familien'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ParticipantsFamiliesScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.payment),
-            title: const Text('Zahlungen'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const PaymentsListScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.shopping_cart),
-            title: const Text('Ausgaben'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ExpensesListScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.attach_money),
-            title: const Text('Einnahmen'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const IncomesListScreen(),
-                ),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.receipt_long),
-            title: const Text('Kassenstand'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const CashStatusScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.badge),
-            title: const Text('Rollen'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const RolesListScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.task_alt),
-            title: const Text('Aufgaben'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const TasksScreen(),
-                ),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.event_note),
-            title: const Text('Event wechseln'),
-            onTap: () {
-              ref.read(currentEventProvider.notifier).clearEvent();
-              Navigator.of(context).pushReplacementNamed('/');
-            },
+          // Blauer Menü-Bereich
+          Expanded(
+            child: Container(
+              color: const Color(0xFF2196F3),
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _buildDrawerItem(
+                    context,
+                    Icons.dashboard,
+                    'Dashboard',
+                    () => Navigator.of(context).pop(),
+                  ),
+                  const Divider(color: Colors.white24, height: 1),
+                  _buildDrawerItem(
+                    context,
+                    Icons.people,
+                    'Teilnehmer',
+                    () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ParticipantsListScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.family_restroom,
+                    'Familien',
+                    () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const FamiliesListScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(color: Colors.white24, height: 1),
+                  _buildDrawerItem(
+                    context,
+                    Icons.payment,
+                    'Zahlungseingänge',
+                    () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const PaymentsListScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.attach_money,
+                    'Sonstige Einnahmen',
+                    () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const IncomesListScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.shopping_cart,
+                    'Ausgaben',
+                    () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ExpensesListScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(color: Colors.white24, height: 1),
+                  _buildDrawerItem(
+                    context,
+                    Icons.receipt_long,
+                    'Kassenstand',
+                    () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const CashStatusScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.rule,
+                    'Regelwerke',
+                    () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const RulesetsListScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.badge,
+                    'Rollen',
+                    () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const RolesListScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.task_alt,
+                    'Aufgaben',
+                    () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const TasksScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(color: Colors.white24, height: 1),
+                  _buildDrawerItem(
+                    context,
+                    Icons.settings,
+                    'Einstellungen',
+                    () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: AppConstants.spacingL),
+                  _buildDrawerItem(
+                    context,
+                    Icons.event_note,
+                    'Freizeit wechseln',
+                    () {
+                      ref.read(currentEventProvider.notifier).clearEvent();
+                      Navigator.of(context).pushReplacementNamed('/');
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDrawerItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+  ) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white),
+      ),
+      onTap: onTap,
+      hoverColor: Colors.white.withOpacity(0.1),
+      dense: true,
     );
   }
 
@@ -422,17 +509,7 @@ class DashboardScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Event Info Card
-          _buildEventInfoCard(context, currentEvent),
-          const SizedBox(height: AppConstants.spacingL),
-
-          // Statistics Cards
-          const Text(
-            'Übersicht',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: AppConstants.spacing),
-
+          // Teilnehmer und Familien Karten
           StreamBuilder<int>(
             stream: (database.select(database.participants)
                   ..where((tbl) => tbl.eventId.equals(eventId))
@@ -445,12 +522,17 @@ class DashboardScreen extends ConsumerWidget {
               return Row(
                 children: [
                   Expanded(
-                    child: _buildStatCard(
+                    child: _buildOverviewCard(
                       context,
                       'Teilnehmer',
                       participantCount.toString(),
                       Icons.people,
-                      Colors.blue,
+                      const Color(0xFF2196F3), // Blau
+                      () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ParticipantsListScreen(),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: AppConstants.spacing),
@@ -462,12 +544,17 @@ class DashboardScreen extends ConsumerWidget {
                           .map((list) => list.length),
                       builder: (context, snapshot) {
                         final familyCount = snapshot.data ?? 0;
-                        return _buildStatCard(
+                        return _buildOverviewCard(
                           context,
                           'Familien',
                           familyCount.toString(),
                           Icons.family_restroom,
-                          Colors.green,
+                          const Color(0xFF4CAF50), // Grün
+                          () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const FamiliesListScreen(),
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -477,111 +564,116 @@ class DashboardScreen extends ConsumerWidget {
             },
           ),
 
-          const SizedBox(height: AppConstants.spacing),
+          const SizedBox(height: AppConstants.spacingL),
 
-          // Financial Overview - Payments and Expenses
-          StreamBuilder<List<Payment>>(
-            stream: (database.select(database.payments)
-                  ..where((tbl) => tbl.eventId.equals(eventId))
-                  ..where((tbl) => tbl.isActive.equals(true)))
-                .watch(),
-            builder: (context, snapshot) {
-              final payments = snapshot.data ?? [];
-              final totalPayments = payments.fold<double>(
-                0.0,
-                (sum, payment) => sum + payment.amount,
-              );
-
-              return Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      context,
-                      'Zahlungen',
-                      NumberFormat.currency(locale: 'de_DE', symbol: '€').format(totalPayments),
-                      Icons.payment,
-                      Colors.blue,
-                    ),
-                  ),
-                  const SizedBox(width: AppConstants.spacing),
-                  Expanded(
-                    child: StreamBuilder<List<Expense>>(
-                      stream: (database.select(database.expenses)
-                            ..where((tbl) => tbl.eventId.equals(eventId))
-                            ..where((tbl) => tbl.isActive.equals(true)))
-                          .watch(),
-                      builder: (context, snapshot) {
-                        final expenses = snapshot.data ?? [];
-                        final totalExpenses = expenses.fold<double>(
-                          0.0,
-                          (sum, expense) => sum + expense.amount,
-                        );
-
-                        return _buildStatCard(
-                          context,
-                          'Ausgaben',
-                          NumberFormat.currency(locale: 'de_DE', symbol: '€').format(totalExpenses),
-                          Icons.shopping_cart,
-                          Colors.red,
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              );
-            },
+          // Finanzübersicht
+          const Text(
+            'Finanzübersicht',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: AppConstants.spacing),
 
-          // Financial Overview - Incomes and Cash Balance
-          StreamBuilder<List<Income>>(
-            stream: (database.select(database.incomes)
+          // Einnahmen Sektion
+          const Text(
+            'Einnahmen',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+
+          StreamBuilder<List<Participant>>(
+            stream: (database.select(database.participants)
                   ..where((tbl) => tbl.eventId.equals(eventId))
                   ..where((tbl) => tbl.isActive.equals(true)))
                 .watch(),
-            builder: (context, incomeSnapshot) {
-              final incomes = incomeSnapshot.data ?? [];
-              final totalIncomes = incomes.fold<double>(
+            builder: (context, participantSnapshot) {
+              final participants = participantSnapshot.data ?? [];
+              final sollEinnahmenGesamt = participants.fold<double>(
                 0.0,
-                (sum, income) => sum + income.amount,
+                (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
               );
 
-              return StreamBuilder<List<Expense>>(
-                stream: (database.select(database.expenses)
+              final sollZahlungseingaenge = sollEinnahmenGesamt; // Teilnahmegebühren
+
+              return StreamBuilder<List<Income>>(
+                stream: (database.select(database.incomes)
                       ..where((tbl) => tbl.eventId.equals(eventId))
                       ..where((tbl) => tbl.isActive.equals(true)))
                     .watch(),
-                builder: (context, expenseSnapshot) {
-                  final expenses = expenseSnapshot.data ?? [];
-                  final totalExpenses = expenses.fold<double>(
+                builder: (context, incomeSnapshot) {
+                  final incomes = incomeSnapshot.data ?? [];
+                  final sollSonstigeEinnahmen = incomes.fold<double>(
                     0.0,
-                    (sum, expense) => sum + expense.amount,
+                    (sum, income) => sum + income.amount,
                   );
-                  final cashBalance = totalIncomes - totalExpenses;
 
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatCard(
-                          context,
-                          'Einnahmen',
-                          NumberFormat.currency(locale: 'de_DE', symbol: '€').format(totalIncomes),
-                          Icons.attach_money,
-                          Colors.green,
-                        ),
-                      ),
-                      const SizedBox(width: AppConstants.spacing),
-                      Expanded(
-                        child: _buildStatCard(
-                          context,
-                          'Kassenstand',
-                          NumberFormat.currency(locale: 'de_DE', symbol: '€').format(cashBalance),
-                          Icons.account_balance_wallet,
-                          cashBalance >= 0 ? Colors.teal : Colors.deepOrange,
-                        ),
-                      ),
-                    ],
+                  return StreamBuilder<List<Payment>>(
+                    stream: (database.select(database.payments)
+                          ..where((tbl) => tbl.eventId.equals(eventId))
+                          ..where((tbl) => tbl.isActive.equals(true)))
+                        .watch(),
+                    builder: (context, paymentSnapshot) {
+                      final payments = paymentSnapshot.data ?? [];
+                      final istEinnahmenGesamt = payments.fold<double>(
+                        0.0,
+                        (sum, payment) => sum + payment.amount,
+                      ) + sollSonstigeEinnahmen;
+
+                      return Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildFinanceCard(
+                                  context,
+                                  'Soll Einnahmen (Gesamt)',
+                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(sollEinnahmenGesamt + sollSonstigeEinnahmen),
+                                  null,
+                                  backgroundColor: const Color(0xFFE8F5E9), // Hellgrün
+                                  textColor: const Color(0xFF2E7D32), // Dunkelgrün
+                                ),
+                              ),
+                              const SizedBox(width: AppConstants.spacing),
+                              Expanded(
+                                child: _buildFinanceCard(
+                                  context,
+                                  'Soll Zahlungseingänge',
+                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(sollZahlungseingaenge),
+                                  'Teilnahmegebühren',
+                                  backgroundColor: const Color(0xFFE3F2FD), // Hellblau
+                                  textColor: const Color(0xFF1976D2), // Blau
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppConstants.spacing),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildFinanceCard(
+                                  context,
+                                  'Soll Sonstige Einnahmen',
+                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(sollSonstigeEinnahmen),
+                                  'Zuschüsse',
+                                  backgroundColor: const Color(0xFFE3F2FD), // Hellblau
+                                  textColor: const Color(0xFF1976D2), // Blau
+                                ),
+                              ),
+                              const SizedBox(width: AppConstants.spacing),
+                              Expanded(
+                                child: _buildFinanceCard(
+                                  context,
+                                  'Ist Einnahmen (Gesamt)',
+                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(istEinnahmenGesamt),
+                                  'Zahlungen + Sonstige',
+                                  borderColor: const Color(0xFF4CAF50), // Grün
+                                  textColor: const Color(0xFF2E7D32), // Dunkelgrün
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
                   );
                 },
               );
@@ -590,202 +682,230 @@ class DashboardScreen extends ConsumerWidget {
 
           const SizedBox(height: AppConstants.spacingL),
 
-          // Quick Actions
+          // Ausgaben Sektion
           const Text(
-            'Schnellzugriff',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            'Ausgaben',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: AppConstants.spacing),
+          const SizedBox(height: AppConstants.spacingM),
 
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            children: [
-              _buildQuickActionCard(
-                context,
-                'Teilnehmer',
-                Icons.people,
-                Colors.blue,
-                () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const ParticipantsListScreen(),
+          StreamBuilder<List<Expense>>(
+            stream: (database.select(database.expenses)
+                  ..where((tbl) => tbl.eventId.equals(eventId))
+                  ..where((tbl) => tbl.isActive.equals(true)))
+                .watch(),
+            builder: (context, expenseSnapshot) {
+              final expenses = expenseSnapshot.data ?? [];
+              final sollAusgabenGesamt = expenses.fold<double>(
+                0.0,
+                (sum, expense) => sum + expense.amount,
+              );
+              final beglicheneAusgaben = sollAusgabenGesamt; // Tatsächlich gezahlt (hier gleich)
+
+              return Row(
+                children: [
+                  Expanded(
+                    child: _buildFinanceCard(
+                      context,
+                      'Soll Ausgaben (Gesamt)',
+                      NumberFormat.currency(locale: 'de_DE', symbol: '€').format(sollAusgabenGesamt),
+                      null,
+                      backgroundColor: const Color(0xFFFCE4EC), // Hellrosa
+                      textColor: const Color(0xFFC2185B), // Pink
+                    ),
                   ),
-                ),
-              ),
-              _buildQuickActionCard(
-                context,
-                'Familien',
-                Icons.family_restroom,
-                Colors.green,
-                () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const FamiliesListScreen(),
+                  const SizedBox(width: AppConstants.spacing),
+                  Expanded(
+                    child: _buildFinanceCard(
+                      context,
+                      'Beglichene Ausgaben',
+                      NumberFormat.currency(locale: 'de_DE', symbol: '€').format(beglicheneAusgaben),
+                      'Tatsächlich gezahlt',
+                      borderColor: const Color(0xFFE91E63), // Pink
+                      textColor: const Color(0xFFC2185B), // Pink
+                    ),
                   ),
-                ),
-              ),
-              _buildQuickActionCard(
-                context,
-                'Zahlungen',
-                Icons.payment,
-                Colors.orange,
-                () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const PaymentsListScreen(),
-                  ),
-                ),
-              ),
-              _buildQuickActionCard(
-                context,
-                'Ausgaben',
-                Icons.shopping_cart,
-                Colors.red,
-                () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const ExpensesListScreen(),
-                  ),
-                ),
-              ),
-              _buildQuickActionCard(
-                context,
-                'Einnahmen',
-                Icons.attach_money,
-                Colors.green[700]!,
-                () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const IncomesListScreen(),
-                  ),
-                ),
-              ),
-              _buildQuickActionCard(
-                context,
-                'Regelwerke',
-                Icons.rule,
-                Colors.purple,
-                () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const RulesetsListScreen(),
-                  ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
+          ),
+
+          const SizedBox(height: AppConstants.spacingL),
+
+          // Saldo Sektion
+          const Text(
+            'Saldo',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+
+          StreamBuilder<List<Payment>>(
+            stream: (database.select(database.payments)
+                  ..where((tbl) => tbl.eventId.equals(eventId))
+                  ..where((tbl) => tbl.isActive.equals(true)))
+                .watch(),
+            builder: (context, paymentSnapshot) {
+              final payments = paymentSnapshot.data ?? [];
+              final totalPayments = payments.fold<double>(
+                0.0,
+                (sum, payment) => sum + payment.amount,
+              );
+
+              return StreamBuilder<List<Income>>(
+                stream: (database.select(database.incomes)
+                      ..where((tbl) => tbl.eventId.equals(eventId))
+                      ..where((tbl) => tbl.isActive.equals(true)))
+                    .watch(),
+                builder: (context, incomeSnapshot) {
+                  final incomes = incomeSnapshot.data ?? [];
+                  final totalIncomes = incomes.fold<double>(
+                    0.0,
+                    (sum, income) => sum + income.amount,
+                  );
+
+                  return StreamBuilder<List<Expense>>(
+                    stream: (database.select(database.expenses)
+                          ..where((tbl) => tbl.eventId.equals(eventId))
+                          ..where((tbl) => tbl.isActive.equals(true)))
+                        .watch(),
+                    builder: (context, expenseSnapshot) {
+                      final expenses = expenseSnapshot.data ?? [];
+                      final totalExpenses = expenses.fold<double>(
+                        0.0,
+                        (sum, expense) => sum + expense.amount,
+                      );
+                      final saldo = totalPayments + totalIncomes - totalExpenses;
+
+                      return _buildFinanceCard(
+                        context,
+                        'Saldo (Gesamt)',
+                        NumberFormat.currency(locale: 'de_DE', symbol: '€').format(saldo),
+                        'Einnahmen - Ausgaben',
+                        backgroundColor: const Color(0xFFE8F5E9), // Hellgrün
+                        textColor: const Color(0xFF2E7D32), // Dunkelgrün
+                      );
+                    },
+                  );
+                },
+              );
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEventInfoCard(BuildContext context, Event event) {
-    return Card(
-      child: Padding(
-        padding: AppConstants.paddingAll16,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              event.name,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: AppConstants.spacingS),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  '${_formatDate(event.startDate)} - ${_formatDate(event.endDate)}',
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-            if (event.location != null) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    event.location!,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard(
+  Widget _buildOverviewCard(
     BuildContext context,
     String title,
     String value,
     IconData icon,
     Color color,
-  ) {
-    return Card(
-      child: Padding(
-        padding: AppConstants.paddingAll16,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 20),
-                const Spacer(),
-              ],
-            ),
-            const SizedBox(height: AppConstants.spacingS),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              title,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActionCard(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Color color,
     VoidCallback onTap,
   ) {
     return Card(
+      elevation: 2,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: AppConstants.paddingAll16,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, size: 48, color: color),
-              const SizedBox(height: AppConstants.spacingS),
+              Row(
+                children: [
+                  Icon(icon, color: color, size: 28),
+                  const Spacer(),
+                ],
+              ),
+              const SizedBox(height: AppConstants.spacingM),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
-                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppConstants.spacingS),
+              const Row(
+                children: [
+                  Text(
+                    'Zur Übersicht →',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF4CAF50),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFinanceCard(
+    BuildContext context,
+    String title,
+    String value,
+    String? subtitle, {
+    Color? backgroundColor,
+    Color? borderColor,
+    Color? textColor,
+  }) {
+    return Card(
+      elevation: 2,
+      color: backgroundColor ?? Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: borderColor != null
+            ? BorderSide(color: borderColor, width: 2)
+            : BorderSide.none,
+      ),
+      child: Padding(
+        padding: AppConstants.paddingAll16,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: textColor ?? Colors.grey[700],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingS),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: textColor ?? Colors.black,
+              ),
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: textColor?.withOpacity(0.7) ?? Colors.grey[600],
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'screens/auth/event_selection_screen.dart';
 import 'utils/constants.dart';
@@ -25,6 +26,15 @@ class MGBFreizeitplanerApp extends StatelessWidget {
     return MaterialApp(
       title: 'MGB Freizeitplaner',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('de', 'DE'),
+      ],
+      locale: const Locale('de', 'DE'),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppConstants.primaryColor,
