@@ -69,6 +69,9 @@ dependencies:
   # DateTime Utilities
   intl: ^0.20.2
 
+  # HTTP Client für GitHub-Import
+  http: ^1.2.2
+
   # Logging
   logger: ^2.0.2
 

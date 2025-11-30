@@ -4,12 +4,10 @@ import 'package:intl/intl.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../data/database/app_database.dart';
-import '../participants/participants_list_screen.dart';
-import '../families/families_list_screen.dart';
+import '../participants/participants_families_screen.dart';
 import '../payments/payments_list_screen.dart';
 import '../expenses/expenses_list_screen.dart';
 import '../incomes/incomes_list_screen.dart';
-import '../rulesets/rulesets_list_screen.dart';
 import '../cash_status/cash_status_screen.dart';
 import '../roles/roles_list_screen.dart';
 import '../tasks/tasks_screen.dart';
@@ -34,6 +32,23 @@ class DashboardScreen extends ConsumerWidget {
       );
     }
 
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Responsive Breakpoint: > 800px = Desktop
+        final isDesktop = constraints.maxWidth > 800;
+
+        if (isDesktop) {
+          // Desktop-Layout: NavigationRail (immer sichtbar)
+          return _buildDesktopLayout(context, ref, currentEvent);
+        } else {
+          // Mobile-Layout: Drawer (Swipe)
+          return _buildMobileLayout(context, ref, currentEvent);
+        }
+      },
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context, WidgetRef ref, Event currentEvent) {
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -62,6 +77,161 @@ class DashboardScreen extends ConsumerWidget {
       ),
       drawer: _buildDrawer(context, ref),
       body: _buildDashboardContent(context, ref, currentEvent),
+    );
+  }
+
+  Widget _buildDesktopLayout(BuildContext context, WidgetRef ref, Event currentEvent) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false, // Kein Hamburger-Icon
+        title: Row(
+          children: [
+            Container(
+              padding: AppConstants.paddingAll8,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.event, size: 24),
+            ),
+            const SizedBox(width: AppConstants.spacingM),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Dashboard'),
+                Text(
+                  currentEvent.name,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Einstellungen',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Row(
+        children: [
+          // NavigationRail (immer sichtbar)
+          _buildNavigationRail(context, ref),
+          // Vertikaler Separator
+          const VerticalDivider(thickness: 1, width: 1),
+          // Dashboard Content
+          Expanded(
+            child: _buildDashboardContent(context, ref, currentEvent),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationRail(BuildContext context, WidgetRef ref) {
+    return NavigationRail(
+      extended: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      selectedIndex: 0, // Dashboard ist immer selected
+      destinations: const [
+        NavigationRailDestination(
+          icon: Icon(Icons.dashboard),
+          label: Text('Dashboard'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.people),
+          label: Text('Teilnehmer & Familien'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.payment),
+          label: Text('Zahlungen'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.shopping_cart),
+          label: Text('Ausgaben'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.attach_money),
+          label: Text('Einnahmen'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.receipt_long),
+          label: Text('Kassenstand'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.badge),
+          label: Text('Rollen'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.task_alt),
+          label: Text('Aufgaben'),
+        ),
+      ],
+      onDestinationSelected: (index) {
+        // Navigation basierend auf Index
+        switch (index) {
+          case 0:
+            // Dashboard - bereits da
+            break;
+          case 1:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const ParticipantsFamiliesScreen(),
+              ),
+            );
+            break;
+          case 2:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const PaymentsListScreen(),
+              ),
+            );
+            break;
+          case 3:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const ExpensesListScreen(),
+              ),
+            );
+            break;
+          case 4:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const IncomesListScreen(),
+              ),
+            );
+            break;
+          case 5:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const CashStatusScreen(),
+              ),
+            );
+            break;
+          case 6:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const RolesListScreen(),
+              ),
+            );
+            break;
+          case 7:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const TasksScreen(),
+              ),
+            );
+            break;
+        }
+      },
     );
   }
 
@@ -138,24 +308,12 @@ class DashboardScreen extends ConsumerWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.people),
-            title: const Text('Teilnehmer'),
+            title: const Text('Teilnehmer & Familien'),
             onTap: () {
               Navigator.of(context).pop();
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const ParticipantsListScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.family_restroom),
-            title: const Text('Familien'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const FamiliesListScreen(),
+                  builder: (context) => const ParticipantsFamiliesScreen(),
                 ),
               );
             },
@@ -205,18 +363,6 @@ class DashboardScreen extends ConsumerWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const CashStatusScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.rule),
-            title: const Text('Regelwerke'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const RulesetsListScreen(),
                 ),
               );
             },

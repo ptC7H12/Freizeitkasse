@@ -23,11 +23,44 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
   String _searchQuery = '';
   String? _ageFilter; // 'children', 'youth', 'adults'
   String? _genderFilter;
+  String? _paymentFilter; // 'all', 'open', 'paid'
+  Map<int, double> _participantPayments = {}; // participantId -> total paid
+
+  @override
+  void initState() {
+    super.initState();
+    _loadParticipantPayments();
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadParticipantPayments() async {
+    final currentEvent = ref.read(currentEventProvider);
+    if (currentEvent == null) return;
+
+    final database = ref.read(databaseProvider);
+    final payments = await (database.select(database.payments)
+          ..where((tbl) => tbl.eventId.equals(currentEvent.id))
+          ..where((tbl) => tbl.isActive.equals(true))
+          ..where((tbl) => tbl.participantId.isNotNull()))
+        .get();
+
+    // Gruppiere Zahlungen nach Teilnehmer
+    final paymentMap = <int, double>{};
+    for (final payment in payments) {
+      if (payment.participantId != null) {
+        paymentMap[payment.participantId!] =
+          (paymentMap[payment.participantId!] ?? 0) + payment.amount;
+      }
+    }
+
+    setState(() {
+      _participantPayments = paymentMap;
+    });
   }
 
   List<Participant> _filterParticipants(List<Participant> participants) {
@@ -64,6 +97,23 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
     // Gender filter
     if (_genderFilter != null && _genderFilter!.isNotEmpty) {
       filtered = filtered.where((p) => p.gender == _genderFilter).toList();
+    }
+
+    // Payment status filter
+    if (_paymentFilter != null && _paymentFilter != 'all') {
+      filtered = filtered.where((p) {
+        final totalPrice = _getDisplayPrice(p);
+        final totalPaid = _participantPayments[p.id] ?? 0.0;
+
+        switch (_paymentFilter) {
+          case 'open':
+            return totalPaid < totalPrice; // Noch nicht vollständig bezahlt
+          case 'paid':
+            return totalPaid >= totalPrice; // Vollständig bezahlt
+          default:
+            return true;
+        }
+      }).toList();
     }
 
     return filtered;
@@ -173,6 +223,44 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                 ),
               ],
             ),
+            const SizedBox(height: AppConstants.spacing),
+            const Text('Zahlungsstatus:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: AppConstants.spacingS),
+            Wrap(
+              spacing: 8,
+              children: [
+                FilterChip(
+                  label: const Text('Alle'),
+                  selected: _paymentFilter == null || _paymentFilter == 'all',
+                  onSelected: (selected) {
+                    setState(() {
+                      _paymentFilter = null;
+                    });
+                    RouteHelpers.pop(context);
+                  },
+                ),
+                FilterChip(
+                  label: const Text('Offene Zahlungen'),
+                  selected: _paymentFilter == 'open',
+                  onSelected: (selected) {
+                    setState(() {
+                      _paymentFilter = selected ? 'open' : null;
+                    });
+                    RouteHelpers.pop(context);
+                  },
+                ),
+                FilterChip(
+                  label: const Text('Beglichene Zahlungen'),
+                  selected: _paymentFilter == 'paid',
+                  onSelected: (selected) {
+                    setState(() {
+                      _paymentFilter = selected ? 'paid' : null;
+                    });
+                    RouteHelpers.pop(context);
+                  },
+                ),
+              ],
+            ),
           ],
         ),
         actions: [
@@ -181,6 +269,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
               setState(() {
                 _ageFilter = null;
                 _genderFilter = null;
+                _paymentFilter = null;
               });
               RouteHelpers.pop(context);
             },
@@ -285,7 +374,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
           ),
 
           // Filter chips
-          if (_ageFilter != null || _genderFilter != null)
+          if (_ageFilter != null || _genderFilter != null || _paymentFilter != null)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Wrap(
@@ -306,6 +395,15 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                       onDeleted: () {
                         setState(() {
                           _genderFilter = null;
+                        });
+                      },
+                    ),
+                  if (_paymentFilter != null)
+                    Chip(
+                      label: Text(_getPaymentFilterLabel(_paymentFilter!)),
+                      onDeleted: () {
+                        setState(() {
+                          _paymentFilter = null;
                         });
                       },
                     ),
@@ -471,6 +569,17 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
         return 'Jugendliche (13-17)';
       case 'adults':
         return 'Erwachsene (≥18)';
+      default:
+        return filter;
+    }
+  }
+
+  String _getPaymentFilterLabel(String filter) {
+    switch (filter) {
+      case 'open':
+        return 'Offene Zahlungen';
+      case 'paid':
+        return 'Beglichene Zahlungen';
       default:
         return filter;
     }
