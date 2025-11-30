@@ -90,7 +90,7 @@ class ValidationException extends AppException {
 class InvalidInputException extends ValidationException {
   final String field;
 
-  const InvalidInputException(
+  InvalidInputException(
     this.field,
     String message, {
     String? code,
@@ -173,13 +173,19 @@ class ExcelImportException extends ImportExportException {
   final String? column;
 
   const ExcelImportException(
-    super.message, {
+    String message, {
     this.row,
     this.column,
-    super.fileName,
-    super.code,
-    super.originalError,
-  }) : super('import');
+    String? fileName,
+    String? code,
+    dynamic originalError,
+  }) : super(
+          'import',
+          message,
+          fileName: fileName,
+          code: code,
+          originalError: originalError,
+        );
 
   @override
   String toString() {
@@ -198,11 +204,17 @@ class ExcelImportException extends ImportExportException {
 /// PDF-Export Fehler
 class PdfExportException extends ImportExportException {
   const PdfExportException(
-    super.message, {
-    super.fileName,
-    super.code,
-    super.originalError,
-  }) : super('export');
+    String message, {
+    String? fileName,
+    String? code,
+    dynamic originalError,
+  }) : super(
+          'export',
+          message,
+          fileName: fileName,
+          code: code,
+          originalError: originalError,
+        );
 }
 
 // ===== NETZWERK EXCEPTIONS =====
@@ -244,6 +256,17 @@ class PermissionException extends AppException {
         );
 }
 
+// ===== ALLGEMEINE EXCEPTIONS =====
+
+/// Allgemeine/Unbekannte Fehler
+class GeneralException extends AppException {
+  const GeneralException(
+    super.message, {
+    super.code,
+    super.originalError,
+  });
+}
+
 // ===== HELPER FUNCTIONS =====
 
 /// Konvertiert allgemeine Exceptions zu App-Exceptions
@@ -260,7 +283,7 @@ AppException toAppException(dynamic error, {String? context}) {
   }
 
   // Allgemeiner Fehler
-  return AppException(
+  return GeneralException(
     context != null ? '$context: ${error.toString()}' : error.toString(),
     originalError: error,
   );

@@ -69,8 +69,7 @@ class PriceCalculatorService {
   ///   Basispreis für die Altersgruppe
   static double _getBasePriceByAge(int age, List<dynamic> ageGroups) {
     AppLogger.debug(
-      'Suche Basispreis für Alter $age in ${ageGroups.length} Altersgruppen',
-      name: 'PriceCalculatorService',
+      '[PriceCalculatorService] Suche Basispreis für Alter $age in ${ageGroups.length} Altersgruppen',
     );
 
     for (var group in ageGroups) {
@@ -78,8 +77,7 @@ class PriceCalculatorService {
       final maxAge = group['max_age'] as int? ?? 999;
 
       AppLogger.debug(
-        'Prüfe Gruppe: min=$minAge, max=$maxAge, group=$group',
-        name: 'PriceCalculatorService',
+        '[PriceCalculatorService] Prüfe Gruppe: min=$minAge, max=$maxAge, group=$group',
       );
 
       if (minAge <= age && age <= maxAge) {
@@ -87,8 +85,7 @@ class PriceCalculatorService {
         if (group.containsKey('base_price') == true) {
           final price = (group['base_price'] as num).toDouble();
           AppLogger.debug(
-            'Basispreis für Alter $age: $price€ (Gruppe $minAge-$maxAge)',
-            name: 'PriceCalculatorService',
+            '[PriceCalculatorService] Basispreis für Alter $age: $price€ (Gruppe $minAge-$maxAge)',
           );
           return price;
         }
@@ -96,17 +93,14 @@ class PriceCalculatorService {
         // Legacy Format: price als Fallback
         final price = (group['price'] as num?)?.toDouble() ?? 0.0;
         AppLogger.debug(
-          'Basispreis für Alter $age: $price€ (Gruppe $minAge-$maxAge, legacy format)',
-          name: 'PriceCalculatorService',
+          '[PriceCalculatorService] Basispreis für Alter $age: $price€ (Gruppe $minAge-$maxAge, legacy format)',
         );
         return price;
       }
     }
 
-    AppLogger.debug(
-      'Keine passende Altersgruppe für Alter $age gefunden! Rückgabe: 0.0',
-      name: 'PriceCalculatorService',
-      level: 900, // Warning level
+    AppLogger.warning(
+      '[PriceCalculatorService] Keine passende Altersgruppe für Alter $age gefunden! Rückgabe: 0.0',
     );
     return 0.0;
   }
