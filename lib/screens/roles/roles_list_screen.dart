@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/role_provider.dart';
 import '../../providers/current_event_provider.dart';
 import 'role_form_screen.dart';
+import '../../utils/constants.dart';
 
 class RolesListScreen extends ConsumerWidget {
   const RolesListScreen({super.key});

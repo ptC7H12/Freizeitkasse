@@ -5,6 +5,7 @@ import '../../data/database/app_database.dart';
 import '../../providers/income_provider.dart';
 import '../../providers/current_event_provider.dart';
 import 'income_form_screen.dart';
+import '../../utils/constants.dart';
 
 class IncomesListScreen extends ConsumerWidget {
   const IncomesListScreen({super.key});

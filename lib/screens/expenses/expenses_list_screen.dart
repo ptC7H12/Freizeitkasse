@@ -5,6 +5,7 @@ import '../../data/database/app_database.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/current_event_provider.dart';
 import 'expense_form_screen.dart';
+import '../../utils/constants.dart';
 
 class ExpensesListScreen extends ConsumerWidget {
   const ExpensesListScreen({super.key});
