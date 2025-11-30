@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
+import 'dart:developer' as developer;
 import '../../data/database/app_database.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../providers/ruleset_provider.dart';
+import '../../services/github_ruleset_service.dart';
+import '../../utils/route_helpers.dart';
+import '../../utils/constants.dart';
 import '../dashboard/dashboard_screen.dart';
 
 /// Event Selection Screen
@@ -199,73 +204,231 @@ class EventSelectionScreen extends ConsumerWidget {
     final locationController = TextEditingController();
     DateTime startDate = DateTime.now();
     DateTime endDate = DateTime.now().add(const Duration(days: 7));
+    String selectedEventType = 'Kinderfreizeit';
+
+    final eventTypes = [
+      'Kinderfreizeit',
+      'Teeniefreizeit',
+      'Jugendfreizeit',
+      'Familienfreizeit',
+      'Sonstige',
+    ];
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Neues Event erstellen'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Event-Name *',
-                  hintText: 'z.B. Sommerfreizeit 2025',
-                ),
-              ),
-              const SizedBox(height: AppConstants.spacing),
-              TextField(
-                controller: locationController,
-                decoration: const InputDecoration(
-                  labelText: 'Ort',
-                  hintText: 'z.B. Campingplatz Müggelsee',
-                ),
-              ),
-              // TODO: Date pickers für Start/End-Datum
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => RouteHelpers.pop(context),
-            child: const Text('Abbrechen'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (nameController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Bitte Event-Name eingeben'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Neues Event erstellen'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Event-Name *',
+                    hintText: 'z.B. Sommerfreizeit 2025',
                   ),
-                );
-                return;
-              }
-
-              // Event erstellen
-              final database = ref?.read(databaseProvider);
-              if (database != null) {
-                await database.into(database.events).insert(
-                      EventsCompanion.insert(
-                        name: nameController.text,
-                        startDate: startDate,
-                        endDate: endDate,
-                        location: drift.Value(locationController.text.isEmpty
-                            ? null
-                            : locationController.text),
-                      ),
+                ),
+                const SizedBox(height: AppConstants.spacing),
+                DropdownButtonFormField<String>(
+                  value: selectedEventType,
+                  decoration: const InputDecoration(
+                    labelText: 'Freizeittyp *',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.category),
+                  ),
+                  items: eventTypes.map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text(type),
                     );
-              }
-
-              if (context.mounted) {
-                RouteHelpers.pop(context);
-              }
-            },
-            child: const Text('Erstellen'),
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        selectedEventType = value;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: AppConstants.spacing),
+                TextField(
+                  controller: locationController,
+                  decoration: const InputDecoration(
+                    labelText: 'Ort',
+                    hintText: 'z.B. Campingplatz Müggelsee',
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacing),
+                InkWell(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: startDate,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                      locale: const Locale('de', 'DE'),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        startDate = picked;
+                        if (endDate.isBefore(startDate)) {
+                          endDate = startDate.add(const Duration(days: 7));
+                        }
+                      });
+                    }
+                  },
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Startdatum *',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.calendar_today),
+                    ),
+                    child: Text(_formatDate(startDate)),
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacing),
+                InkWell(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: endDate,
+                      firstDate: startDate,
+                      lastDate: DateTime(2100),
+                      locale: const Locale('de', 'DE'),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        endDate = picked;
+                      });
+                    }
+                  },
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Enddatum *',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.calendar_today),
+                    ),
+                    child: Text(_formatDate(endDate)),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => RouteHelpers.pop(context),
+              child: const Text('Abbrechen'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (nameController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Bitte Event-Name eingeben'),
+                    ),
+                  );
+                  return;
+                }
+
+                // Event erstellen
+                final database = ref?.read(databaseProvider);
+                if (database != null) {
+                  final eventId = await database.into(database.events).insert(
+                        EventsCompanion.insert(
+                          name: nameController.text,
+                          startDate: startDate,
+                          endDate: endDate,
+                          location: drift.Value(locationController.text.isEmpty
+                              ? null
+                              : locationController.text),
+                          eventType: drift.Value(selectedEventType),
+                        ),
+                      );
+
+                  // Automatischer Ruleset-Import von GitHub
+                  if (ref != null) {
+                    await _importRulesetFromGitHub(
+                      context,
+                      ref,
+                      eventId,
+                      selectedEventType,
+                      startDate.year,
+                    );
+                  }
+                }
+
+                if (context.mounted) {
+                  RouteHelpers.pop(context);
+                }
+              },
+              child: const Text('Erstellen'),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _importRulesetFromGitHub(
+    BuildContext context,
+    WidgetRef ref,
+    int eventId,
+    String eventType,
+    int year,
+  ) async {
+    // GitHub-Pfad aus Settings laden (vorerst hardcoded)
+    // TODO: Aus Settings-Tabelle laden
+    const githubPath = 'https://raw.githubusercontent.com/YOUR_ORG/YOUR_REPO/main/rulesets';
+
+    // Versuche Ruleset von GitHub zu laden
+    try {
+      final yamlContent = await GitHubRulesetService.loadRulesetFromGitHub(
+        githubBasePath: githubPath,
+        eventType: eventType,
+        year: year,
+      );
+
+      if (yamlContent != null) {
+        // Ruleset erfolgreich geladen - speichern
+        final database = ref.read(databaseProvider);
+        final repository = ref.read(rulesetRepositoryProvider);
+
+        await repository.createRuleset(
+          eventId: eventId,
+          name: '$eventType $year (GitHub)',
+          yamlContent: yamlContent,
+          validFrom: DateTime(year, 1, 1),
+          description: 'Automatisch importiert von GitHub',
+        );
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Regelwerk von GitHub geladen: $eventType'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // Fallback auf lokales Template
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('GitHub-Regelwerk nicht gefunden - verwende Standard-Template'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Fehler beim Laden - stilles Fallback
+      developer.log(
+        'Fehler beim GitHub-Import: $e',
+        name: 'EventSelectionScreen',
+        level: 900,
+      );
+    }
   }
 }

@@ -34,6 +34,23 @@ class DashboardScreen extends ConsumerWidget {
       );
     }
 
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Responsive Breakpoint: > 800px = Desktop
+        final isDesktop = constraints.maxWidth > 800;
+
+        if (isDesktop) {
+          // Desktop-Layout: NavigationRail (immer sichtbar)
+          return _buildDesktopLayout(context, ref, currentEvent);
+        } else {
+          // Mobile-Layout: Drawer (Swipe)
+          return _buildMobileLayout(context, ref, currentEvent);
+        }
+      },
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context, WidgetRef ref, Event currentEvent) {
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -62,6 +79,183 @@ class DashboardScreen extends ConsumerWidget {
       ),
       drawer: _buildDrawer(context, ref),
       body: _buildDashboardContent(context, ref, currentEvent),
+    );
+  }
+
+  Widget _buildDesktopLayout(BuildContext context, WidgetRef ref, Event currentEvent) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false, // Kein Hamburger-Icon
+        title: Row(
+          children: [
+            Container(
+              padding: AppConstants.paddingAll8,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.event, size: 24),
+            ),
+            const SizedBox(width: AppConstants.spacingM),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Dashboard'),
+                Text(
+                  currentEvent.name,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Einstellungen',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Row(
+        children: [
+          // NavigationRail (immer sichtbar)
+          _buildNavigationRail(context, ref),
+          // Vertikaler Separator
+          const VerticalDivider(thickness: 1, width: 1),
+          // Dashboard Content
+          Expanded(
+            child: _buildDashboardContent(context, ref, currentEvent),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationRail(BuildContext context, WidgetRef ref) {
+    return NavigationRail(
+      extended: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      selectedIndex: 0, // Dashboard ist immer selected
+      destinations: const [
+        NavigationRailDestination(
+          icon: Icon(Icons.dashboard),
+          label: Text('Dashboard'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.people),
+          label: Text('Teilnehmer'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.family_restroom),
+          label: Text('Familien'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.payment),
+          label: Text('Zahlungen'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.shopping_cart),
+          label: Text('Ausgaben'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.attach_money),
+          label: Text('Einnahmen'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.receipt_long),
+          label: Text('Kassenstand'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.rule),
+          label: Text('Regelwerke'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.badge),
+          label: Text('Rollen'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.task_alt),
+          label: Text('Aufgaben'),
+        ),
+      ],
+      onDestinationSelected: (index) {
+        // Navigation basierend auf Index
+        switch (index) {
+          case 0:
+            // Dashboard - bereits da
+            break;
+          case 1:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const ParticipantsListScreen(),
+              ),
+            );
+            break;
+          case 2:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const FamiliesListScreen(),
+              ),
+            );
+            break;
+          case 3:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const PaymentsListScreen(),
+              ),
+            );
+            break;
+          case 4:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const ExpensesListScreen(),
+              ),
+            );
+            break;
+          case 5:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const IncomesListScreen(),
+              ),
+            );
+            break;
+          case 6:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const CashStatusScreen(),
+              ),
+            );
+            break;
+          case 7:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const RulesetsListScreen(),
+              ),
+            );
+            break;
+          case 8:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const RolesListScreen(),
+              ),
+            );
+            break;
+          case 9:
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const TasksScreen(),
+              ),
+            );
+            break;
+        }
+      },
     );
   }
 

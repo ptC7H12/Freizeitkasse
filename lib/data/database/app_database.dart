@@ -18,6 +18,7 @@ class Events extends Table {
   DateTimeColumn get endDate => dateTime()();
   TextColumn get location => text().withLength(max: 200).nullable()();
   TextColumn get description => text().nullable()();
+  TextColumn get eventType => text().withLength(max: 50).nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
@@ -168,6 +169,7 @@ class Settings extends Table {
   TextColumn get iban => text().withLength(max: 34).nullable()();
   TextColumn get bic => text().withLength(max: 11).nullable()();
   TextColumn get invoiceFooter => text().nullable()();
+  TextColumn get githubRulesetPath => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }

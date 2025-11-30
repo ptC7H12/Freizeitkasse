@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
+import '../../providers/database_provider.dart';
+import '../../providers/current_event_provider.dart';
+import 'package:drift/drift.dart' as drift;
 import 'categories_management_screen.dart';
 
 /// Einstellungen-Screen
@@ -94,6 +97,25 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     );
                   },
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: AppConstants.spacing),
+
+          // GitHub Integration Section
+          _buildSectionHeader(context, 'GitHub-Integration'),
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.cloud_outlined),
+                  title: const Text('GitHub Ruleset-Pfad'),
+                  subtitle: const Text('URL zu GitHub-Repository mit Regelwerk-Templates'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _showGitHubPathDialog(context, ref),
                 ),
               ],
             ),
@@ -215,6 +237,126 @@ class SettingsScreen extends ConsumerWidget {
       leading: Icon(icon),
       title: Text(title),
       subtitle: Text(subtitle),
+    );
+  }
+
+  void _showGitHubPathDialog(BuildContext context, WidgetRef ref) async {
+    final currentEvent = ref.read(currentEventProvider);
+    if (currentEvent == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kein Event ausgewählt')),
+      );
+      return;
+    }
+
+    final database = ref.read(databaseProvider);
+
+    // Lade aktuelle Settings
+    final settings = await (database.select(database.settings)
+          ..where((tbl) => tbl.eventId.equals(currentEvent.id)))
+        .getSingleOrNull();
+
+    final controller = TextEditingController(
+      text: settings?.githubRulesetPath ?? '',
+    );
+
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('GitHub Ruleset-Pfad konfigurieren'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Basis-URL zu Ihrem GitHub-Repository mit Regelwerk-Templates.\n\n'
+              'Beispiel:\n'
+              'https://raw.githubusercontent.com/user/repo/main/rulesets\n\n'
+              'Pattern: {Freizeittyp}_{Jahr}.yaml',
+              style: TextStyle(fontSize: 12),
+            ),
+            const SizedBox(height: AppConstants.spacing),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'GitHub-Pfad',
+                hintText: 'https://raw.githubusercontent.com/...',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.link),
+              ),
+              maxLines: 2,
+            ),
+            const SizedBox(height: AppConstants.spacingM),
+            Container(
+              padding: AppConstants.paddingAll12,
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue[200]!),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Erwartete Dateinamen:',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                  SizedBox(height: 4),
+                  Text('• Kinderfreizeit_2025.yaml', style: TextStyle(fontSize: 11)),
+                  Text('• Teeniefreizeit_2025.yaml', style: TextStyle(fontSize: 11)),
+                  Text('• Jugendfreizeit_2025.yaml', style: TextStyle(fontSize: 11)),
+                  Text('• Familienfreizeit_2025.yaml', style: TextStyle(fontSize: 11)),
+                  Text('• Sonstige_2025.yaml', style: TextStyle(fontSize: 11)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final path = controller.text.trim();
+
+              if (settings == null) {
+                // Settings noch nicht vorhanden - erstellen
+                await database.into(database.settings).insert(
+                  SettingsCompanion.insert(
+                    eventId: currentEvent.id,
+                    githubRulesetPath: drift.Value(path.isEmpty ? null : path),
+                  ),
+                );
+              } else {
+                // Settings aktualisieren
+                await (database.update(database.settings)
+                      ..where((tbl) => tbl.id.equals(settings.id)))
+                    .write(
+                  SettingsCompanion(
+                    githubRulesetPath: drift.Value(path.isEmpty ? null : path),
+                    updatedAt: drift.Value(DateTime.now()),
+                  ),
+                );
+              }
+
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('GitHub-Pfad gespeichert'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Speichern'),
+          ),
+        ],
+      ),
     );
   }
 }
