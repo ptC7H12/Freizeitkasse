@@ -4,12 +4,10 @@ import 'package:intl/intl.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../data/database/app_database.dart';
-import '../participants/participants_list_screen.dart';
-import '../families/families_list_screen.dart';
+import '../participants/participants_families_screen.dart';
 import '../payments/payments_list_screen.dart';
 import '../expenses/expenses_list_screen.dart';
 import '../incomes/incomes_list_screen.dart';
-import '../rulesets/rulesets_list_screen.dart';
 import '../cash_status/cash_status_screen.dart';
 import '../roles/roles_list_screen.dart';
 import '../tasks/tasks_screen.dart';
@@ -150,11 +148,7 @@ class DashboardScreen extends ConsumerWidget {
         ),
         NavigationRailDestination(
           icon: Icon(Icons.people),
-          label: Text('Teilnehmer'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.family_restroom),
-          label: Text('Familien'),
+          label: Text('Teilnehmer & Familien'),
         ),
         NavigationRailDestination(
           icon: Icon(Icons.payment),
@@ -171,10 +165,6 @@ class DashboardScreen extends ConsumerWidget {
         NavigationRailDestination(
           icon: Icon(Icons.receipt_long),
           label: Text('Kassenstand'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.rule),
-          label: Text('Regelwerke'),
         ),
         NavigationRailDestination(
           icon: Icon(Icons.badge),
@@ -194,60 +184,46 @@ class DashboardScreen extends ConsumerWidget {
           case 1:
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => const ParticipantsListScreen(),
+                builder: (context) => const ParticipantsFamiliesScreen(),
               ),
             );
             break;
           case 2:
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => const FamiliesListScreen(),
+                builder: (context) => const PaymentsListScreen(),
               ),
             );
             break;
           case 3:
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => const PaymentsListScreen(),
+                builder: (context) => const ExpensesListScreen(),
               ),
             );
             break;
           case 4:
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => const ExpensesListScreen(),
+                builder: (context) => const IncomesListScreen(),
               ),
             );
             break;
           case 5:
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => const IncomesListScreen(),
+                builder: (context) => const CashStatusScreen(),
               ),
             );
             break;
           case 6:
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => const CashStatusScreen(),
-              ),
-            );
-            break;
-          case 7:
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const RulesetsListScreen(),
-              ),
-            );
-            break;
-          case 8:
-            Navigator.of(context).push(
-              MaterialPageRoute(
                 builder: (context) => const RolesListScreen(),
               ),
             );
             break;
-          case 9:
+          case 7:
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const TasksScreen(),
@@ -332,24 +308,12 @@ class DashboardScreen extends ConsumerWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.people),
-            title: const Text('Teilnehmer'),
+            title: const Text('Teilnehmer & Familien'),
             onTap: () {
               Navigator.of(context).pop();
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const ParticipantsListScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.family_restroom),
-            title: const Text('Familien'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const FamiliesListScreen(),
+                  builder: (context) => const ParticipantsFamiliesScreen(),
                 ),
               );
             },
@@ -399,18 +363,6 @@ class DashboardScreen extends ConsumerWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const CashStatusScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.rule),
-            title: const Text('Regelwerke'),
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const RulesetsListScreen(),
                 ),
               );
             },

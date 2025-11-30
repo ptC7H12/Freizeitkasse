@@ -5,6 +5,7 @@ import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
 import 'package:drift/drift.dart' as drift;
 import 'categories_management_screen.dart';
+import 'rulesets_management_screen.dart';
 
 /// Einstellungen-Screen
 ///
@@ -94,6 +95,31 @@ class SettingsScreen extends ConsumerWidget {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const CategoriesManagementScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: AppConstants.spacing),
+
+          // Rulesets Management Section
+          _buildSectionHeader(context, 'Regelwerke'),
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.rule),
+                  title: const Text('Regelwerke verwalten'),
+                  subtitle: const Text('Preisstrukturen und Rabatte konfigurieren'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const RulesetsManagementScreen(),
                       ),
                     );
                   },
