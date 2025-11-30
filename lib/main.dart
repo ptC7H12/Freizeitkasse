@@ -26,28 +26,28 @@ class MGBFreizeitplanerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2196F3), // Material Blue
+          seedColor: AppConstants.primaryColor,
           brightness: Brightness.light,
-          primary: const Color(0xFF2196F3),
-          secondary: const Color(0xFF4CAF50), // Green for positive actions
-          tertiary: const Color(0xFFFF9800), // Orange for warnings/highlights
+          primary: AppConstants.primaryColor,
+          secondary: AppConstants.secondaryColor,
+          tertiary: AppConstants.tertiaryColor,
         ),
         useMaterial3: true,
 
         // AppBar with gradient-ready styling
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           centerTitle: false,
-          elevation: 2,
-          backgroundColor: Color(0xFF2196F3),
+          elevation: AppConstants.elevationLow,
+          backgroundColor: AppConstants.primaryColor,
           foregroundColor: Colors.white,
         ),
 
         // Cards with subtle elevation and color
         cardTheme: CardThemeData(
-          elevation: 3,
+          elevation: AppConstants.elevationMedium,
           shadowColor: Colors.black.withOpacity(0.1),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: AppConstants.borderRadius16,
           ),
           color: Colors.white,
         ),
@@ -55,37 +55,34 @@ class MGBFreizeitplanerApp extends StatelessWidget {
         // Input fields with rounded corners
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppConstants.borderRadius12,
             borderSide: BorderSide(color: Colors.grey.shade300),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppConstants.borderRadius12,
             borderSide: BorderSide(color: Colors.grey.shade300),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF2196F3), width: 2),
+            borderRadius: AppConstants.borderRadius12,
+            borderSide: BorderSide(color: AppConstants.primaryColor, width: 2),
           ),
           filled: true,
           fillColor: Colors.grey.shade50,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
+          contentPadding: AppConstants.paddingAll16,
         ),
 
         // Elevated buttons with vibrant colors
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2196F3),
+            backgroundColor: AppConstants.primaryColor,
             foregroundColor: Colors.white,
-            elevation: 2,
+            elevation: AppConstants.elevationLow,
             padding: const EdgeInsets.symmetric(
-              horizontal: 32,
-              vertical: 16,
+              horizontal: AppConstants.spacingXL,
+              vertical: AppConstants.spacing,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: AppConstants.borderRadius12,
             ),
             textStyle: const TextStyle(
               fontSize: 16,
@@ -97,24 +94,24 @@ class MGBFreizeitplanerApp extends StatelessWidget {
         // Filled buttons (secondary style)
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xFF4CAF50),
+            backgroundColor: AppConstants.secondaryColor,
             foregroundColor: Colors.white,
-            elevation: 2,
+            elevation: AppConstants.elevationLow,
             padding: const EdgeInsets.symmetric(
-              horizontal: 32,
-              vertical: 16,
+              horizontal: AppConstants.spacingXL,
+              vertical: AppConstants.spacing,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: AppConstants.borderRadius12,
             ),
           ),
         ),
 
         // Floating Action Button
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Color(0xFF2196F3),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: AppConstants.primaryColor,
           foregroundColor: Colors.white,
-          elevation: 4,
+          elevation: AppConstants.elevationMedium,
         ),
 
         // Drawer theme
@@ -127,7 +124,7 @@ class MGBFreizeitplanerApp extends StatelessWidget {
 
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2196F3),
+          seedColor: AppConstants.primaryColor,
           brightness: Brightness.dark,
           primary: const Color(0xFF64B5F6),
           secondary: const Color(0xFF81C784),
@@ -137,7 +134,7 @@ class MGBFreizeitplanerApp extends StatelessWidget {
 
         appBarTheme: const AppBarTheme(
           centerTitle: false,
-          elevation: 2,
+          elevation: AppConstants.elevationLow,
           backgroundColor: Color(0xFF1976D2),
           foregroundColor: Colors.white,
         ),
