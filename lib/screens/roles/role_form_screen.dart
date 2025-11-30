@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/role_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../widgets/responsive_form_container.dart';
-
-class RoleFormScreen extends ConsumerStatefulWidget {
 import '../../extensions/context_extensions.dart';
 import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
+
+class RoleFormScreen extends ConsumerStatefulWidget {
   final int? roleId;
 
   const RoleFormScreen({super.key, this.roleId});
