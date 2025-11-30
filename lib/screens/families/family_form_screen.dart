@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/family_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../utils/validators.dart';
+import '../../widgets/responsive_form_container.dart';
+import '../../extensions/context_extensions.dart';
+import '../../utils/route_helpers.dart';
 
 /// Familien-Formular (Create/Edit)
 class FamilyFormScreen extends ConsumerStatefulWidget {
@@ -99,9 +102,9 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveFormContainer(
+          child: ListView(
+            children: [
             // Familienname
             TextFormField(
               controller: _familyNameController,
@@ -113,14 +116,14 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
                   Validators.required(value, fieldName: 'Familienname'),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Kontaktdaten
             Text(
               'Kontaktdaten',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             TextFormField(
               controller: _contactPersonController,
@@ -130,7 +133,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             TextFormField(
               controller: _phoneController,
@@ -141,7 +144,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               validator: Validators.phone,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             TextFormField(
               controller: _emailController,
@@ -152,14 +155,14 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               validator: Validators.email,
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Adresse
             Text(
               'Adresse',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             TextFormField(
               controller: _streetController,
@@ -168,7 +171,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             Row(
               children: [
@@ -183,7 +186,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
                     validator: Validators.postalCode,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppConstants.spacing),
                 Expanded(
                   flex: 2,
                   child: TextFormField(
@@ -213,9 +216,10 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
           ],
         ),
+      ),
       ),
     );
   }
@@ -256,10 +260,8 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Familie erstellt')),
-          );
-          Navigator.of(context).pop();
+          context.showSuccess('Familie erstellt');
+          RouteHelpers.pop(context);
         }
       } else {
         // Update
@@ -280,17 +282,13 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Familie aktualisiert')),
-          );
-          Navigator.of(context).pop();
+          context.showSuccess('Familie aktualisiert');
+          RouteHelpers.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler: $e')),
-        );
+        context.showError('Fehler: $e');
       }
     } finally {
       if (mounted) {
@@ -330,10 +328,8 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
       await repository.deleteFamily(widget.familyId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Familie gelöscht')),
-        );
-        Navigator.of(context).pop();
+        context.showSuccess('Familie gelöscht');
+        RouteHelpers.pop(context);
       }
     }
   }

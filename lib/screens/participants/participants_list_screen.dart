@@ -79,7 +79,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Altersgruppe:', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             Wrap(
               spacing: 8,
               children: [
@@ -90,7 +90,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -100,7 +100,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = selected ? 'children' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -110,7 +110,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = selected ? 'youth' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -120,14 +120,14 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = selected ? 'adults' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             const Text('Geschlecht:', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             Wrap(
               spacing: 8,
               children: [
@@ -138,7 +138,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -148,7 +148,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = selected ? 'Männlich' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -158,7 +158,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = selected ? 'Weiblich' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -168,7 +168,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = selected ? 'Divers' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
               ],
@@ -182,12 +182,12 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                 _ageFilter = null;
                 _genderFilter = null;
               });
-              Navigator.pop(context);
+              RouteHelpers.pop(context);
             },
             child: const Text('Zurücksetzen'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => RouteHelpers.pop(context),
             child: const Text('Schließen'),
           ),
         ],
@@ -230,9 +230,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
               final currentEvent = ref.read(currentEventProvider);
 
               if (participantsValue == null || participantsValue.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Keine Teilnehmer zum Exportieren')),
-                );
+                context.showSuccess('Keine Teilnehmer zum Exportieren');
                 return;
               }
 
@@ -243,15 +241,11 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                   eventName: currentEvent?.name ?? 'Veranstaltung',
                 );
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('PDF gespeichert: $filePath')),
-                  );
+                  context.showError('PDF gespeichert: $filePath');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Fehler beim Export: $e')),
-                  );
+                  context.showError('Fehler beim Export: $e');
                 }
               }
             },
@@ -263,7 +257,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
         children: [
           // Search Bar
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: AppConstants.paddingAll16,
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -335,14 +329,14 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(Icons.search_off, size: 80, color: Colors.grey),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppConstants.spacing),
                         const Text(
                           'Keine Ergebnisse gefunden',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppConstants.spacingS),
                         const Text('Versuchen Sie eine andere Suche oder Filter'),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppConstants.spacing),
                         TextButton(
                           onPressed: () {
                             setState(() {
@@ -370,7 +364,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     ),
                     Expanded(
                       child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: AppConstants.paddingAll16,
                         itemCount: filteredParticipants.length,
                         itemBuilder: (context, index) {
                           final participant = filteredParticipants[index];

@@ -5,7 +5,10 @@ import '../../providers/current_event_provider.dart';
 import '../../providers/participant_provider.dart';
 import '../../providers/family_provider.dart';
 import '../../utils/validators.dart';
+import '../../extensions/context_extensions.dart';
+import '../../utils/route_helpers.dart';
 import '../../utils/date_utils.dart';
+import '../../widgets/responsive_form_container.dart';
 
 /// Zahlungs-Formular (Create/Edit)
 class PaymentFormScreen extends ConsumerStatefulWidget {
@@ -114,9 +117,9 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveFormContainer(
+          child: ListView(
+            children: [
             // Betrag
             TextFormField(
               controller: _amountController,
@@ -129,14 +132,14 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               autofocus: true,
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Zahlungsdatum
             Text(
               'Zahlungsdatum',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             InkWell(
               onTap: () => _selectPaymentDate(context),
               child: InputDecorator(
@@ -147,7 +150,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Zahlungsmethode
             DropdownButtonFormField<String>(
@@ -171,14 +174,14 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               },
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Zahlungstyp
             Text(
               'Zahlung für',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             SegmentedButton<String>(
               segments: const [
                 ButtonSegment(
@@ -206,7 +209,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               },
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Teilnehmer/Familie Auswahl
             if (_paymentType == 'participant')
@@ -214,7 +217,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
             else
               _buildFamilyDropdown(),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Notizen
             TextFormField(
@@ -243,9 +246,10 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
           ],
         ),
+      ),
       ),
     );
   }
@@ -369,10 +373,8 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Zahlung erstellt')),
-          );
-          Navigator.of(context).pop();
+          context.showSuccess('Zahlung erstellt');
+          RouteHelpers.pop(context);
         }
       } else {
         // Update
@@ -385,17 +387,13 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Zahlung aktualisiert')),
-          );
-          Navigator.of(context).pop();
+          context.showSuccess('Zahlung aktualisiert');
+          RouteHelpers.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler: $e')),
-        );
+        context.showError('Fehler: $e');
       }
     } finally {
       if (mounted) {
@@ -431,10 +429,8 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
       await repository.deletePayment(widget.paymentId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Zahlung gelöscht')),
-        );
-        Navigator.of(context).pop();
+        context.showSuccess('Zahlung gelöscht');
+        RouteHelpers.pop(context);
       }
     }
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'screens/auth/event_selection_screen.dart';
+import 'utils/constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,54 +27,118 @@ class MGBFreizeitplanerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
+          seedColor: AppConstants.primaryColor,
           brightness: Brightness.light,
+          primary: AppConstants.primaryColor,
+          secondary: AppConstants.secondaryColor,
+          tertiary: AppConstants.tertiaryColor,
         ),
         useMaterial3: true,
 
-        // German-style date formatting
-        // Additional theme customizations
-        appBarTheme: const AppBarTheme(
+        // AppBar with gradient-ready styling
+        appBarTheme: AppBarTheme(
           centerTitle: false,
-          elevation: 0,
+          elevation: AppConstants.elevationLow,
+          backgroundColor: AppConstants.primaryColor,
+          foregroundColor: Colors.white,
         ),
 
-        cardTheme: const CardThemeData(
-          elevation: 2,
+        // Cards with subtle elevation and color
+        cardTheme: CardThemeData(
+          elevation: AppConstants.elevationMedium,
+          shadowColor: Colors.black.withOpacity(0.1),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
+            borderRadius: AppConstants.borderRadius16,
           ),
+          color: Colors.white,
         ),
 
+        // Input fields with rounded corners
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: AppConstants.borderRadius12,
+            borderSide: BorderSide(color: Colors.grey.shade300),
           ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: AppConstants.borderRadius12,
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: AppConstants.borderRadius12,
+            borderSide: BorderSide(color: AppConstants.primaryColor, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.grey.shade50,
+          contentPadding: AppConstants.paddingAll16,
+        ),
+
+        // Elevated buttons with vibrant colors
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppConstants.primaryColor,
+            foregroundColor: Colors.white,
+            elevation: AppConstants.elevationLow,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingXL,
+              vertical: AppConstants.spacing,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: AppConstants.borderRadius12,
+            ),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
 
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
+        // Filled buttons (secondary style)
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            backgroundColor: AppConstants.secondaryColor,
+            foregroundColor: Colors.white,
+            elevation: AppConstants.elevationLow,
             padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 12,
+              horizontal: AppConstants.spacingXL,
+              vertical: AppConstants.spacing,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: AppConstants.borderRadius12,
             ),
           ),
+        ),
+
+        // Floating Action Button
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: AppConstants.primaryColor,
+          foregroundColor: Colors.white,
+          elevation: AppConstants.elevationMedium,
+        ),
+
+        // Drawer theme
+        drawerTheme: DrawerThemeData(
+          backgroundColor: Colors.white,
+          elevation: 16,
+          shadowColor: Colors.black.withOpacity(0.2),
         ),
       ),
 
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
+          seedColor: AppConstants.primaryColor,
           brightness: Brightness.dark,
+          primary: const Color(0xFF64B5F6),
+          secondary: const Color(0xFF81C784),
+          tertiary: const Color(0xFFFFB74D),
         ),
         useMaterial3: true,
+
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+          elevation: AppConstants.elevationLow,
+          backgroundColor: Color(0xFF1976D2),
+          foregroundColor: Colors.white,
+        ),
       ),
 
       // Start with event selection screen

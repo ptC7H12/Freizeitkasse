@@ -13,6 +13,7 @@ import '../rulesets/rulesets_list_screen.dart';
 import '../cash_status/cash_status_screen.dart';
 import '../roles/roles_list_screen.dart';
 import '../tasks/tasks_screen.dart';
+import '../settings/settings_screen.dart';
 
 /// Dashboard Screen
 ///
@@ -48,8 +49,13 @@ class DashboardScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
+            tooltip: 'Einstellungen',
             onPressed: () {
-              // TODO: Settings Screen
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
             },
           ),
         ],
@@ -67,35 +73,60 @@ class DashboardScreen extends ConsumerWidget {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF2196F3), // Material Blue
+                  Color(0xFF1976D2), // Darker Blue
+                ],
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Icon(
-                  Icons.event,
-                  size: 48,
-                  color: Colors.white,
+                Container(
+                  padding: AppConstants.paddingAll8,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.event,
+                    size: 40,
+                    color: Colors.white,
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppConstants.spacingM),
                 const Text(
                   'MGB Freizeitplaner',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
                   ),
                 ),
-                if (currentEvent != null)
-                  Text(
-                    currentEvent.name,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
+                if (currentEvent != null) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      currentEvent.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
+                ],
               ],
             ),
           ),
@@ -237,20 +268,20 @@ class DashboardScreen extends ConsumerWidget {
     final eventId = currentEvent.id;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: AppConstants.paddingAll16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Event Info Card
           _buildEventInfoCard(context, currentEvent),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppConstants.spacingL),
 
           // Statistics Cards
           const Text(
             'Übersicht',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
 
           StreamBuilder<int>(
             stream: (database.select(database.participants)
@@ -272,7 +303,7 @@ class DashboardScreen extends ConsumerWidget {
                       Colors.blue,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppConstants.spacing),
                   Expanded(
                     child: StreamBuilder<int>(
                       stream: (database.select(database.families)
@@ -296,7 +327,7 @@ class DashboardScreen extends ConsumerWidget {
             },
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
 
           // Financial Overview - Payments and Expenses
           StreamBuilder<List<Payment>>(
@@ -322,7 +353,7 @@ class DashboardScreen extends ConsumerWidget {
                       Colors.blue,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppConstants.spacing),
                   Expanded(
                     child: StreamBuilder<List<Expense>>(
                       stream: (database.select(database.expenses)
@@ -351,7 +382,7 @@ class DashboardScreen extends ConsumerWidget {
             },
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
 
           // Financial Overview - Incomes and Cash Balance
           StreamBuilder<List<Income>>(
@@ -390,7 +421,7 @@ class DashboardScreen extends ConsumerWidget {
                           Colors.green,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: AppConstants.spacing),
                       Expanded(
                         child: _buildStatCard(
                           context,
@@ -407,14 +438,14 @@ class DashboardScreen extends ConsumerWidget {
             },
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: AppConstants.spacingL),
 
           // Quick Actions
           const Text(
             'Schnellzugriff',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
 
           GridView.count(
             shrinkWrap: true,
@@ -499,7 +530,7 @@ class DashboardScreen extends ConsumerWidget {
   Widget _buildEventInfoCard(BuildContext context, Event event) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppConstants.paddingAll16,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -507,7 +538,7 @@ class DashboardScreen extends ConsumerWidget {
               event.name,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             Row(
               children: [
                 const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
@@ -546,7 +577,7 @@ class DashboardScreen extends ConsumerWidget {
   ) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppConstants.paddingAll16,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -556,7 +587,7 @@ class DashboardScreen extends ConsumerWidget {
                 const Spacer(),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             Text(
               value,
               style: const TextStyle(
@@ -589,12 +620,12 @@ class DashboardScreen extends ConsumerWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppConstants.paddingAll16,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: 48, color: color),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppConstants.spacingS),
               Text(
                 title,
                 style: const TextStyle(

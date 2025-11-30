@@ -55,21 +55,21 @@ class IncomesListScreen extends ConsumerWidget {
                     size: 80,
                     color: Colors.grey[400],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppConstants.spacing),
                   Text(
                     'Noch keine Einnahmen',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: Colors.grey[600],
                         ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppConstants.spacingS),
                   Text(
                     'Fügen Sie die erste Einnahme hinzu',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[500],
                         ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppConstants.spacingL),
                   FilledButton.icon(
                     onPressed: () {
                       Navigator.push(
@@ -100,13 +100,13 @@ class IncomesListScreen extends ConsumerWidget {
             children: [
               // Total summary card
               Card(
-                margin: const EdgeInsets.all(16),
+                margin: AppConstants.paddingAll16,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppConstants.paddingAll16,
                   child: Row(
                     children: [
                       const Icon(Icons.euro, size: 32, color: Colors.green),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: AppConstants.spacing),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -144,7 +144,7 @@ class IncomesListScreen extends ConsumerWidget {
                       label: Text('Alle (${incomes.length})'),
                       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppConstants.spacingS),
                     ...incomesBySource.entries.map((entry) => Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: Chip(
@@ -158,7 +158,7 @@ class IncomesListScreen extends ConsumerWidget {
               // Incomes list
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppConstants.paddingAll16,
                   itemCount: incomes.length,
                   itemBuilder: (context, index) {
                     final income = incomes[index];
@@ -251,7 +251,7 @@ class _IncomeListItem extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppConstants.paddingAll16,
           child: Row(
             children: [
               // Source icon
@@ -267,7 +267,7 @@ class _IncomeListItem extends StatelessWidget {
                   color: sourceColor,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppConstants.spacing),
 
               // Income details
               Expanded(
@@ -304,7 +304,7 @@ class _IncomeListItem extends StatelessWidget {
                               ),
                         ),
                         if (income.paymentMethod != null) ...[
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppConstants.spacingM),
                           Icon(
                             Icons.payment,
                             size: 14,

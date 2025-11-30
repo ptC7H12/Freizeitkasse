@@ -68,17 +68,13 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
 
   Future<void> _importFile() async {
     if (_selectedFilePath == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bitte wählen Sie zuerst eine Datei aus')),
-      );
+      context.showSuccess('Bitte wählen Sie zuerst eine Datei aus');
       return;
     }
 
     final currentEvent = ref.read(currentEventProvider);
     if (currentEvent == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Keine Veranstaltung ausgewählt')),
-      );
+      context.showSuccess('Keine Veranstaltung ausgewählt');
       return;
     }
 
@@ -140,19 +136,19 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
         title: const Text('Teilnehmer importieren'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: AppConstants.paddingAll16,
         children: [
           // Instructions Card
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: AppConstants.paddingAll16,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       const Icon(Icons.info_outline, color: Colors.blue),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppConstants.spacingS),
                       Text(
                         'Anleitung',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -161,7 +157,7 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppConstants.spacingM),
                   const Text(
                     '1. Laden Sie die Excel-Vorlage herunter\n'
                     '2. Füllen Sie die Teilnehmerdaten aus\n'
@@ -173,12 +169,12 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
 
           // Download Template Button
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: AppConstants.paddingAll16,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -188,25 +184,25 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppConstants.spacingM),
                   FilledButton.icon(
                     onPressed: _downloadTemplate,
                     icon: const Icon(Icons.download),
                     label: const Text('Excel-Vorlage herunterladen'),
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
+                      padding: AppConstants.paddingAll16,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
 
           // File Selection
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: AppConstants.paddingAll16,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -216,10 +212,10 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppConstants.spacingM),
                   if (_selectedFilePath != null) ...[
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: AppConstants.paddingAll12,
                       decoration: BoxDecoration(
                         color: Colors.green[50],
                         borderRadius: BorderRadius.circular(8),
@@ -228,7 +224,7 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
                       child: Row(
                         children: [
                           Icon(Icons.check_circle, color: Colors.green[700]),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppConstants.spacingM),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,7 +253,7 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                   ],
                   FilledButton.icon(
                     onPressed: _pickFile,
@@ -266,19 +262,19 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
                         ? 'Excel-Datei auswählen'
                         : 'Andere Datei auswählen'),
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
+                      padding: AppConstants.paddingAll16,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
 
           // Import Button
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: AppConstants.paddingAll16,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -288,7 +284,7 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppConstants.spacingM),
                   FilledButton.icon(
                     onPressed: _isImporting || _selectedFilePath == null ? null : _importFile,
                     icon: _isImporting
@@ -300,7 +296,7 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
                         : const Icon(Icons.upload),
                     label: Text(_isImporting ? 'Importiere...' : 'Import starten'),
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
+                      padding: AppConstants.paddingAll16,
                       backgroundColor: Colors.green,
                     ),
                   ),
@@ -311,11 +307,11 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
 
           // Import Results
           if (_importResult != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             Card(
               color: _importResult!.hasErrors ? Colors.orange[50] : Colors.green[50],
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -325,7 +321,7 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
                           _importResult!.hasErrors ? Icons.warning_amber : Icons.check_circle,
                           color: _importResult!.hasErrors ? Colors.orange[700] : Colors.green[700],
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppConstants.spacingS),
                         Text(
                           'Import-Ergebnis',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -337,22 +333,22 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     Text('Gesamtzeilen: ${_importResult!.totalRows}'),
                     Text('Erfolgreich: ${_importResult!.successCount}'),
                     if (_importResult!.hasErrors)
                       Text('Fehler: ${_importResult!.errorCount}'),
                     if (_importResult!.hasErrors) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppConstants.spacingM),
                       const Divider(),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppConstants.spacingM),
                       Text(
                         'Fehlerdetails:',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppConstants.spacingS),
                       ..._importResult!.errors.take(10).map((error) => Padding(
                             padding: const EdgeInsets.only(bottom: 4),
                             child: Text(

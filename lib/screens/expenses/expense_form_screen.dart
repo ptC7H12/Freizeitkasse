@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../widgets/responsive_form_container.dart';
+import '../../extensions/context_extensions.dart';
+import '../../utils/route_helpers.dart';
 
 class ExpenseFormScreen extends ConsumerStatefulWidget {
   final int? expenseId;
@@ -106,9 +109,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     final currentEvent = ref.read(currentEventProvider);
     if (currentEvent == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Keine Veranstaltung ausgewählt')),
-        );
+        context.showError('Keine Veranstaltung ausgewählt');
       }
       return;
     }
@@ -150,20 +151,14 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.expenseId == null
-                ? 'Ausgabe erfolgreich erstellt'
-                : 'Ausgabe erfolgreich aktualisiert'),
-          ),
-        );
-        Navigator.pop(context);
+        context.showSuccess(widget.expenseId == null
+            ? 'Ausgabe erfolgreich erstellt'
+            : 'Ausgabe erfolgreich aktualisiert');
+        RouteHelpers.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Speichern: $e')),
-        );
+        context.showError('Fehler beim Speichern: $e');
       }
     } finally {
       if (mounted) {
@@ -207,16 +202,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       await repository.deleteExpense(widget.expenseId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ausgabe erfolgreich gelöscht')),
-        );
-        Navigator.pop(context);
+        context.showSuccess('Ausgabe erfolgreich gelöscht');
+        RouteHelpers.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Löschen: $e')),
-        );
+        context.showError('Fehler beim Löschen: $e');
       }
     } finally {
       if (mounted) {
@@ -251,13 +242,13 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveFormContainer(
+          child: ListView(
+            children: [
             // Category selection
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -265,7 +256,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       'Kategorie',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedCategory,
                       decoration: const InputDecoration(
@@ -297,12 +288,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Amount and Date
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -310,7 +301,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       'Betrag und Datum',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _amountController,
                       decoration: const InputDecoration(
@@ -334,7 +325,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     InkWell(
                       onTap: _selectDate,
                       borderRadius: BorderRadius.circular(8),
@@ -353,12 +344,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Description and Vendor
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -366,7 +357,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       'Details',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _descriptionController,
                       decoration: const InputDecoration(
@@ -377,7 +368,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       ),
                       maxLines: 3,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     TextFormField(
                       controller: _vendorController,
                       decoration: const InputDecoration(
@@ -391,12 +382,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Payment details
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -404,7 +395,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       'Zahlungsdetails',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedPaymentMethod,
                       decoration: const InputDecoration(
@@ -430,7 +421,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                         });
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     TextFormField(
                       controller: _receiptNumberController,
                       decoration: const InputDecoration(
@@ -444,12 +435,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Notes
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -457,7 +448,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       'Notizen',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _notesController,
                       decoration: const InputDecoration(
@@ -472,7 +463,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Save button
             FilledButton.icon(
@@ -486,12 +477,13 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   : const Icon(Icons.save),
               label: Text(isEditing ? 'Aktualisieren' : 'Speichern'),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
           ],
         ),
+      ),
       ),
     );
   }

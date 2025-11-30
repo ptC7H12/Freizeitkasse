@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/ruleset_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../widgets/responsive_form_container.dart';
 
+import '../../extensions/context_extensions.dart';
+import '../../utils/route_helpers.dart';
 class RulesetFormScreen extends ConsumerStatefulWidget {
   final int? rulesetId;
 
@@ -111,9 +114,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
     final currentEvent = ref.read(currentEventProvider);
     if (currentEvent == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Keine Veranstaltung ausgewählt')),
-        );
+        context.showSuccess('Keine Veranstaltung ausgewählt');
       }
       return;
     }
@@ -153,13 +154,11 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                 : 'Regelwerk erfolgreich aktualisiert'),
           ),
         );
-        Navigator.pop(context);
+        RouteHelpers.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Speichern: $e')),
-        );
+        context.showError('Fehler beim Speichern: $e');
       }
     } finally {
       if (mounted) {
@@ -206,16 +205,12 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       await repository.deleteRuleset(widget.rulesetId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Regelwerk erfolgreich gelöscht')),
-        );
-        Navigator.pop(context);
+        context.showSuccess('Regelwerk erfolgreich gelöscht');
+        RouteHelpers.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Löschen: $e')),
-        );
+        context.showError('Fehler beim Löschen: $e');
       }
     } finally {
       if (mounted) {
@@ -288,13 +283,13 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
+        child: ResponsiveFormContainer(
+          child: ListView(
+            children: [
             // Basic Information
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -302,7 +297,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                       'Grundinformationen',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
@@ -318,7 +313,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     InkWell(
                       onTap: _selectDate,
                       borderRadius: BorderRadius.circular(8),
@@ -334,7 +329,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     TextFormField(
                       controller: _descriptionController,
                       decoration: const InputDecoration(
@@ -349,12 +344,12 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // YAML Editor
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -370,7 +365,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                           icon: const Icon(Icons.file_copy, size: 16),
                           label: const Text('Vorlage'),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppConstants.spacingS),
                         FilledButton.icon(
                           onPressed: _validateYaml,
                           icon: const Icon(Icons.check_circle, size: 16),
@@ -378,7 +373,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _yamlController,
                       decoration: InputDecoration(
@@ -403,21 +398,21 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Validation Status
             if (_yamlError == null && _parsedData != null)
               Card(
                 color: Colors.green[50],
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppConstants.paddingAll16,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           const Icon(Icons.check_circle, color: Colors.green),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppConstants.spacingS),
                           Text(
                             'YAML ist gültig',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -427,7 +422,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppConstants.spacingM),
                       _buildParsedDataSummary(_parsedData!),
                     ],
                   ),
@@ -437,14 +432,14 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
               Card(
                 color: Colors.red[50],
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppConstants.paddingAll16,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           const Icon(Icons.error, color: Colors.red),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppConstants.spacingS),
                           Text(
                             'YAML-Fehler',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -454,7 +449,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppConstants.spacingS),
                       Text(
                         _yamlError!,
                         style: TextStyle(
@@ -467,7 +462,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                   ),
                 ),
               ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Save button
             FilledButton.icon(
@@ -481,12 +476,13 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                   : const Icon(Icons.save),
               label: Text(isEditing ? 'Aktualisieren' : 'Speichern'),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
           ],
         ),
+      ),
       ),
     );
   }
@@ -521,9 +517,9 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                 'YAML-Struktur:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppConstants.spacingM),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: AppConstants.paddingAll12,
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(8),
@@ -553,7 +549,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => RouteHelpers.pop(context),
             child: const Text('Schließen'),
           ),
         ],
