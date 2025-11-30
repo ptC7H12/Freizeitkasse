@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../widgets/responsive_form_container.dart';
+import '../../extensions/context_extensions.dart';
+import '../../utils/route_helpers.dart';
 
 class ExpenseFormScreen extends ConsumerStatefulWidget {
   final int? expenseId;
@@ -107,9 +109,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     final currentEvent = ref.read(currentEventProvider);
     if (currentEvent == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Keine Veranstaltung ausgewählt')),
-        );
+        context.showError('Keine Veranstaltung ausgewählt');
       }
       return;
     }
@@ -151,20 +151,14 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.expenseId == null
-                ? 'Ausgabe erfolgreich erstellt'
-                : 'Ausgabe erfolgreich aktualisiert'),
-          ),
-        );
-        Navigator.pop(context);
+        context.showSuccess(widget.expenseId == null
+            ? 'Ausgabe erfolgreich erstellt'
+            : 'Ausgabe erfolgreich aktualisiert');
+        RouteHelpers.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Speichern: $e')),
-        );
+        context.showError('Fehler beim Speichern: $e');
       }
     } finally {
       if (mounted) {
@@ -208,16 +202,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       await repository.deleteExpense(widget.expenseId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ausgabe erfolgreich gelöscht')),
-        );
-        Navigator.pop(context);
+        context.showSuccess('Ausgabe erfolgreich gelöscht');
+        RouteHelpers.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Löschen: $e')),
-        );
+        context.showError('Fehler beim Löschen: $e');
       }
     } finally {
       if (mounted) {

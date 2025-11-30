@@ -566,9 +566,7 @@ class _ParticipantFormScreenState
     }
 
     if (_birthDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bitte Geburtsdatum auswählen')),
-      );
+      context.showError('Bitte Geburtsdatum auswählen');
       return;
     }
 
@@ -631,10 +629,8 @@ class _ParticipantFormScreenState
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Teilnehmer erstellt')),
-          );
-          Navigator.of(context).pop();
+          context.showSuccess('Teilnehmer erstellt');
+          RouteHelpers.pop(context);
         }
       } else {
         // Update
@@ -675,17 +671,13 @@ class _ParticipantFormScreenState
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Teilnehmer aktualisiert')),
-          );
-          Navigator.of(context).pop();
+          context.showSuccess('Teilnehmer aktualisiert');
+          RouteHelpers.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler: $e')),
-        );
+        context.showError('Fehler: $e');
       }
     } finally {
       if (mounted) {
@@ -721,10 +713,8 @@ class _ParticipantFormScreenState
       await repository.deleteParticipant(widget.participantId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Teilnehmer gelöscht')),
-        );
-        Navigator.of(context).pop();
+        context.showSuccess('Teilnehmer gelöscht');
+        RouteHelpers.pop(context);
       }
     }
   }

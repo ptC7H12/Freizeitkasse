@@ -4,6 +4,8 @@ import '../../providers/family_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../utils/validators.dart';
 import '../../widgets/responsive_form_container.dart';
+import '../../extensions/context_extensions.dart';
+import '../../utils/route_helpers.dart';
 
 /// Familien-Formular (Create/Edit)
 class FamilyFormScreen extends ConsumerStatefulWidget {
@@ -258,10 +260,8 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Familie erstellt')),
-          );
-          Navigator.of(context).pop();
+          context.showSuccess('Familie erstellt');
+          RouteHelpers.pop(context);
         }
       } else {
         // Update
@@ -282,17 +282,13 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Familie aktualisiert')),
-          );
-          Navigator.of(context).pop();
+          context.showSuccess('Familie aktualisiert');
+          RouteHelpers.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler: $e')),
-        );
+        context.showError('Fehler: $e');
       }
     } finally {
       if (mounted) {
@@ -332,10 +328,8 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
       await repository.deleteFamily(widget.familyId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Familie gelöscht')),
-        );
-        Navigator.of(context).pop();
+        context.showSuccess('Familie gelöscht');
+        RouteHelpers.pop(context);
       }
     }
   }
