@@ -1,4 +1,4 @@
-import 'dart:developer' as developer;
+import '../utils/logger.dart';
 
 /// Preisberechnungs-Service
 ///
@@ -68,7 +68,7 @@ class PriceCalculatorService {
   /// Returns:
   ///   Basispreis für die Altersgruppe
   static double _getBasePriceByAge(int age, List<dynamic> ageGroups) {
-    developer.log(
+    AppLogger.debug(
       'Suche Basispreis für Alter $age in ${ageGroups.length} Altersgruppen',
       name: 'PriceCalculatorService',
     );
@@ -77,7 +77,7 @@ class PriceCalculatorService {
       final minAge = group['min_age'] as int? ?? 0;
       final maxAge = group['max_age'] as int? ?? 999;
 
-      developer.log(
+      AppLogger.debug(
         'Prüfe Gruppe: min=$minAge, max=$maxAge, group=$group',
         name: 'PriceCalculatorService',
       );
@@ -86,7 +86,7 @@ class PriceCalculatorService {
         // Neues Format: base_price direkt aus age_group
         if (group.containsKey('base_price') == true) {
           final price = (group['base_price'] as num).toDouble();
-          developer.log(
+          AppLogger.debug(
             'Basispreis für Alter $age: $price€ (Gruppe $minAge-$maxAge)',
             name: 'PriceCalculatorService',
           );
@@ -95,7 +95,7 @@ class PriceCalculatorService {
 
         // Legacy Format: price als Fallback
         final price = (group['price'] as num?)?.toDouble() ?? 0.0;
-        developer.log(
+        AppLogger.debug(
           'Basispreis für Alter $age: $price€ (Gruppe $minAge-$maxAge, legacy format)',
           name: 'PriceCalculatorService',
         );
@@ -103,7 +103,7 @@ class PriceCalculatorService {
       }
     }
 
-    developer.log(
+    AppLogger.debug(
       'Keine passende Altersgruppe für Alter $age gefunden! Rückgabe: 0.0',
       name: 'PriceCalculatorService',
       level: 900, // Warning level
