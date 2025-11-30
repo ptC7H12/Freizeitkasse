@@ -68,17 +68,13 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
 
   Future<void> _importFile() async {
     if (_selectedFilePath == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bitte wählen Sie zuerst eine Datei aus')),
-      );
+      context.showSuccess('Bitte wählen Sie zuerst eine Datei aus');
       return;
     }
 
     final currentEvent = ref.read(currentEventProvider);
     if (currentEvent == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Keine Veranstaltung ausgewählt')),
-      );
+      context.showSuccess('Keine Veranstaltung ausgewählt');
       return;
     }
 

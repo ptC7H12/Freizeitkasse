@@ -58,15 +58,11 @@ class CashStatusScreen extends ConsumerWidget {
                 );
 
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('PDF gespeichert: $filePath')),
-                  );
+                  context.showError('PDF gespeichert: $filePath');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Fehler beim Export: $e')),
-                  );
+                  context.showError('Fehler beim Export: $e');
                 }
               }
             },

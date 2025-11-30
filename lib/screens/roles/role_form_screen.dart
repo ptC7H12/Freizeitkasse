@@ -5,6 +5,8 @@ import '../../providers/current_event_provider.dart';
 import '../../widgets/responsive_form_container.dart';
 
 class RoleFormScreen extends ConsumerStatefulWidget {
+import '../../extensions/context_extensions.dart';
+import '../../utils/route_helpers.dart';
   final int? roleId;
 
   const RoleFormScreen({super.key, this.roleId});
@@ -54,9 +56,7 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
     final currentEvent = ref.read(currentEventProvider);
     if (currentEvent == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Keine Veranstaltung ausgewählt')),
-        );
+        context.showSuccess('Keine Veranstaltung ausgewählt');
       }
       return;
     }
@@ -92,13 +92,11 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
                 : 'Rolle erfolgreich aktualisiert'),
           ),
         );
-        Navigator.pop(context);
+        RouteHelpers.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Speichern: $e')),
-        );
+        context.showError('Fehler beim Speichern: $e');
       }
     } finally {
       if (mounted) {
@@ -145,16 +143,12 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
       await repository.deleteRole(widget.roleId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Rolle erfolgreich gelöscht')),
-        );
-        Navigator.pop(context);
+        context.showSuccess('Rolle erfolgreich gelöscht');
+        RouteHelpers.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Löschen: $e')),
-        );
+        context.showError('Fehler beim Löschen: $e');
       }
     } finally {
       if (mounted) {

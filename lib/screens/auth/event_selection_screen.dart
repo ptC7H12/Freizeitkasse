@@ -229,7 +229,7 @@ class EventSelectionScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => RouteHelpers.pop(context),
             child: const Text('Abbrechen'),
           ),
           ElevatedButton(
@@ -259,7 +259,7 @@ class EventSelectionScreen extends ConsumerWidget {
               }
 
               if (context.mounted) {
-                Navigator.of(context).pop();
+                RouteHelpers.pop(context);
               }
             },
             child: const Text('Erstellen'),

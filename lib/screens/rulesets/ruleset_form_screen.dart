@@ -5,6 +5,8 @@ import '../../providers/ruleset_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../widgets/responsive_form_container.dart';
 
+import '../../extensions/context_extensions.dart';
+import '../../utils/route_helpers.dart';
 class RulesetFormScreen extends ConsumerStatefulWidget {
   final int? rulesetId;
 
@@ -112,9 +114,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
     final currentEvent = ref.read(currentEventProvider);
     if (currentEvent == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Keine Veranstaltung ausgewählt')),
-        );
+        context.showSuccess('Keine Veranstaltung ausgewählt');
       }
       return;
     }
@@ -154,13 +154,11 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                 : 'Regelwerk erfolgreich aktualisiert'),
           ),
         );
-        Navigator.pop(context);
+        RouteHelpers.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Speichern: $e')),
-        );
+        context.showError('Fehler beim Speichern: $e');
       }
     } finally {
       if (mounted) {
@@ -207,16 +205,12 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       await repository.deleteRuleset(widget.rulesetId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Regelwerk erfolgreich gelöscht')),
-        );
-        Navigator.pop(context);
+        context.showSuccess('Regelwerk erfolgreich gelöscht');
+        RouteHelpers.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Löschen: $e')),
-        );
+        context.showError('Fehler beim Löschen: $e');
       }
     } finally {
       if (mounted) {
@@ -555,7 +549,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => RouteHelpers.pop(context),
             child: const Text('Schließen'),
           ),
         ],

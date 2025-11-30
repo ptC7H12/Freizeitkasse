@@ -90,7 +90,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -100,7 +100,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = selected ? 'children' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -110,7 +110,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = selected ? 'youth' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -120,7 +120,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = selected ? 'adults' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
               ],
@@ -138,7 +138,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -148,7 +148,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = selected ? 'Männlich' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -158,7 +158,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = selected ? 'Weiblich' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
                 FilterChip(
@@ -168,7 +168,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = selected ? 'Divers' : null;
                     });
-                    Navigator.pop(context);
+                    RouteHelpers.pop(context);
                   },
                 ),
               ],
@@ -182,12 +182,12 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                 _ageFilter = null;
                 _genderFilter = null;
               });
-              Navigator.pop(context);
+              RouteHelpers.pop(context);
             },
             child: const Text('Zurücksetzen'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => RouteHelpers.pop(context),
             child: const Text('Schließen'),
           ),
         ],
@@ -230,9 +230,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
               final currentEvent = ref.read(currentEventProvider);
 
               if (participantsValue == null || participantsValue.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Keine Teilnehmer zum Exportieren')),
-                );
+                context.showSuccess('Keine Teilnehmer zum Exportieren');
                 return;
               }
 
@@ -243,15 +241,11 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                   eventName: currentEvent?.name ?? 'Veranstaltung',
                 );
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('PDF gespeichert: $filePath')),
-                  );
+                  context.showError('PDF gespeichert: $filePath');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Fehler beim Export: $e')),
-                  );
+                  context.showError('Fehler beim Export: $e');
                 }
               }
             },

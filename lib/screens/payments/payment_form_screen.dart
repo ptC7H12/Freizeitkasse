@@ -5,6 +5,8 @@ import '../../providers/current_event_provider.dart';
 import '../../providers/participant_provider.dart';
 import '../../providers/family_provider.dart';
 import '../../utils/validators.dart';
+import '../../extensions/context_extensions.dart';
+import '../../utils/route_helpers.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/responsive_form_container.dart';
 
@@ -371,10 +373,8 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Zahlung erstellt')),
-          );
-          Navigator.of(context).pop();
+          context.showSuccess('Zahlung erstellt');
+          RouteHelpers.pop(context);
         }
       } else {
         // Update
@@ -387,17 +387,13 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Zahlung aktualisiert')),
-          );
-          Navigator.of(context).pop();
+          context.showSuccess('Zahlung aktualisiert');
+          RouteHelpers.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler: $e')),
-        );
+        context.showError('Fehler: $e');
       }
     } finally {
       if (mounted) {
@@ -433,10 +429,8 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
       await repository.deletePayment(widget.paymentId!);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Zahlung gelöscht')),
-        );
-        Navigator.of(context).pop();
+        context.showSuccess('Zahlung gelöscht');
+        RouteHelpers.pop(context);
       }
     }
   }
