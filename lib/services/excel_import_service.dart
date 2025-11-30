@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:excel/excel.dart';
 import '../data/repositories/participant_repository.dart';
-import '../utils/logger.dart';
-import '../utils/exceptions.dart';
 
 class ExcelImportService {
   final ParticipantRepository _participantRepository;
@@ -133,10 +131,14 @@ class ExcelImportService {
 
   /// Get cell value as string
   String? _getCellValue(List<Data?> row, int columnIndex) {
-    if (columnIndex >= row.length) return null;
+    if (columnIndex >= row.length) {
+      return null;
+    }
 
     final cell = row[columnIndex];
-    if (cell == null || cell.value == null) return null;
+    if (cell == null || cell.value == null) {
+      return null;
+    }
 
     return cell.value.toString().trim();
   }

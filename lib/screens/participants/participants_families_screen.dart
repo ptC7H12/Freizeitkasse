@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../utils/constants.dart';
 import 'participants_list_screen.dart';
 import '../families/families_list_screen.dart';
 

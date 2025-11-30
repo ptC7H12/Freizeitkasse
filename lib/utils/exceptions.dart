@@ -190,9 +190,15 @@ class ExcelImportException extends ImportExportException {
   @override
   String toString() {
     final location = <String>[];
-    if (fileName != null) location.add('Datei: $fileName');
-    if (row != null) location.add('Zeile: $row');
-    if (column != null) location.add('Spalte: $column');
+    if (fileName != null) {
+      location.add('Datei: $fileName');
+    }
+    if (row != null) {
+      location.add('Zeile: $row');
+    }
+    if (column != null) {
+      location.add('Spalte: $column');
+    }
 
     if (location.isNotEmpty) {
       return 'ExcelImportException [${location.join(', ')}]: $message';
@@ -271,7 +277,9 @@ class GeneralException extends AppException {
 
 /// Konvertiert allgemeine Exceptions zu App-Exceptions
 AppException toAppException(dynamic error, {String? context}) {
-  if (error is AppException) return error;
+  if (error is AppException) {
+    return error;
+  }
 
   // Drift/SQLite Errors
   if (error.toString().contains('UNIQUE constraint failed')) {

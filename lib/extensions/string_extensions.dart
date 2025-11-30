@@ -10,13 +10,17 @@ extension StringExtensions on String {
 
   /// Kapitalisiert den ersten Buchstaben
   String get capitalize {
-    if (isEmpty) return this;
+    if (isEmpty) {
+      return this;
+    }
     return '${this[0].toUpperCase()}${substring(1)}';
   }
 
   /// Kapitalisiert jeden Wort-Anfang
   String get capitalizeWords {
-    if (isEmpty) return this;
+    if (isEmpty) {
+      return this;
+    }
     return split(' ').map((word) => word.capitalize).join(' ');
   }
 
@@ -35,8 +39,12 @@ extension StringExtensions on String {
   /// Konvertiert zu bool (null-safe)
   bool? toBoolOrNull() {
     final lower = toLowerCase();
-    if (lower == 'true' || lower == '1' || lower == 'yes') return true;
-    if (lower == 'false' || lower == '0' || lower == 'no') return false;
+    if (lower == 'true' || lower == '1' || lower == 'yes') {
+      return true;
+    }
+    if (lower == 'false' || lower == '0' || lower == 'no') {
+      return false;
+    }
     return null;
   }
 
@@ -59,7 +67,9 @@ extension StringExtensions on String {
 
   /// Kürzt String auf maximale Länge
   String truncate(int maxLength, {String suffix = '...'}) {
-    if (length <= maxLength) return this;
+    if (length <= maxLength) {
+      return this;
+    }
     return '${substring(0, maxLength - suffix.length)}$suffix';
   }
 
@@ -69,7 +79,9 @@ extension StringExtensions on String {
   /// Deutsche IBAN formatieren (DE89... → DE89 3704 0044 0532 0130 00)
   String get formatIban {
     final clean = removeWhitespace.toUpperCase();
-    if (clean.length != 22) return this;
+    if (clean.length != 22) {
+      return this;
+    }
 
     return '${clean.substring(0, 4)} '
         '${clean.substring(4, 8)} '

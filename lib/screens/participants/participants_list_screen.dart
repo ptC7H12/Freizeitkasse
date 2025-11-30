@@ -44,7 +44,9 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
 
   Future<void> _loadParticipantPayments() async {
     final currentEvent = ref.read(currentEventProvider);
-    if (currentEvent == null) return;
+    if (currentEvent == null) {
+      return;
+    }
 
     final database = ref.read(databaseProvider);
     final payments = await (database.select(database.payments)

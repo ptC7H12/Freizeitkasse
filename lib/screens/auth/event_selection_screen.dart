@@ -232,7 +232,7 @@ class EventSelectionScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppConstants.spacing),
                 DropdownButtonFormField<String>(
-                  value: selectedEventType,
+                  initialValue: selectedEventType,
                   decoration: const InputDecoration(
                     labelText: 'Freizeittyp *',
                     border: OutlineInputBorder(),
@@ -392,7 +392,7 @@ class EventSelectionScreen extends ConsumerWidget {
 
       if (yamlContent != null) {
         // Ruleset erfolgreich geladen - speichern
-        final database = ref.read(databaseProvider);
+        //final database = ref.read(databaseProvider);
         final repository = ref.read(rulesetRepositoryProvider);
 
         await repository.createRuleset(

@@ -195,7 +195,9 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed != true) {
+      return;
+    }
 
     setState(() {
       _isDeleting = true;

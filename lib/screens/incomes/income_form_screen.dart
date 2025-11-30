@@ -190,7 +190,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed != true) {
+      return;
+    }
 
     setState(() {
       _isDeleting = true;

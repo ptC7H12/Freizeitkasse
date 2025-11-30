@@ -36,7 +36,9 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
 
   Future<void> _loadFamilyPayments() async {
     final currentEvent = ref.read(currentEventProvider);
-    if (currentEvent == null) return;
+    if (currentEvent == null) {
+      return;
+    }
 
     final database = ref.read(databaseProvider);
 

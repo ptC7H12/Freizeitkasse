@@ -242,8 +242,12 @@ class UIHelpers {
   /// Gibt die optimale Anzahl an Spalten für ein Grid zurück
   static int getGridColumnCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    if (width >= AppConstants.breakpointDesktop) return 4;
-    if (width >= AppConstants.breakpointTablet) return 3;
+    if (width >= AppConstants.breakpointDesktop) {
+      return 4;
+    }
+    if (width >= AppConstants.breakpointTablet) {
+      return 3;
+    }
     return 2;
   }
 }

@@ -96,7 +96,7 @@ Widget _buildCategoryList(
   BuildContext context,
   WidgetRef ref,
   List<dynamic> items,
-  {required bool isExpense},
+  {required bool isExpense}
 ) {
   return Column(
     children: [
@@ -189,7 +189,7 @@ Widget _buildCategoryTile(
   BuildContext context,
   WidgetRef ref,
   dynamic item,
-  {required bool isExpense},
+  {required bool isExpense}
 ) {
   final isSystem = isExpense
       ? (item as ExpenseCategory).isSystem

@@ -122,7 +122,9 @@ class TaskRepository {
     bool? clearAssignment,
   }) async {
     final existing = await getTaskById(id);
-    if (existing == null) return false;
+    if (existing == null) {
+      return false;
+    }
 
     final companion = TasksCompanion(
       id: Value(id),

@@ -36,7 +36,7 @@ class MGBFreizeitplanerApp extends StatelessWidget {
         useMaterial3: true,
 
         // AppBar with gradient-ready styling
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           centerTitle: false,
           elevation: AppConstants.elevationLow,
           backgroundColor: AppConstants.primaryColor,
@@ -65,7 +65,7 @@ class MGBFreizeitplanerApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: AppConstants.borderRadius12,
-            borderSide: BorderSide(color: AppConstants.primaryColor, width: 2),
+            borderSide: const BorderSide(color: AppConstants.primaryColor, width: 2),
           ),
           filled: true,
           fillColor: Colors.grey.shade50,
@@ -109,7 +109,7 @@ class MGBFreizeitplanerApp extends StatelessWidget {
         ),
 
         // Floating Action Button
-        floatingActionButtonTheme: FloatingActionButtonThemeData(
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: AppConstants.primaryColor,
           foregroundColor: Colors.white,
           elevation: AppConstants.elevationMedium,

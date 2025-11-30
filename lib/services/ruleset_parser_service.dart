@@ -1,6 +1,4 @@
 import 'package:yaml/yaml.dart';
-import '../utils/logger.dart';
-import '../utils/exceptions.dart';
 import 'dart:developer' as developer;
 
 /// YAML-Regelwerk-Parser Service
@@ -112,7 +110,9 @@ class RulesetParserService {
   // ============================================================================
 
   static DateTime? _parseDate(dynamic value) {
-    if (value == null) return null;
+    if (value == null) {
+      return null;
+    }
 
     try {
       if (value is DateTime) {
@@ -150,7 +150,9 @@ class RulesetParserService {
   }
 
   static Map<String, dynamic> _parseRoleDiscounts(dynamic roleDiscounts) {
-    if (roleDiscounts == null) return {};
+    if (roleDiscounts == null) {
+      return {};
+    }
     if (roleDiscounts is! YamlMap) {
       throw const FormatException('role_discounts muss ein Dictionary sein');
     }
@@ -178,7 +180,9 @@ class RulesetParserService {
   }
 
   static Map<String, dynamic> _parseFamilyDiscount(dynamic familyDiscount) {
-    if (familyDiscount == null) return {'enabled': false};
+    if (familyDiscount == null) {
+      return {'enabled': false};
+    }
     if (familyDiscount is! YamlMap) {
       throw const FormatException('family_discount muss ein Dictionary sein');
     }

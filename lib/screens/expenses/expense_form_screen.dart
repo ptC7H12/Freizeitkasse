@@ -192,7 +192,9 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed != true) {
+      return;
+    }
 
     setState(() {
       _isDeleting = true;

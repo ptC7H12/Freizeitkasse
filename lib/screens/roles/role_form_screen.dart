@@ -133,7 +133,9 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed != true) {
+      return;
+    }
 
     setState(() {
       _isDeleting = true;

@@ -287,7 +287,9 @@ class SettingsScreen extends ConsumerWidget {
       text: settings?.githubRulesetPath ?? '',
     );
 
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      return;
+    }
 
     showDialog(
       context: context,
