@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../data/database/app_database.dart';
 import 'package:drift/drift.dart' as drift;
 import 'categories_management_screen.dart';
 import 'rulesets_management_screen.dart';
