@@ -171,18 +171,18 @@ class _ParticipantFormScreenState
               label: 'Vorname *',
               validator: (value) => Validators.required(value, fieldName: 'Vorname'),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             _buildTextField(
               controller: _lastNameController,
               label: 'Nachname *',
               validator: (value) => Validators.required(value, fieldName: 'Nachname'),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             _buildDateField(),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             _buildGenderDropdown(),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Adresse
             _buildSectionHeader('Adresse'),
@@ -190,7 +190,7 @@ class _ParticipantFormScreenState
               controller: _streetController,
               label: 'Straße',
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             Row(
               children: [
                 Expanded(
@@ -202,7 +202,7 @@ class _ParticipantFormScreenState
                     validator: Validators.postalCode,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppConstants.spacing),
                 Expanded(
                   flex: 2,
                   child: _buildTextField(
@@ -213,7 +213,7 @@ class _ParticipantFormScreenState
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Kontakt
             _buildSectionHeader('Kontaktdaten'),
@@ -223,7 +223,7 @@ class _ParticipantFormScreenState
               keyboardType: TextInputType.phone,
               validator: Validators.phone,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             _buildTextField(
               controller: _emailController,
               label: 'E-Mail',
@@ -231,7 +231,7 @@ class _ParticipantFormScreenState
               validator: Validators.email,
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Notfallkontakt
             _buildSectionHeader('Notfallkontakt'),
@@ -239,7 +239,7 @@ class _ParticipantFormScreenState
               controller: _emergencyContactController,
               label: 'Notfallkontakt Name',
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             _buildTextField(
               controller: _emergencyPhoneController,
               label: 'Notfallkontakt Telefon',
@@ -247,7 +247,7 @@ class _ParticipantFormScreenState
               validator: Validators.phone,
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Medizinische Informationen
             _buildSectionHeader('Medizinische Informationen'),
@@ -256,28 +256,28 @@ class _ParticipantFormScreenState
               label: 'Medizinische Hinweise',
               maxLines: 3,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             _buildTextField(
               controller: _allergiesController,
               label: 'Allergien',
               maxLines: 2,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             _buildTextField(
               controller: _dietaryRestrictionsController,
               label: 'Ernährungseinschränkungen',
               maxLines: 2,
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Rolle & Familie
             _buildSectionHeader('Rolle & Familie'),
             _buildRoleDropdown(),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             _buildFamilyDropdown(),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Sonstige Optionen
             _buildSectionHeader('Sonstige Optionen'),
@@ -292,7 +292,7 @@ class _ParticipantFormScreenState
               },
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Preis (TODO: Live-Berechnung)
             _buildSectionHeader('Preis'),
@@ -315,7 +315,7 @@ class _ParticipantFormScreenState
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
           ],
         ),
       ),
@@ -523,7 +523,7 @@ class _ParticipantFormScreenState
           },
         ),
         if (_hasManualPrice) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
           _buildTextField(
             controller: _manualPriceController,
             label: 'Preis (€) *',
@@ -531,20 +531,20 @@ class _ParticipantFormScreenState
             validator: Validators.positiveAmount,
           ),
         ],
-        const SizedBox(height: 16),
+        const SizedBox(height: AppConstants.spacing),
         _buildTextField(
           controller: _discountPercentController,
           label: 'Zusätzlicher Rabatt (%)',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           validator: Validators.percentage,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppConstants.spacing),
         _buildTextField(
           controller: _discountReasonController,
           label: 'Rabattgrund',
           maxLines: 2,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppConstants.spacing),
         // Live-Preisberechnung (wie HTMX in Web-App!)
         PricePreviewWidget(
           birthDate: _birthDate,

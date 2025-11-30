@@ -56,21 +56,21 @@ class RulesetsListScreen extends ConsumerWidget {
                     size: 80,
                     color: Colors.grey[400],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppConstants.spacing),
                   Text(
                     'Noch keine Regelwerke',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: Colors.grey[600],
                         ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppConstants.spacingS),
                   Text(
                     'Regelwerke definieren Preise und Rabatte',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[500],
                         ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppConstants.spacingL),
                   FilledButton.icon(
                     onPressed: () {
                       Navigator.push(
@@ -89,7 +89,7 @@ class RulesetsListScreen extends ConsumerWidget {
           }
 
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: AppConstants.paddingAll16,
             children: [
               // Current Active Ruleset Card
               currentRulesetAsync.when(
@@ -99,7 +99,7 @@ class RulesetsListScreen extends ConsumerWidget {
                       color: Theme.of(context).colorScheme.primaryContainer,
                       margin: const EdgeInsets.only(bottom: 24),
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: AppConstants.paddingAll16,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -109,7 +109,7 @@ class RulesetsListScreen extends ConsumerWidget {
                                   Icons.check_circle,
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: AppConstants.spacingS),
                                 Text(
                                   'Aktuell aktives Regelwerk',
                                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -119,14 +119,14 @@ class RulesetsListScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppConstants.spacingM),
                             Text(
                               currentRuleset.name,
                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppConstants.spacingS),
                             Row(
                               children: [
                                 const Icon(Icons.calendar_today, size: 16),
@@ -138,7 +138,7 @@ class RulesetsListScreen extends ConsumerWidget {
                               ],
                             ),
                             if (currentRuleset.description != null) ...[
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppConstants.spacingS),
                               Text(
                                 currentRuleset.description!,
                                 style: Theme.of(context).textTheme.bodyMedium,
@@ -162,7 +162,7 @@ class RulesetsListScreen extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppConstants.spacing),
 
               ...rulesets.map((ruleset) {
                 final isCurrent = currentRulesetAsync.value?.id == ruleset.id;
@@ -221,7 +221,7 @@ class _RulesetListItem extends ConsumerWidget {
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppConstants.paddingAll16,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -243,7 +243,7 @@ class _RulesetListItem extends ConsumerWidget {
                               ),
                             ),
                             if (isCurrent) ...[
-                              const SizedBox(width: 8),
+                              const SizedBox(width: AppConstants.spacingS),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
@@ -291,7 +291,7 @@ class _RulesetListItem extends ConsumerWidget {
                 ],
               ),
               if (ruleset.description != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppConstants.spacingS),
                 Text(
                   ruleset.description!,
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -299,12 +299,12 @@ class _RulesetListItem extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
-              const SizedBox(height: 12),
+              const SizedBox(height: AppConstants.spacingM),
               statisticsAsync.when(
                 data: (stats) {
                   if (stats.containsKey('error')) {
                     return Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: AppConstants.paddingAll8,
                       decoration: BoxDecoration(
                         color: Colors.red[50],
                         borderRadius: BorderRadius.circular(8),
@@ -312,7 +312,7 @@ class _RulesetListItem extends ConsumerWidget {
                       child: Row(
                         children: [
                           const Icon(Icons.error_outline, size: 16, color: Colors.red),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppConstants.spacingS),
                           Expanded(
                             child: Text(
                               stats['error'] as String? ?? '',

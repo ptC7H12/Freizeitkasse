@@ -40,7 +40,7 @@ class PaymentsListScreen extends ConsumerWidget {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: AppConstants.paddingAll16,
             itemCount: payments.length,
             itemBuilder: (context, index) {
               final payment = payments[index];

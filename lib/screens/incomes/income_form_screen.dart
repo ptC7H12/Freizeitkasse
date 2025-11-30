@@ -246,7 +246,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
             // Source selection
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -254,7 +254,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                       'Quelle',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedSource,
                       decoration: const InputDecoration(
@@ -286,12 +286,12 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Amount and Date
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -299,7 +299,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                       'Betrag und Datum',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _amountController,
                       decoration: const InputDecoration(
@@ -323,7 +323,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     InkWell(
                       onTap: _selectDate,
                       borderRadius: BorderRadius.circular(8),
@@ -342,12 +342,12 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Description
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -355,7 +355,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                       'Details',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _descriptionController,
                       decoration: const InputDecoration(
@@ -370,12 +370,12 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Payment details
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -383,7 +383,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                       'Zahlungsdetails',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedPaymentMethod,
                       decoration: const InputDecoration(
@@ -409,7 +409,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                         });
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     TextFormField(
                       controller: _referenceNumberController,
                       decoration: const InputDecoration(
@@ -423,12 +423,12 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Notes
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -436,7 +436,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                       'Notizen',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _notesController,
                       decoration: const InputDecoration(
@@ -451,7 +451,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Save button
             FilledButton.icon(
@@ -465,10 +465,10 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                   : const Icon(Icons.save),
               label: Text(isEditing ? 'Aktualisieren' : 'Speichern'),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
           ],
         ),
       ),

@@ -45,9 +45,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           // Statistics Card
           statsAsync.when(
             data: (stats) => Card(
-              margin: const EdgeInsets.all(16),
+              margin: AppConstants.paddingAll16,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -77,7 +77,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppConstants.spacingS),
 
           // Tasks List
           Expanded(
@@ -90,7 +90,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.task_alt, size: 80, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppConstants.spacing),
                         Text('Keine Aufgaben', style: TextStyle(color: Colors.grey[600])),
                       ],
                     ),
@@ -98,7 +98,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppConstants.paddingAll16,
                   itemCount: filteredTasks.length,
                   itemBuilder: (context, index) =>
                       _TaskListItem(task: filteredTasks[index], onTap: () => _showTaskDialog(context, filteredTasks[index])),
@@ -252,13 +252,13 @@ class _TaskFormDialogState extends ConsumerState<_TaskFormDialog> {
                 decoration: const InputDecoration(labelText: 'Titel *', border: OutlineInputBorder()),
                 validator: (v) => v?.isEmpty == true ? 'Titel erforderlich' : null,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppConstants.spacingM),
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Beschreibung', border: OutlineInputBorder()),
                 maxLines: 3,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppConstants.spacingM),
               DropdownButtonFormField<String>(
                 initialValue: _priority,
                 decoration: const InputDecoration(labelText: 'Priorität', border: OutlineInputBorder()),
@@ -269,7 +269,7 @@ class _TaskFormDialogState extends ConsumerState<_TaskFormDialog> {
                 ],
                 onChanged: (v) => setState(() => _priority = v!),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppConstants.spacingM),
               InkWell(
                 onTap: () async {
                   final picked = await showDatePicker(
@@ -287,7 +287,7 @@ class _TaskFormDialogState extends ConsumerState<_TaskFormDialog> {
                   child: Text(DateFormat('dd.MM.yyyy').format(_dueDate)),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppConstants.spacingM),
               participantsAsync.when(
                 data: (participants) => DropdownButtonFormField<int?>(
                   initialValue: _assignedTo,

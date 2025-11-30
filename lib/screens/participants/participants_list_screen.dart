@@ -79,7 +79,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Altersgruppe:', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             Wrap(
               spacing: 8,
               children: [
@@ -125,9 +125,9 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             const Text('Geschlecht:', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             Wrap(
               spacing: 8,
               children: [
@@ -257,7 +257,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
         children: [
           // Search Bar
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: AppConstants.paddingAll16,
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -329,14 +329,14 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(Icons.search_off, size: 80, color: Colors.grey),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppConstants.spacing),
                         const Text(
                           'Keine Ergebnisse gefunden',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppConstants.spacingS),
                         const Text('Versuchen Sie eine andere Suche oder Filter'),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppConstants.spacing),
                         TextButton(
                           onPressed: () {
                             setState(() {
@@ -364,7 +364,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     ),
                     Expanded(
                       child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: AppConstants.paddingAll16,
                         itemCount: filteredParticipants.length,
                         itemBuilder: (context, index) {
                           final participant = filteredParticipants[index];

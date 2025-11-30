@@ -116,14 +116,14 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
                   Validators.required(value, fieldName: 'Familienname'),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Kontaktdaten
             Text(
               'Kontaktdaten',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             TextFormField(
               controller: _contactPersonController,
@@ -133,7 +133,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             TextFormField(
               controller: _phoneController,
@@ -144,7 +144,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               validator: Validators.phone,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             TextFormField(
               controller: _emailController,
@@ -155,14 +155,14 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               validator: Validators.email,
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Adresse
             Text(
               'Adresse',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             TextFormField(
               controller: _streetController,
@@ -171,7 +171,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             Row(
               children: [
@@ -186,7 +186,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
                     validator: Validators.postalCode,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppConstants.spacing),
                 Expanded(
                   flex: 2,
                   child: TextFormField(
@@ -216,7 +216,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
           ],
         ),
       ),

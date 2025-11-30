@@ -47,7 +47,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
 
           // Appearance Section (Future)
           _buildSectionHeader(context, 'Darstellung'),
@@ -74,7 +74,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
 
           // Categories Section
           _buildSectionHeader(context, 'Kategorien'),
@@ -99,7 +99,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
 
           // Data Section
           _buildSectionHeader(context, 'Daten'),
@@ -142,7 +142,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AppConstants.spacing),
 
           // About Section
           _buildSectionHeader(context, 'Über'),
@@ -160,9 +160,9 @@ class SettingsScreen extends ConsumerWidget {
                       applicationName: 'MGB Freizeitplaner',
                       applicationVersion: appVersion,
                       applicationIcon: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: AppConstants.paddingAll16,
                         child: Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: AppConstants.paddingAll16,
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.primary,
                             borderRadius: BorderRadius.circular(16),

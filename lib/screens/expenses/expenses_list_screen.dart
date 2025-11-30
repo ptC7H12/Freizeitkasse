@@ -55,21 +55,21 @@ class ExpensesListScreen extends ConsumerWidget {
                     size: 80,
                     color: Colors.grey[400],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppConstants.spacing),
                   Text(
                     'Noch keine Ausgaben',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: Colors.grey[600],
                         ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppConstants.spacingS),
                   Text(
                     'Fügen Sie die erste Ausgabe hinzu',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[500],
                         ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppConstants.spacingL),
                   FilledButton.icon(
                     onPressed: () {
                       Navigator.push(
@@ -100,13 +100,13 @@ class ExpensesListScreen extends ConsumerWidget {
             children: [
               // Total summary card
               Card(
-                margin: const EdgeInsets.all(16),
+                margin: AppConstants.paddingAll16,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppConstants.paddingAll16,
                   child: Row(
                     children: [
                       const Icon(Icons.euro, size: 32, color: Colors.red),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: AppConstants.spacing),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -144,7 +144,7 @@ class ExpensesListScreen extends ConsumerWidget {
                       label: Text('Alle (${expenses.length})'),
                       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppConstants.spacingS),
                     ...expensesByCategory.entries.map((entry) => Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: Chip(
@@ -158,7 +158,7 @@ class ExpensesListScreen extends ConsumerWidget {
               // Expenses list
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppConstants.paddingAll16,
                   itemCount: expenses.length,
                   itemBuilder: (context, index) {
                     final expense = expenses[index];
@@ -255,7 +255,7 @@ class _ExpenseListItem extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppConstants.paddingAll16,
           child: Row(
             children: [
               // Category icon
@@ -271,7 +271,7 @@ class _ExpenseListItem extends StatelessWidget {
                   color: categoryColor,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppConstants.spacing),
 
               // Expense details
               Expanded(
@@ -287,7 +287,7 @@ class _ExpenseListItem extends StatelessWidget {
                               ),
                         ),
                         if (expense.vendor != null) ...[
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppConstants.spacingS),
                           Flexible(
                             child: Text(
                               '• ${expense.vendor}',
@@ -324,7 +324,7 @@ class _ExpenseListItem extends StatelessWidget {
                               ),
                         ),
                         if (expense.paymentMethod != null) ...[
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppConstants.spacingM),
                           Icon(
                             Icons.payment,
                             size: 14,

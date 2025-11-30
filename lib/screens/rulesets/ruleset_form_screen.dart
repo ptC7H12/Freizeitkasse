@@ -289,7 +289,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
             // Basic Information
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -297,7 +297,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                       'Grundinformationen',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
@@ -313,7 +313,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     InkWell(
                       onTap: _selectDate,
                       borderRadius: BorderRadius.circular(8),
@@ -329,7 +329,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     TextFormField(
                       controller: _descriptionController,
                       decoration: const InputDecoration(
@@ -344,12 +344,12 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // YAML Editor
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -365,7 +365,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                           icon: const Icon(Icons.file_copy, size: 16),
                           label: const Text('Vorlage'),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppConstants.spacingS),
                         FilledButton.icon(
                           onPressed: _validateYaml,
                           icon: const Icon(Icons.check_circle, size: 16),
@@ -373,7 +373,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _yamlController,
                       decoration: InputDecoration(
@@ -398,21 +398,21 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Validation Status
             if (_yamlError == null && _parsedData != null)
               Card(
                 color: Colors.green[50],
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppConstants.paddingAll16,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           const Icon(Icons.check_circle, color: Colors.green),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppConstants.spacingS),
                           Text(
                             'YAML ist gültig',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -422,7 +422,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppConstants.spacingM),
                       _buildParsedDataSummary(_parsedData!),
                     ],
                   ),
@@ -432,14 +432,14 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
               Card(
                 color: Colors.red[50],
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppConstants.paddingAll16,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           const Icon(Icons.error, color: Colors.red),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppConstants.spacingS),
                           Text(
                             'YAML-Fehler',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -449,7 +449,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppConstants.spacingS),
                       Text(
                         _yamlError!,
                         style: TextStyle(
@@ -462,7 +462,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                   ),
                 ),
               ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Save button
             FilledButton.icon(
@@ -476,10 +476,10 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                   : const Icon(Icons.save),
               label: Text(isEditing ? 'Aktualisieren' : 'Speichern'),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
           ],
         ),
       ),
@@ -517,9 +517,9 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                 'YAML-Struktur:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppConstants.spacingM),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: AppConstants.paddingAll12,
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(8),

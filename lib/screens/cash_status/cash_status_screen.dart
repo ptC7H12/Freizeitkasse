@@ -71,23 +71,23 @@ class CashStatusScreen extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: AppConstants.paddingAll16,
         children: [
           // Summary Card
           _buildSummaryCard(context, ref, currentEvent.id),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppConstants.spacingL),
 
           // Income vs Expense Chart
           _buildIncomeExpenseChart(context, ref, currentEvent.id),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppConstants.spacingL),
 
           // Expense by Category Chart
           _buildExpenseByCategoryChart(context, ref, currentEvent.id),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppConstants.spacingL),
 
           // Income by Source Chart
           _buildIncomeBySourceChart(context, ref, currentEvent.id),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppConstants.spacingL),
 
           // Detailed Breakdown
           _buildDetailedBreakdown(context, ref, database, currentEvent.id),
@@ -103,7 +103,7 @@ class CashStatusScreen extends ConsumerWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: AppConstants.paddingAll24,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -113,7 +113,7 @@ class CashStatusScreen extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
             Row(
               children: [
                 Expanded(
@@ -129,7 +129,7 @@ class CashStatusScreen extends ConsumerWidget {
                     error: (_, __) => const Text('Fehler'),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppConstants.spacing),
                 Expanded(
                   child: totalExpensesAsync.when(
                     data: (totalExpenses) => _buildSummaryItem(
@@ -145,9 +145,9 @@ class CashStatusScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             const Divider(),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             StreamBuilder<List<Payment>>(
               stream: (database.select(database.payments)
                     ..where((tbl) => tbl.eventId.equals(eventId))
@@ -179,7 +179,7 @@ class CashStatusScreen extends ConsumerWidget {
                                   Icons.account_balance_wallet,
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              const SizedBox(width: AppConstants.spacing),
                               Expanded(
                                 child: _buildSummaryItem(
                                   context,
@@ -191,10 +191,10 @@ class CashStatusScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppConstants.spacing),
                           if (outstanding > 0)
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: AppConstants.paddingAll12,
                               decoration: BoxDecoration(
                                 color: Colors.orange[50],
                                 borderRadius: BorderRadius.circular(8),
@@ -203,7 +203,7 @@ class CashStatusScreen extends ConsumerWidget {
                               child: Row(
                                 children: [
                                   Icon(Icons.warning_amber, color: Colors.orange[700]),
-                                  const SizedBox(width: 12),
+                                  const SizedBox(width: AppConstants.spacingM),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,7 +260,7 @@ class CashStatusScreen extends ConsumerWidget {
         Row(
           children: [
             Icon(icon, size: 20, color: color),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppConstants.spacingS),
             Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -269,7 +269,7 @@ class CashStatusScreen extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppConstants.spacingS),
         Text(
           NumberFormat.currency(locale: 'de_DE', symbol: '€').format(value),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -287,7 +287,7 @@ class CashStatusScreen extends ConsumerWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: AppConstants.paddingAll24,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -297,7 +297,7 @@ class CashStatusScreen extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
             SizedBox(
               height: 200,
               child: totalIncomesAsync.when(
@@ -396,7 +396,7 @@ class CashStatusScreen extends ConsumerWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: AppConstants.paddingAll24,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -406,7 +406,7 @@ class CashStatusScreen extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
             SizedBox(
               height: 200,
               child: expensesByCategoryAsync.when(
@@ -466,7 +466,7 @@ class CashStatusScreen extends ConsumerWidget {
                                       shape: BoxShape.circle,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: AppConstants.spacingS),
                                   Expanded(
                                     child: Text(
                                       entry.key,
@@ -498,7 +498,7 @@ class CashStatusScreen extends ConsumerWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: AppConstants.paddingAll24,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -508,7 +508,7 @@ class CashStatusScreen extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
             SizedBox(
               height: 200,
               child: incomesBySourceAsync.when(
@@ -568,7 +568,7 @@ class CashStatusScreen extends ConsumerWidget {
                                       shape: BoxShape.circle,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: AppConstants.spacingS),
                                   Expanded(
                                     child: Text(
                                       entry.key,
@@ -603,7 +603,7 @@ class CashStatusScreen extends ConsumerWidget {
   ) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: AppConstants.paddingAll24,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -613,7 +613,7 @@ class CashStatusScreen extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             _buildDetailedSection(context, ref, 'Ausgaben nach Kategorie', expensesByCategoryProvider),
             const Divider(height: 32),
             _buildDetailedSection(context, ref, 'Einnahmen nach Quelle', incomesBySourceProvider),
@@ -640,7 +640,7 @@ class CashStatusScreen extends ConsumerWidget {
                 fontWeight: FontWeight.bold,
               ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppConstants.spacingM),
         dataAsync.when(
           data: (data) {
             if (data.isEmpty) {

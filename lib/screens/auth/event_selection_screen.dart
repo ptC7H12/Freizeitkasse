@@ -35,7 +35,7 @@ class EventSelectionScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppConstants.spacing),
                   Text('Fehler: ${snapshot.error}'),
                 ],
               ),
@@ -69,17 +69,17 @@ class EventSelectionScreen extends ConsumerWidget {
             size: 100,
             color: Colors.grey,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppConstants.spacingL),
           const Text(
             'Noch keine Events vorhanden',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppConstants.spacingS),
           const Text(
             'Erstelle dein erstes Event, um zu beginnen.',
             style: TextStyle(color: Colors.grey),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppConstants.spacingL),
           ElevatedButton.icon(
             onPressed: () => _showCreateEventDialog(context, null),
             icon: const Icon(Icons.add),
@@ -103,7 +103,7 @@ class EventSelectionScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 24),
+              const SizedBox(height: AppConstants.spacingL),
               const Text(
                 'Wähle ein Event aus',
                 style: TextStyle(
@@ -112,7 +112,7 @@ class EventSelectionScreen extends ConsumerWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppConstants.spacingS),
               const Text(
                 'Mit welchem Event möchtest du arbeiten?',
                 style: TextStyle(color: Colors.grey),
@@ -127,7 +127,7 @@ class EventSelectionScreen extends ConsumerWidget {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
-                        contentPadding: const EdgeInsets.all(16),
+                        contentPadding: AppConstants.paddingAll16,
                         leading: CircleAvatar(
                           backgroundColor: Theme.of(context).primaryColor,
                           child: const Icon(Icons.event, color: Colors.white),
@@ -142,7 +142,7 @@ class EventSelectionScreen extends ConsumerWidget {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppConstants.spacingS),
                             Row(
                               children: [
                                 const Icon(Icons.calendar_today, size: 16),
@@ -215,7 +215,7 @@ class EventSelectionScreen extends ConsumerWidget {
                   hintText: 'z.B. Sommerfreizeit 2025',
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppConstants.spacing),
               TextField(
                 controller: locationController,
                 decoration: const InputDecoration(

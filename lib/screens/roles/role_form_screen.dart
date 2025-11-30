@@ -190,11 +190,11 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
             Card(
               color: Colors.blue[50],
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Row(
                   children: [
                     Icon(Icons.info_outline, color: Colors.blue[700]),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppConstants.spacingM),
                     Expanded(
                       child: Text(
                         'Rollen können in Regelwerken für Rabatte verwendet werden (z.B. "Mitarbeiter" 50% Rabatt)',
@@ -205,12 +205,12 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Basic Information
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -218,7 +218,7 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
                       'Rolleninformationen',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
@@ -234,7 +234,7 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     TextFormField(
                       controller: _descriptionController,
                       decoration: const InputDecoration(
@@ -249,12 +249,12 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Examples Card
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -264,7 +264,7 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     _buildExampleTile('Mitarbeiter', 'Betreuer und Helfer bei der Veranstaltung'),
                     _buildExampleTile('Leitung', 'Veranstaltungsleitung und Koordination'),
                     _buildExampleTile('Küche', 'Küchenteam für Verpflegung'),
@@ -273,7 +273,7 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Save button
             FilledButton.icon(
@@ -287,10 +287,10 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
                   : const Icon(Icons.save),
               label: Text(isEditing ? 'Aktualisieren' : 'Speichern'),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
           ],
         ),
       ),
@@ -304,7 +304,7 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
       child: Row(
         children: [
           Icon(Icons.check_circle_outline, size: 16, color: Colors.grey[600]),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppConstants.spacingS),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

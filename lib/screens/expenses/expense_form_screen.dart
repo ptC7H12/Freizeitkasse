@@ -248,7 +248,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
             // Category selection
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -256,7 +256,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       'Kategorie',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedCategory,
                       decoration: const InputDecoration(
@@ -288,12 +288,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Amount and Date
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -301,7 +301,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       'Betrag und Datum',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _amountController,
                       decoration: const InputDecoration(
@@ -325,7 +325,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     InkWell(
                       onTap: _selectDate,
                       borderRadius: BorderRadius.circular(8),
@@ -344,12 +344,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Description and Vendor
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -357,7 +357,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       'Details',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _descriptionController,
                       decoration: const InputDecoration(
@@ -368,7 +368,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       ),
                       maxLines: 3,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     TextFormField(
                       controller: _vendorController,
                       decoration: const InputDecoration(
@@ -382,12 +382,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Payment details
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -395,7 +395,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       'Zahlungsdetails',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedPaymentMethod,
                       decoration: const InputDecoration(
@@ -421,7 +421,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                         });
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppConstants.spacing),
                     TextFormField(
                       controller: _receiptNumberController,
                       decoration: const InputDecoration(
@@ -435,12 +435,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Notes
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -448,7 +448,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       'Notizen',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppConstants.spacingM),
                     TextFormField(
                       controller: _notesController,
                       decoration: const InputDecoration(
@@ -463,7 +463,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Save button
             FilledButton.icon(
@@ -477,10 +477,10 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   : const Icon(Icons.save),
               label: Text(isEditing ? 'Aktualisieren' : 'Speichern'),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.all(16),
+                padding: AppConstants.paddingAll16,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
           ],
         ),
       ),

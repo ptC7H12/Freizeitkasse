@@ -53,14 +53,14 @@ class RolesListScreen extends ConsumerWidget {
                     size: 80,
                     color: Colors.grey[400],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppConstants.spacing),
                   Text(
                     'Noch keine Rollen',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: Colors.grey[600],
                         ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppConstants.spacingS),
                   Text(
                     'Rollen wie "Mitarbeiter" oder "Leitung"\nfür Teilnehmer-Rabatte erstellen',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -68,7 +68,7 @@ class RolesListScreen extends ConsumerWidget {
                         ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppConstants.spacingL),
                   FilledButton.icon(
                     onPressed: () {
                       Navigator.push(
@@ -87,17 +87,17 @@ class RolesListScreen extends ConsumerWidget {
           }
 
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: AppConstants.paddingAll16,
             children: [
               // Info Card
               Card(
                 color: Colors.blue[50],
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppConstants.paddingAll16,
                   child: Row(
                     children: [
                       Icon(Icons.info_outline, color: Colors.blue[700]),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppConstants.spacingM),
                       Expanded(
                         child: Text(
                           'Rollen werden in Regelwerken für Rabatte verwendet',
@@ -108,7 +108,7 @@ class RolesListScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppConstants.spacing),
 
               // Roles List
               ...rolesWithCounts.map((data) {
@@ -163,7 +163,7 @@ class _RoleListItem extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppConstants.paddingAll16,
           child: Row(
             children: [
               Container(
@@ -178,7 +178,7 @@ class _RoleListItem extends StatelessWidget {
                   color: Colors.purple,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppConstants.spacing),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +198,7 @@ class _RoleListItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppConstants.spacingS),
                     Row(
                       children: [
                         Icon(Icons.people, size: 16, color: Colors.grey[600]),

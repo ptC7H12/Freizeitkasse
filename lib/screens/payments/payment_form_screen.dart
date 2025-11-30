@@ -132,14 +132,14 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               autofocus: true,
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Zahlungsdatum
             Text(
               'Zahlungsdatum',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             InkWell(
               onTap: () => _selectPaymentDate(context),
               child: InputDecorator(
@@ -150,7 +150,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Zahlungsmethode
             DropdownButtonFormField<String>(
@@ -174,14 +174,14 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               },
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Zahlungstyp
             Text(
               'Zahlung für',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             SegmentedButton<String>(
               segments: const [
                 ButtonSegment(
@@ -209,7 +209,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               },
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Teilnehmer/Familie Auswahl
             if (_paymentType == 'participant')
@@ -217,7 +217,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
             else
               _buildFamilyDropdown(),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Notizen
             TextFormField(
@@ -246,7 +246,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
           ],
         ),
       ),
