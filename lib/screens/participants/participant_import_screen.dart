@@ -7,6 +7,7 @@ import '../../providers/excel_import_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../services/excel_import_service.dart';
 import '../../utils/constants.dart';
+import '../../extensions/context_extensions.dart';
 
 class ParticipantImportScreen extends ConsumerStatefulWidget {
   const ParticipantImportScreen({super.key});

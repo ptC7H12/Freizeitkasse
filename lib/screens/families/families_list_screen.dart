@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import '../../providers/family_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
