@@ -30,7 +30,7 @@ class FileStorageService {
     try {
       // File Picker öffnen
       final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
+        type: FileType.any,
         allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
         withData: false,
         withReadStream: false,
@@ -96,13 +96,13 @@ class FileStorageService {
     final fileName = path.basename(filePath);
     final extension = path.extension(filePath).toLowerCase();
 
-    FileType fileType;
+    ReceiptFileType fileType;
     if (extension == '.pdf') {
-      fileType = FileType.pdf;
+      fileType = ReceiptFileType.pdf;
     } else if (['.jpg', '.jpeg', '.png'].contains(extension)) {
-      fileType = FileType.image;
+      fileType = ReceiptFileType.image;
     } else {
-      fileType = FileType.unknown;
+      fileType = ReceiptFileType.unknown;
     }
 
     return FileInfo(
@@ -125,7 +125,7 @@ class FileStorageService {
 class FileInfo {
   final String path;
   final String name;
-  final FileType type;
+  final ReceiptFileType type;
   final File file;
 
   FileInfo({
@@ -136,7 +136,7 @@ class FileInfo {
   });
 }
 
-enum FileType {
+enum ReceiptFileType {
   image,
   pdf,
   unknown,
