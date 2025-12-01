@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../../data/database/app_database.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../providers/database_provider.dart';
+import '../../data/repositories/expense_repository.dart';
 import 'expense_form_screen.dart';
 import '../../utils/constants.dart';
 
@@ -88,49 +90,99 @@ class ExpensesListScreen extends ConsumerWidget {
             );
           }
 
-          // Group expenses by category
+          // Berechne Statistiken
           final expensesByCategory = <String, List<Expense>>{};
-          double total = 0.0;
+          double gesamtbetrag = 0.0;
+          double beglichene = 0.0;
 
           for (final expense in expenses) {
             expensesByCategory.putIfAbsent(expense.category, () => []).add(expense);
-            total += expense.amount;
+            gesamtbetrag += expense.amount;
+            if (expense.reimbursed) {
+              beglichene += expense.amount;
+            }
           }
+
+          final offeneAusgaben = gesamtbetrag - beglichene;
 
           return Column(
             children: [
-              // Total summary card
-              Card(
-                margin: AppConstants.paddingAll16,
-                child: Padding(
-                  padding: AppConstants.paddingAll16,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.euro, size: 32, color: Colors.red),
-                      const SizedBox(width: AppConstants.spacing),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Gesamtausgaben',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          Text(
-                            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(total),
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red[700],
-                                ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Text(
-                        '${expenses.length} Ausgaben',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ],
+              // Statistik-Header
+              Container(
+                padding: AppConstants.paddingAll16,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE91E63).withOpacity(0.1),
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
                   ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.shopping_cart, color: const Color(0xFFE91E63), size: 24),
+                        const SizedBox(width: AppConstants.spacingS),
+                        const Text(
+                          'Übersicht',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppConstants.spacing),
+                    // Erste Zeile: Zahlung gesamt, Gesamtbetrag
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildStatCard(
+                            context,
+                            'Ausgaben gesamt',
+                            expenses.length.toString(),
+                            Icons.receipt_long,
+                            const Color(0xFF2196F3),
+                          ),
+                        ),
+                        const SizedBox(width: AppConstants.spacing),
+                        Expanded(
+                          child: _buildStatCard(
+                            context,
+                            'Gesamtbetrag',
+                            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(gesamtbetrag),
+                            Icons.euro,
+                            const Color(0xFFE91E63),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppConstants.spacing),
+                    // Zweite Zeile: Offene Ausgaben, Beglichen
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildStatCard(
+                            context,
+                            'Offene Ausgaben',
+                            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(offeneAusgaben),
+                            Icons.hourglass_empty,
+                            const Color(0xFFFF9800),
+                          ),
+                        ),
+                        const SizedBox(width: AppConstants.spacing),
+                        Expanded(
+                          child: _buildStatCard(
+                            context,
+                            'Beglichen',
+                            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(beglichene),
+                            Icons.check_circle,
+                            const Color(0xFF4CAF50),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
 
@@ -188,9 +240,56 @@ class ExpensesListScreen extends ConsumerWidget {
       ),
     );
   }
+
+  /// Kleine Statistik-Karte
+  Widget _buildStatCard(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      padding: AppConstants.paddingAll16,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: AppConstants.borderRadius8,
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 20),
+              const SizedBox(width: AppConstants.spacingS),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingS),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _ExpenseListItem extends StatelessWidget {
+class _ExpenseListItem extends ConsumerWidget {
   final Expense expense;
 
   const _ExpenseListItem({required this.expense});
@@ -237,8 +336,24 @@ class _ExpenseListItem extends StatelessWidget {
     }
   }
 
+  /// Toggle Reimbursed Status
+  Future<void> _toggleReimbursedStatus(WidgetRef ref) async {
+    final database = ref.read(databaseProvider);
+    final repository = ExpenseRepository(database);
+
+    try {
+      await repository.updateExpense(
+        id: expense.id,
+        reimbursed: !expense.reimbursed,
+      );
+    } catch (e) {
+      // Fehlerbehandlung könnte hier verbessert werden
+      print('Fehler beim Aktualisieren des Status: $e');
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final categoryColor = _getCategoryColor(expense.category);
     final categoryIcon = _getCategoryIcon(expense.category);
     final dateFormat = DateFormat('dd.MM.yyyy', 'de_DE');
@@ -345,7 +460,7 @@ class _ExpenseListItem extends StatelessWidget {
                 ),
               ),
 
-              // Amount
+              // Amount and Status
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -356,13 +471,59 @@ class _ExpenseListItem extends StatelessWidget {
                           color: Colors.red[700],
                         ),
                   ),
-                  if (expense.receiptNumber != null)
+                  const SizedBox(height: AppConstants.spacingS),
+                  // Status-Chip (klickbar zum Togglen)
+                  InkWell(
+                    onTap: () => _toggleReimbursedStatus(ref),
+                    borderRadius: AppConstants.borderRadius8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: expense.reimbursed
+                            ? const Color(0xFF4CAF50).withOpacity(0.1)
+                            : const Color(0xFFFF9800).withOpacity(0.1),
+                        borderRadius: AppConstants.borderRadius8,
+                        border: Border.all(
+                          color: expense.reimbursed
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFFFF9800),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            expense.reimbursed ? Icons.check_circle : Icons.hourglass_empty,
+                            size: 16,
+                            color: expense.reimbursed
+                                ? const Color(0xFF4CAF50)
+                                : const Color(0xFFFF9800),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            expense.reimbursed ? 'Erstattet' : 'Offen',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: expense.reimbursed
+                                  ? const Color(0xFF4CAF50)
+                                  : const Color(0xFFFF9800),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (expense.receiptNumber != null) ...[
+                    const SizedBox(height: 4),
                     Text(
                       'Beleg: ${expense.receiptNumber}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.grey[600],
                           ),
                     ),
+                  ],
                 ],
               ),
             ],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../providers/payment_provider.dart';
+import '../../providers/participant_provider.dart';
 import '../../utils/date_utils.dart';
 import 'payment_form_screen.dart';
 import '../../utils/constants.dart';
@@ -12,75 +14,109 @@ class PaymentsListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final paymentsAsync = ref.watch(paymentsProvider);
+    final participantsAsync = ref.watch(participantsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Zahlungen'),
+        title: const Text('Zahlungseingänge'),
       ),
       body: paymentsAsync.when(
         data: (payments) {
-          if (payments.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.payment, size: 100, color: Colors.grey),
-                  SizedBox(height: 24),
-                  Text(
-                    'Noch keine Zahlungen',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Erfasse die erste Zahlung.',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            );
-          }
+          // Berechne Statistiken
+          final zahlungGesamt = payments.length;
+          final gesamtbetrag = payments.fold<double>(
+            0.0,
+            (sum, payment) => sum + payment.amount,
+          );
 
-          return ListView.builder(
-            padding: AppConstants.paddingAll16,
-            itemCount: payments.length,
-            itemBuilder: (context, index) {
-              final payment = payments[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.green.shade100,
-                    child: Icon(Icons.euro, color: Colors.green.shade700),
-                  ),
-                  title: Text(
-                    '${payment.amount.toStringAsFixed(2)} €',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      Text(AppDateUtils.formatGerman(payment.paymentDate)),
-                      if (payment.paymentMethod != null)
-                        Text('Methode: ${payment.paymentMethod}'),
-                    ],
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => PaymentFormScreen(
-                          paymentId: payment.id,
+          return Column(
+            children: [
+              // Statistik-Header
+              participantsAsync.when(
+                data: (participants) {
+                  final erwarteteEinnahme = participants.fold<double>(
+                    0.0,
+                    (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
+                  );
+                  final ausstehend = erwarteteEinnahme - gesamtbetrag;
+
+                  return _buildStatsHeader(
+                    context,
+                    zahlungGesamt,
+                    gesamtbetrag,
+                    erwarteteEinnahme,
+                    ausstehend,
+                  );
+                },
+                loading: () => _buildStatsHeaderLoading(context, zahlungGesamt, gesamtbetrag),
+                error: (_, __) => _buildStatsHeaderLoading(context, zahlungGesamt, gesamtbetrag),
+              ),
+
+              // Zahlungsliste
+              Expanded(
+                child: payments.isEmpty
+                    ? const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.payment, size: 100, color: Colors.grey),
+                            SizedBox(height: 24),
+                            Text(
+                              'Noch keine Zahlungen',
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Erfasse die erste Zahlung.',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
                         ),
+                      )
+                    : ListView.builder(
+                        padding: AppConstants.paddingAll16,
+                        itemCount: payments.length,
+                        itemBuilder: (context, index) {
+                          final payment = payments[index];
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.green.shade100,
+                                child: Icon(Icons.euro, color: Colors.green.shade700),
+                              ),
+                              title: Text(
+                                '${payment.amount.toStringAsFixed(2)} €',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 4),
+                                  Text(AppDateUtils.formatGerman(payment.paymentDate)),
+                                  if (payment.paymentMethod != null)
+                                    Text('Methode: ${payment.paymentMethod}'),
+                                ],
+                              ),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => PaymentFormScreen(
+                                      paymentId: payment.id,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              );
-            },
+              ),
+            ],
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -96,6 +132,279 @@ class PaymentsListScreen extends ConsumerWidget {
         },
         icon: const Icon(Icons.add),
         label: const Text('Zahlung'),
+      ),
+    );
+  }
+
+  /// Statistik-Header mit allen Informationen
+  Widget _buildStatsHeader(
+    BuildContext context,
+    int zahlungGesamt,
+    double gesamtbetrag,
+    double erwarteteEinnahme,
+    double ausstehend,
+  ) {
+    final currencyFormat = NumberFormat.currency(locale: 'de_DE', symbol: '€');
+
+    return Container(
+      padding: AppConstants.paddingAll16,
+      decoration: BoxDecoration(
+        color: const Color(0xFF2196F3).withOpacity(0.1),
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade300),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.payments, color: const Color(0xFF2196F3), size: 24),
+              const SizedBox(width: AppConstants.spacingS),
+              const Text(
+                'Übersicht',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacing),
+          Row(
+            children: [
+              // Zahlung gesamt
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  'Zahlungen gesamt',
+                  zahlungGesamt.toString(),
+                  Icons.receipt_long,
+                  const Color(0xFF2196F3),
+                ),
+              ),
+              const SizedBox(width: AppConstants.spacing),
+              // Gesamtbetrag
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  'Gesamtbetrag',
+                  currencyFormat.format(gesamtbetrag),
+                  Icons.euro,
+                  const Color(0xFF4CAF50),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacing),
+          // Erwartete Einnahme mit Info
+          _buildExpectedIncomeCard(
+            context,
+            erwarteteEinnahme,
+            ausstehend,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Statistik-Header während des Ladens (ohne erwartete Einnahme)
+  Widget _buildStatsHeaderLoading(
+    BuildContext context,
+    int zahlungGesamt,
+    double gesamtbetrag,
+  ) {
+    final currencyFormat = NumberFormat.currency(locale: 'de_DE', symbol: '€');
+
+    return Container(
+      padding: AppConstants.paddingAll16,
+      decoration: BoxDecoration(
+        color: const Color(0xFF2196F3).withOpacity(0.1),
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade300),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.payments, color: const Color(0xFF2196F3), size: 24),
+              const SizedBox(width: AppConstants.spacingS),
+              const Text(
+                'Übersicht',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacing),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  'Zahlungen gesamt',
+                  zahlungGesamt.toString(),
+                  Icons.receipt_long,
+                  const Color(0xFF2196F3),
+                ),
+              ),
+              const SizedBox(width: AppConstants.spacing),
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  'Gesamtbetrag',
+                  currencyFormat.format(gesamtbetrag),
+                  Icons.euro,
+                  const Color(0xFF4CAF50),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Kleine Statistik-Karte
+  Widget _buildStatCard(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      padding: AppConstants.paddingAll16,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: AppConstants.borderRadius8,
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 20),
+              const SizedBox(width: AppConstants.spacingS),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingS),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Erwartete Einnahme Karte mit Ausstehend-Info
+  Widget _buildExpectedIncomeCard(
+    BuildContext context,
+    double erwarteteEinnahme,
+    double ausstehend,
+  ) {
+    final currencyFormat = NumberFormat.currency(locale: 'de_DE', symbol: '€');
+    final isComplete = ausstehend <= 0;
+
+    return Container(
+      padding: AppConstants.paddingAll16,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: AppConstants.borderRadius8,
+        border: Border.all(
+          color: isComplete
+              ? const Color(0xFF4CAF50).withOpacity(0.3)
+              : const Color(0xFFFF9800).withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.account_balance_wallet,
+                      color: isComplete ? const Color(0xFF4CAF50) : const Color(0xFFFF9800),
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppConstants.spacingS),
+                    const Text(
+                      'Erwartete Einnahme',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacingS),
+                Text(
+                  currencyFormat.format(erwarteteEinnahme),
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: isComplete ? const Color(0xFF4CAF50) : const Color(0xFFFF9800),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppConstants.spacing),
+          // Ausstehend Info
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isComplete
+                  ? const Color(0xFF4CAF50).withOpacity(0.1)
+                  : const Color(0xFFFF9800).withOpacity(0.1),
+              borderRadius: AppConstants.borderRadius8,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  isComplete ? 'Vollständig' : 'Ausstehend',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: isComplete ? const Color(0xFF4CAF50) : const Color(0xFFFF9800),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  currencyFormat.format(ausstehend.abs()),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isComplete ? const Color(0xFF4CAF50) : const Color(0xFFFF9800),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

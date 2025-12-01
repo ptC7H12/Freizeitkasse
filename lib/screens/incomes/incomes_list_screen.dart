@@ -99,38 +99,114 @@ class IncomesListScreen extends ConsumerWidget {
 
           return Column(
             children: [
-              // Total summary card
-              Card(
-                margin: AppConstants.paddingAll16,
-                child: Padding(
-                  padding: AppConstants.paddingAll16,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.euro, size: 32, color: Colors.green),
-                      const SizedBox(width: AppConstants.spacing),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Gesamteinnahmen',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          Text(
-                            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(total),
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green[700],
-                                ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Text(
-                        '${incomes.length} Einnahmen',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ],
+              // Statistik-Header
+              Container(
+                padding: AppConstants.paddingAll16,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4CAF50).withOpacity(0.1),
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
                   ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.account_balance_wallet, color: const Color(0xFF4CAF50), size: 24),
+                        const SizedBox(width: AppConstants.spacingS),
+                        const Text(
+                          'Übersicht',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppConstants.spacing),
+                    Row(
+                      children: [
+                        // Gesamteinnahmen
+                        Expanded(
+                          child: Container(
+                            padding: AppConstants.paddingAll16,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: AppConstants.borderRadius8,
+                              border: Border.all(color: const Color(0xFF4CAF50).withOpacity(0.3)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.euro, color: const Color(0xFF4CAF50), size: 20),
+                                    const SizedBox(width: AppConstants.spacingS),
+                                    const Text(
+                                      'Gesamteinnahmen',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: AppConstants.spacingS),
+                                Text(
+                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(total),
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF4CAF50),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppConstants.spacing),
+                        // Anzahl Einnahmen
+                        Expanded(
+                          child: Container(
+                            padding: AppConstants.paddingAll16,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: AppConstants.borderRadius8,
+                              border: Border.all(color: const Color(0xFF2196F3).withOpacity(0.3)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.receipt_long, color: const Color(0xFF2196F3), size: 20),
+                                    const SizedBox(width: AppConstants.spacingS),
+                                    const Text(
+                                      'Anzahl Einnahmen',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: AppConstants.spacingS),
+                                Text(
+                                  incomes.length.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2196F3),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
 
