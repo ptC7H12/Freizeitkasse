@@ -76,11 +76,10 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         _descriptionController.text = expense.description ?? '';
         _vendorController.text = expense.vendor ?? '';
         _receiptNumberController.text = expense.receiptNumber ?? '';
-        // TODO: Aktivieren nach build_runner:
-        // _referenceNumberController.text = expense.referenceNumber ?? '';
-        // _paidByController.text = expense.paidBy ?? '';
-        // _reimbursed = expense.reimbursed;
-        // _receiptFilePath = expense.receiptFile;
+        _referenceNumberController.text = expense.referenceNumber ?? '';
+        _paidByController.text = expense.paidBy ?? '';
+        _reimbursed = expense.reimbursed;
+        _receiptFilePath = expense.receiptFile;
         _selectedPaymentMethod = expense.paymentMethod;
         _notesController.text = expense.notes ?? '';
       });

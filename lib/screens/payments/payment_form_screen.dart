@@ -73,8 +73,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
           _amountController.text = payment.amount.toStringAsFixed(2);
           _paymentDate = payment.paymentDate;
           _paymentMethod = payment.paymentMethod;
-          // TODO: Aktivieren nach build_runner:
-          // _referenceNumberController.text = payment.referenceNumber ?? '';
+          _referenceNumberController.text = payment.referenceNumber ?? '';
           _notesController.text = payment.notes ?? '';
           _selectedParticipantId = payment.participantId;
           _selectedFamilyId = payment.familyId;
