@@ -504,12 +504,19 @@ class DashboardScreen extends ConsumerWidget {
     final database = ref.watch(databaseProvider);
     final eventId = currentEvent.id;
 
+    // Responsive Layout
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 800;
+
     return SingleChildScrollView(
       padding: AppConstants.paddingAll16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Teilnehmer und Familien Karten
+          // ========== BEREICH 1: TEILNEHMER ==========
+          _buildSectionHeader(context, Icons.people, 'Teilnehmer'),
+          const SizedBox(height: AppConstants.spacing),
+
           StreamBuilder<int>(
             stream: (database.select(database.participants)
                   ..where((tbl) => tbl.eventId.equals(eventId))
@@ -519,399 +526,579 @@ class DashboardScreen extends ConsumerWidget {
             builder: (context, snapshot) {
               final participantCount = snapshot.data ?? 0;
 
-              return Row(
-                children: [
-                  Expanded(
-                    child: _buildOverviewCard(
-                      context,
-                      'Teilnehmer',
-                      participantCount.toString(),
-                      Icons.people,
-                      const Color(0xFF2196F3), // Blau
-                      () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const ParticipantsListScreen(),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppConstants.spacing),
-                  Expanded(
-                    child: StreamBuilder<int>(
-                      stream: (database.select(database.families)
-                            ..where((tbl) => tbl.eventId.equals(eventId)))
-                          .watch()
-                          .map((list) => list.length),
-                      builder: (context, snapshot) {
-                        final familyCount = snapshot.data ?? 0;
-                        return _buildOverviewCard(
-                          context,
-                          'Familien',
-                          familyCount.toString(),
-                          Icons.family_restroom,
-                          const Color(0xFF4CAF50), // Grün
-                          () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const FamiliesListScreen(),
+              return StreamBuilder<int>(
+                stream: (database.select(database.families)
+                      ..where((tbl) => tbl.eventId.equals(eventId)))
+                    .watch()
+                    .map((list) => list.length),
+                builder: (context, familySnapshot) {
+                  final familyCount = familySnapshot.data ?? 0;
+
+                  return Card(
+                    elevation: 2,
+                    child: Padding(
+                      padding: AppConstants.paddingAll16,
+                      child: isDesktop
+                          ? Row(
+                              children: [
+                                Expanded(
+                                  child: _buildParticipantStat(
+                                    context,
+                                    'Anzahl Teilnehmer',
+                                    participantCount.toString(),
+                                    Icons.people,
+                                    const Color(0xFF2196F3),
+                                    () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => const ParticipantsListScreen(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const VerticalDivider(width: 32),
+                                Expanded(
+                                  child: _buildParticipantStat(
+                                    context,
+                                    'Anzahl Familien',
+                                    familyCount.toString(),
+                                    Icons.family_restroom,
+                                    const Color(0xFF4CAF50),
+                                    () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => const FamiliesListScreen(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Column(
+                              children: [
+                                _buildParticipantStat(
+                                  context,
+                                  'Anzahl Teilnehmer',
+                                  participantCount.toString(),
+                                  Icons.people,
+                                  const Color(0xFF2196F3),
+                                  () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const ParticipantsListScreen(),
+                                    ),
+                                  ),
+                                ),
+                                const Divider(height: 24),
+                                _buildParticipantStat(
+                                  context,
+                                  'Anzahl Familien',
+                                  familyCount.toString(),
+                                  Icons.family_restroom,
+                                  const Color(0xFF4CAF50),
+                                  () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const FamiliesListScreen(),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        );
-                      },
                     ),
-                  ),
-                ],
-              );
-            },
-          ),
-
-          const SizedBox(height: AppConstants.spacingL),
-
-          // Finanzübersicht
-          const Text(
-            'Finanzübersicht',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: AppConstants.spacing),
-
-          // Einnahmen Sektion
-          const Text(
-            'Einnahmen',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: AppConstants.spacingM),
-
-          StreamBuilder<List<Participant>>(
-            stream: (database.select(database.participants)
-                  ..where((tbl) => tbl.eventId.equals(eventId))
-                  ..where((tbl) => tbl.isActive.equals(true)))
-                .watch(),
-            builder: (context, participantSnapshot) {
-              final participants = participantSnapshot.data ?? [];
-              final sollEinnahmenGesamt = participants.fold<double>(
-                0.0,
-                (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
-              );
-
-              final sollZahlungseingaenge = sollEinnahmenGesamt; // Teilnahmegebühren
-
-              return StreamBuilder<List<Income>>(
-                stream: (database.select(database.incomes)
-                      ..where((tbl) => tbl.eventId.equals(eventId))
-                      ..where((tbl) => tbl.isActive.equals(true)))
-                    .watch(),
-                builder: (context, incomeSnapshot) {
-                  final incomes = incomeSnapshot.data ?? [];
-                  final sollSonstigeEinnahmen = incomes.fold<double>(
-                    0.0,
-                    (sum, income) => sum + income.amount,
-                  );
-
-                  return StreamBuilder<List<Payment>>(
-                    stream: (database.select(database.payments)
-                          ..where((tbl) => tbl.eventId.equals(eventId))
-                          ..where((tbl) => tbl.isActive.equals(true)))
-                        .watch(),
-                    builder: (context, paymentSnapshot) {
-                      final payments = paymentSnapshot.data ?? [];
-                      final istEinnahmenGesamt = payments.fold<double>(
-                        0.0,
-                        (sum, payment) => sum + payment.amount,
-                      ) + sollSonstigeEinnahmen;
-
-                      return Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildFinanceCard(
-                                  context,
-                                  'Soll Einnahmen (Gesamt)',
-                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(sollEinnahmenGesamt + sollSonstigeEinnahmen),
-                                  null,
-                                  backgroundColor: const Color(0xFFE8F5E9), // Hellgrün
-                                  textColor: const Color(0xFF2E7D32), // Dunkelgrün
-                                ),
-                              ),
-                              const SizedBox(width: AppConstants.spacing),
-                              Expanded(
-                                child: _buildFinanceCard(
-                                  context,
-                                  'Soll Zahlungseingänge',
-                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(sollZahlungseingaenge),
-                                  'Teilnahmegebühren',
-                                  backgroundColor: const Color(0xFFE3F2FD), // Hellblau
-                                  textColor: const Color(0xFF1976D2), // Blau
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppConstants.spacing),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildFinanceCard(
-                                  context,
-                                  'Soll Sonstige Einnahmen',
-                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(sollSonstigeEinnahmen),
-                                  'Zuschüsse',
-                                  backgroundColor: const Color(0xFFE3F2FD), // Hellblau
-                                  textColor: const Color(0xFF1976D2), // Blau
-                                ),
-                              ),
-                              const SizedBox(width: AppConstants.spacing),
-                              Expanded(
-                                child: _buildFinanceCard(
-                                  context,
-                                  'Ist Einnahmen (Gesamt)',
-                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(istEinnahmenGesamt),
-                                  'Zahlungen + Sonstige',
-                                  borderColor: const Color(0xFF4CAF50), // Grün
-                                  textColor: const Color(0xFF2E7D32), // Dunkelgrün
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-                    },
                   );
                 },
               );
             },
           ),
 
-          const SizedBox(height: AppConstants.spacingL),
+          const SizedBox(height: AppConstants.spacingXL),
 
-          // Ausgaben Sektion
-          const Text(
-            'Ausgaben',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: AppConstants.spacingM),
+          // ========== BEREICH 2: FINANZÜBERSICHT ==========
+          _buildSectionHeader(context, Icons.account_balance_wallet, 'Finanzübersicht'),
+          const SizedBox(height: AppConstants.spacing),
 
-          StreamBuilder<List<Expense>>(
-            stream: (database.select(database.expenses)
-                  ..where((tbl) => tbl.eventId.equals(eventId))
-                  ..where((tbl) => tbl.isActive.equals(true)))
-                .watch(),
-            builder: (context, expenseSnapshot) {
-              final expenses = expenseSnapshot.data ?? [];
-              final sollAusgabenGesamt = expenses.fold<double>(
-                0.0,
-                (sum, expense) => sum + expense.amount,
-              );
-              final beglicheneAusgaben = sollAusgabenGesamt; // Tatsächlich gezahlt (hier gleich)
-
-              return Row(
+          Card(
+            elevation: 2,
+            child: Padding(
+              padding: AppConstants.paddingAll16,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _buildFinanceCard(
-                      context,
-                      'Soll Ausgaben (Gesamt)',
-                      NumberFormat.currency(locale: 'de_DE', symbol: '€').format(sollAusgabenGesamt),
-                      null,
-                      backgroundColor: const Color(0xFFFCE4EC), // Hellrosa
-                      textColor: const Color(0xFFC2185B), // Pink
-                    ),
+                  // === EINNAHMEN ===
+                  Row(
+                    children: [
+                      Icon(Icons.trending_up, color: const Color(0xFF4CAF50), size: 24),
+                      const SizedBox(width: AppConstants.spacingS),
+                      const Text(
+                        'Einnahmen',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: AppConstants.spacing),
-                  Expanded(
-                    child: _buildFinanceCard(
-                      context,
-                      'Beglichene Ausgaben',
-                      NumberFormat.currency(locale: 'de_DE', symbol: '€').format(beglicheneAusgaben),
-                      'Tatsächlich gezahlt',
-                      borderColor: const Color(0xFFE91E63), // Pink
-                      textColor: const Color(0xFFC2185B), // Pink
-                    ),
+                  const SizedBox(height: AppConstants.spacing),
+
+                  StreamBuilder<List<Participant>>(
+                    stream: (database.select(database.participants)
+                          ..where((tbl) => tbl.eventId.equals(eventId))
+                          ..where((tbl) => tbl.isActive.equals(true)))
+                        .watch(),
+                    builder: (context, participantSnapshot) {
+                      final participants = participantSnapshot.data ?? [];
+                      final sollEinnahmenTeilnehmer = participants.fold<double>(
+                        0.0,
+                        (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
+                      );
+
+                      return StreamBuilder<List<Income>>(
+                        stream: (database.select(database.incomes)
+                              ..where((tbl) => tbl.eventId.equals(eventId))
+                              ..where((tbl) => tbl.isActive.equals(true)))
+                            .watch(),
+                        builder: (context, incomeSnapshot) {
+                          final incomes = incomeSnapshot.data ?? [];
+                          final sollSonstigeEinnahmen = incomes.fold<double>(
+                            0.0,
+                            (sum, income) => sum + income.amount,
+                          );
+
+                          return StreamBuilder<List<Payment>>(
+                            stream: (database.select(database.payments)
+                                  ..where((tbl) => tbl.eventId.equals(eventId))
+                                  ..where((tbl) => tbl.isActive.equals(true)))
+                                .watch(),
+                            builder: (context, paymentSnapshot) {
+                              final payments = paymentSnapshot.data ?? [];
+                              final istEinnahmenZahlungen = payments.fold<double>(
+                                0.0,
+                                (sum, payment) => sum + payment.amount,
+                              );
+
+                              final sollEinnahmenGesamt = sollEinnahmenTeilnehmer + sollSonstigeEinnahmen;
+                              final istEinnahmenGesamt = istEinnahmenZahlungen + sollSonstigeEinnahmen;
+
+                              return isDesktop
+                                  ? Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildFinanceDetailCard(
+                                            context,
+                                            'Soll Einnahmen (Gesamt)',
+                                            sollEinnahmenGesamt,
+                                            null,
+                                            const Color(0xFF4CAF50),
+                                          ),
+                                        ),
+                                        const SizedBox(width: AppConstants.spacing),
+                                        Expanded(
+                                          child: _buildFinanceDetailCard(
+                                            context,
+                                            'Soll Zahlungseingänge',
+                                            sollEinnahmenTeilnehmer,
+                                            'durch Teilnahmegebühren',
+                                            const Color(0xFF2196F3),
+                                          ),
+                                        ),
+                                        const SizedBox(width: AppConstants.spacing),
+                                        Expanded(
+                                          child: _buildFinanceDetailCard(
+                                            context,
+                                            'Soll Sonstige Einnahmen',
+                                            sollSonstigeEinnahmen,
+                                            'durch Zuschüsse',
+                                            const Color(0xFF2196F3),
+                                          ),
+                                        ),
+                                        const SizedBox(width: AppConstants.spacing),
+                                        Expanded(
+                                          child: _buildFinanceDetailCard(
+                                            context,
+                                            'Ist Einnahmen (Gesamt)',
+                                            istEinnahmenGesamt,
+                                            'durch Zahlungen + Sonstige',
+                                            const Color(0xFF4CAF50),
+                                            isBold: true,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Column(
+                                      children: [
+                                        _buildFinanceDetailCard(
+                                          context,
+                                          'Soll Einnahmen (Gesamt)',
+                                          sollEinnahmenGesamt,
+                                          null,
+                                          const Color(0xFF4CAF50),
+                                        ),
+                                        const SizedBox(height: AppConstants.spacingS),
+                                        _buildFinanceDetailCard(
+                                          context,
+                                          'Soll Zahlungseingänge',
+                                          sollEinnahmenTeilnehmer,
+                                          'durch Teilnahmegebühren',
+                                          const Color(0xFF2196F3),
+                                        ),
+                                        const SizedBox(height: AppConstants.spacingS),
+                                        _buildFinanceDetailCard(
+                                          context,
+                                          'Soll Sonstige Einnahmen',
+                                          sollSonstigeEinnahmen,
+                                          'durch Zuschüsse',
+                                          const Color(0xFF2196F3),
+                                        ),
+                                        const SizedBox(height: AppConstants.spacingS),
+                                        _buildFinanceDetailCard(
+                                          context,
+                                          'Ist Einnahmen (Gesamt)',
+                                          istEinnahmenGesamt,
+                                          'durch Zahlungen + Sonstige',
+                                          const Color(0xFF4CAF50),
+                                          isBold: true,
+                                        ),
+                                      ],
+                                    );
+                            },
+                          );
+                        },
+                      );
+                    },
                   ),
-                ],
-              );
-            },
-          ),
 
-          const SizedBox(height: AppConstants.spacingL),
+                  const Divider(height: 32),
 
-          // Saldo Sektion
-          const Text(
-            'Saldo',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: AppConstants.spacingM),
+                  // === AUSGABEN ===
+                  Row(
+                    children: [
+                      Icon(Icons.trending_down, color: const Color(0xFFE91E63), size: 24),
+                      const SizedBox(width: AppConstants.spacingS),
+                      const Text(
+                        'Ausgaben',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppConstants.spacing),
 
-          StreamBuilder<List<Payment>>(
-            stream: (database.select(database.payments)
-                  ..where((tbl) => tbl.eventId.equals(eventId))
-                  ..where((tbl) => tbl.isActive.equals(true)))
-                .watch(),
-            builder: (context, paymentSnapshot) {
-              final payments = paymentSnapshot.data ?? [];
-              final totalPayments = payments.fold<double>(
-                0.0,
-                (sum, payment) => sum + payment.amount,
-              );
-
-              return StreamBuilder<List<Income>>(
-                stream: (database.select(database.incomes)
-                      ..where((tbl) => tbl.eventId.equals(eventId))
-                      ..where((tbl) => tbl.isActive.equals(true)))
-                    .watch(),
-                builder: (context, incomeSnapshot) {
-                  final incomes = incomeSnapshot.data ?? [];
-                  final totalIncomes = incomes.fold<double>(
-                    0.0,
-                    (sum, income) => sum + income.amount,
-                  );
-
-                  return StreamBuilder<List<Expense>>(
+                  StreamBuilder<List<Expense>>(
                     stream: (database.select(database.expenses)
                           ..where((tbl) => tbl.eventId.equals(eventId))
                           ..where((tbl) => tbl.isActive.equals(true)))
                         .watch(),
                     builder: (context, expenseSnapshot) {
                       final expenses = expenseSnapshot.data ?? [];
-                      final totalExpenses = expenses.fold<double>(
+                      final sollAusgabenGesamt = expenses.fold<double>(
                         0.0,
                         (sum, expense) => sum + expense.amount,
                       );
-                      final saldo = totalPayments + totalIncomes - totalExpenses;
+                      // TODO: Später mit Status-Feld erweitern
+                      final beglicheneAusgaben = sollAusgabenGesamt;
 
-                      return _buildFinanceCard(
-                        context,
-                        'Saldo (Gesamt)',
-                        NumberFormat.currency(locale: 'de_DE', symbol: '€').format(saldo),
-                        'Einnahmen - Ausgaben',
-                        backgroundColor: const Color(0xFFE8F5E9), // Hellgrün
-                        textColor: const Color(0xFF2E7D32), // Dunkelgrün
+                      return isDesktop
+                          ? Row(
+                              children: [
+                                Expanded(
+                                  child: _buildFinanceDetailCard(
+                                    context,
+                                    'Soll Ausgaben (Gesamt)',
+                                    sollAusgabenGesamt,
+                                    null,
+                                    const Color(0xFFE91E63),
+                                  ),
+                                ),
+                                const SizedBox(width: AppConstants.spacing),
+                                Expanded(
+                                  child: _buildFinanceDetailCard(
+                                    context,
+                                    'Beglichene Ausgaben',
+                                    beglicheneAusgaben,
+                                    null,
+                                    const Color(0xFFE91E63),
+                                    isBold: true,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Column(
+                              children: [
+                                _buildFinanceDetailCard(
+                                  context,
+                                  'Soll Ausgaben (Gesamt)',
+                                  sollAusgabenGesamt,
+                                  null,
+                                  const Color(0xFFE91E63),
+                                ),
+                                const SizedBox(height: AppConstants.spacingS),
+                                _buildFinanceDetailCard(
+                                  context,
+                                  'Beglichene Ausgaben',
+                                  beglicheneAusgaben,
+                                  null,
+                                  const Color(0xFFE91E63),
+                                  isBold: true,
+                                ),
+                              ],
+                            );
+                    },
+                  ),
+
+                  const Divider(height: 32),
+
+                  // === SALDO ===
+                  Row(
+                    children: [
+                      Icon(Icons.account_balance, color: const Color(0xFFFF9800), size: 24),
+                      const SizedBox(width: AppConstants.spacingS),
+                      const Text(
+                        'Saldo',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppConstants.spacing),
+
+                  StreamBuilder<List<Participant>>(
+                    stream: (database.select(database.participants)
+                          ..where((tbl) => tbl.eventId.equals(eventId))
+                          ..where((tbl) => tbl.isActive.equals(true)))
+                        .watch(),
+                    builder: (context, participantSnapshot) {
+                      final participants = participantSnapshot.data ?? [];
+                      final sollEinnahmenTeilnehmer = participants.fold<double>(
+                        0.0,
+                        (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
+                      );
+
+                      return StreamBuilder<List<Income>>(
+                        stream: (database.select(database.incomes)
+                              ..where((tbl) => tbl.eventId.equals(eventId))
+                              ..where((tbl) => tbl.isActive.equals(true)))
+                            .watch(),
+                        builder: (context, incomeSnapshot) {
+                          final incomes = incomeSnapshot.data ?? [];
+                          final istSonstigeEinnahmen = incomes.fold<double>(
+                            0.0,
+                            (sum, income) => sum + income.amount,
+                          );
+
+                          return StreamBuilder<List<Expense>>(
+                            stream: (database.select(database.expenses)
+                                  ..where((tbl) => tbl.eventId.equals(eventId))
+                                  ..where((tbl) => tbl.isActive.equals(true)))
+                                .watch(),
+                            builder: (context, expenseSnapshot) {
+                              final expenses = expenseSnapshot.data ?? [];
+                              final sollAusgabenGesamt = expenses.fold<double>(
+                                0.0,
+                                (sum, expense) => sum + expense.amount,
+                              );
+
+                              // Formel: Soll Einnahmen (Gesamt) + Ist Einnahmen Sonstige - Soll Ausgaben (Gesamt)
+                              final sollEinnahmenGesamt = sollEinnahmenTeilnehmer + istSonstigeEinnahmen;
+                              final saldo = sollEinnahmenGesamt + istSonstigeEinnahmen - sollAusgabenGesamt;
+
+                              return _buildSaldoCard(
+                                context,
+                                saldo,
+                                'Soll Einnahmen (Gesamt) + Ist Sonstige Einnahmen - Soll Ausgaben (Gesamt)',
+                              );
+                            },
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              );
-            },
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildOverviewCard(
+  /// Section Header Widget
+  Widget _buildSectionHeader(BuildContext context, IconData icon, String title) {
+    return Row(
+      children: [
+        Container(
+          padding: AppConstants.paddingAll8,
+          decoration: BoxDecoration(
+            color: AppConstants.primaryColor.withOpacity(0.1),
+            borderRadius: AppConstants.borderRadius8,
+          ),
+          child: Icon(icon, color: AppConstants.primaryColor, size: 24),
+        ),
+        const SizedBox(width: AppConstants.spacingM),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Participant/Family Stat Widget with Quicklink
+  Widget _buildParticipantStat(
     BuildContext context,
-    String title,
-    String value,
+    String label,
+    String count,
     IconData icon,
     Color color,
     VoidCallback onTap,
   ) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: AppConstants.paddingAll16,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, color: color, size: 28),
-                  const Spacer(),
-                ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: AppConstants.borderRadius8,
+      child: Padding(
+        padding: AppConstants.paddingAll8,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: AppConstants.borderRadius8,
               ),
-              const SizedBox(height: AppConstants.spacingM),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: AppConstants.spacingS),
-              const Row(
+              child: Icon(icon, color: color, size: 32),
+            ),
+            const SizedBox(width: AppConstants.spacing),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Zur Übersicht →',
+                    label,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF4CAF50),
-                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    count,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFinanceCard(
-    BuildContext context,
-    String title,
-    String value,
-    String? subtitle, {
-    Color? backgroundColor,
-    Color? borderColor,
-    Color? textColor,
-  }) {
-    return Card(
-      elevation: 2,
-      color: backgroundColor ?? Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: borderColor != null
-            ? BorderSide(color: borderColor, width: 2)
-            : BorderSide.none,
-      ),
-      child: Padding(
-        padding: AppConstants.paddingAll16,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                color: textColor ?? Colors.grey[700],
-                fontWeight: FontWeight.w500,
-              ),
             ),
-            const SizedBox(height: AppConstants.spacingS),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: textColor ?? Colors.black,
-              ),
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: textColor?.withOpacity(0.7) ?? Colors.grey[600],
-                ),
-              ),
-            ],
+            Icon(Icons.arrow_forward_ios, color: color, size: 20),
           ],
         ),
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+  /// Finance Detail Card (for income/expense details)
+  Widget _buildFinanceDetailCard(
+    BuildContext context,
+    String label,
+    double amount,
+    String? subtitle,
+    Color color, {
+    bool isBold = false,
+  }) {
+    return Container(
+      padding: AppConstants.paddingAll16,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: AppConstants.borderRadius8,
+        border: isBold ? Border.all(color: color, width: 2) : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: color.withOpacity(0.8),
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(amount),
+            style: TextStyle(
+              fontSize: isBold ? 24 : 20,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+              color: color,
+            ),
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Saldo Card (highlighted)
+  Widget _buildSaldoCard(
+    BuildContext context,
+    double saldo,
+    String formula,
+  ) {
+    final isPositive = saldo >= 0;
+    final color = isPositive ? const Color(0xFF4CAF50) : const Color(0xFFE91E63);
+
+    return Container(
+      padding: AppConstants.paddingAll16,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: AppConstants.borderRadius12,
+        border: Border.all(color: color, width: 3),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Saldo (Gesamt)',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(saldo),
+                  style: TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  formula,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            isPositive ? Icons.trending_up : Icons.trending_down,
+            color: color,
+            size: 48,
+          ),
+        ],
+      ),
+    );
   }
 }
