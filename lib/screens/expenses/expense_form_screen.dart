@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../providers/file_storage_provider.dart';
+import '../../services/file_storage_service.dart';
 import '../../widgets/responsive_form_container.dart';
 import '../../extensions/context_extensions.dart';
 import '../../utils/route_helpers.dart';
@@ -32,6 +34,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   DateTime _selectedDate = DateTime.now();
   String? _selectedPaymentMethod;
   bool _reimbursed = false;
+  String? _receiptFilePath;
 
   bool _isLoading = false;
   bool _isDeleting = false;
@@ -76,6 +79,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         _referenceNumberController.text = expense.referenceNumber ?? '';
         _paidByController.text = expense.paidBy ?? '';
         _reimbursed = expense.reimbursed;
+        _receiptFilePath = expense.receiptFile;
         _selectedPaymentMethod = expense.paymentMethod;
         _notesController.text = expense.notes ?? '';
       });
@@ -107,6 +111,61 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       setState(() {
         _selectedDate = picked;
       });
+    }
+  }
+
+  Future<void> _uploadReceipt() async {
+    final currentEvent = ref.read(currentEventProvider);
+    if (currentEvent == null) return;
+
+    final fileStorage = ref.read(fileStorageServiceProvider);
+    final expenseId = widget.expenseId ?? 0; // Temporäre ID für neue Ausgaben
+
+    final filePath = await fileStorage.uploadReceipt(
+      eventId: currentEvent.id,
+      expenseId: expenseId,
+    );
+
+    if (filePath != null && mounted) {
+      setState(() {
+        _receiptFilePath = filePath;
+      });
+      context.showSuccess('Beleg hochgeladen');
+    }
+  }
+
+  Future<void> _deleteReceipt() async {
+    if (_receiptFilePath == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Beleg löschen?'),
+        content: const Text('Möchten Sie den Beleg wirklich löschen?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Löschen'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final fileStorage = ref.read(fileStorageServiceProvider);
+      final deleted = await fileStorage.deleteReceipt(_receiptFilePath!);
+
+      if (deleted && mounted) {
+        setState(() {
+          _receiptFilePath = null;
+        });
+        context.showSuccess('Beleg gelöscht');
+      }
     }
   }
 
@@ -143,6 +202,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
           receiptNumber: _receiptNumberController.text.isEmpty ? null : _receiptNumberController.text,
           referenceNumber: _referenceNumberController.text.isEmpty ? null : _referenceNumberController.text,
           paidBy: _paidByController.text.isEmpty ? null : _paidByController.text,
+          receiptFile: _receiptFilePath,
           reimbursed: _reimbursed,
           paymentMethod: _selectedPaymentMethod,
           notes: _notesController.text.isEmpty ? null : _notesController.text,
@@ -159,6 +219,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
           receiptNumber: _receiptNumberController.text.isEmpty ? null : _receiptNumberController.text,
           referenceNumber: _referenceNumberController.text.isEmpty ? null : _referenceNumberController.text,
           paidBy: _paidByController.text.isEmpty ? null : _paidByController.text,
+          receiptFile: _receiptFilePath,
           reimbursed: _reimbursed,
           paymentMethod: _selectedPaymentMethod,
           notes: _notesController.text.isEmpty ? null : _notesController.text,
@@ -479,6 +540,54 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                         });
                       },
                     ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacing),
+
+            // Receipt Upload
+            Card(
+              child: Padding(
+                padding: AppConstants.paddingAll16,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Beleg',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppConstants.spacingM),
+                    if (_receiptFilePath != null) ...[
+                      ListTile(
+                        leading: Icon(
+                          _receiptFilePath!.toLowerCase().endsWith('.pdf')
+                              ? Icons.picture_as_pdf
+                              : Icons.image,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        title: Text(_receiptFilePath!.split('/').last),
+                        subtitle: const Text('Beleg hochgeladen'),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: _deleteReceipt,
+                          tooltip: 'Beleg löschen',
+                        ),
+                      ),
+                    ] else ...[
+                      OutlinedButton.icon(
+                        onPressed: _uploadReceipt,
+                        icon: const Icon(Icons.upload_file),
+                        label: const Text('Beleg hochladen'),
+                      ),
+                      const SizedBox(height: AppConstants.spacingS),
+                      Text(
+                        'Erlaubt: JPG, PNG, PDF',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
                   ],
                 ),
               ),

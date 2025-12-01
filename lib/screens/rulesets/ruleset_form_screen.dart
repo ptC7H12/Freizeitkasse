@@ -1,10 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import '../../providers/ruleset_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../widgets/responsive_form_container.dart';
-
 import '../../extensions/context_extensions.dart';
 import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
@@ -92,6 +96,109 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       setState(() {
         _yamlError = e.toString();
       });
+    }
+  }
+
+  /// YAML von lokaler Datei importieren
+  Future<void> _importFromFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['yaml', 'yml'],
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final file = File(result.files.single.path!);
+      final content = await file.readAsString();
+
+      if (mounted) {
+        setState(() {
+          _yamlController.text = content;
+        });
+        _validateYaml();
+        context.showSuccess('YAML-Datei importiert');
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showError('Fehler beim Importieren: $e');
+      }
+    }
+  }
+
+  /// YAML von GitHub-URL importieren
+  Future<void> _importFromGitHub() async {
+    final urlController = TextEditingController();
+
+    final url = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('YAML von GitHub importieren'),
+        content: TextField(
+          controller: urlController,
+          decoration: const InputDecoration(
+            labelText: 'GitHub Raw URL',
+            hintText: 'https://raw.githubusercontent.com/...',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Abbrechen'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(urlController.text),
+            child: const Text('Importieren'),
+          ),
+        ],
+      ),
+    );
+
+    if (url == null || url.isEmpty) return;
+
+    try {
+      setState(() => _isLoading = true);
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          setState(() {
+            _yamlController.text = response.body;
+            _isLoading = false;
+          });
+          _validateYaml();
+          context.showSuccess('YAML von GitHub importiert');
+        }
+      } else {
+        throw Exception('HTTP ${response.statusCode}');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        context.showError('Fehler beim Importieren: $e');
+      }
+    }
+
+    urlController.dispose();
+  }
+
+  /// YAML als Datei exportieren
+  Future<void> _exportToFile() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final fileName = '${_nameController.text.replaceAll(' ', '_')}.yaml';
+      final file = File(path.join(dir.path, fileName));
+
+      await file.writeAsString(_yamlController.text);
+
+      if (mounted) {
+        context.showSuccess('Exportiert nach: ${file.path}');
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showError('Fehler beim Exportieren: $e');
+      }
     }
   }
 
@@ -265,6 +372,55 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       appBar: AppBar(
         title: Text(isEditing ? 'Regelwerk bearbeiten' : 'Neues Regelwerk'),
         actions: [
+          // Import/Export Menu
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              switch (value) {
+                case 'import_file':
+                  _importFromFile();
+                  break;
+                case 'import_github':
+                  _importFromGitHub();
+                  break;
+                case 'export':
+                  _exportToFile();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'import_file',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_upload),
+                    SizedBox(width: 8),
+                    Text('YAML importieren (Datei)'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'import_github',
+                child: Row(
+                  children: [
+                    Icon(Icons.cloud_download),
+                    SizedBox(width: 8),
+                    Text('YAML importieren (GitHub)'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'export',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_download),
+                    SizedBox(width: 8),
+                    Text('YAML exportieren'),
+                  ],
+                ),
+              ),
+            ],
+          ),
           if (isEditing)
             IconButton(
               icon: _isDeleting
