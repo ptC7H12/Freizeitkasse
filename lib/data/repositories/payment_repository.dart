@@ -42,6 +42,7 @@ class PaymentRepository {
     required double amount,
     required DateTime paymentDate,
     String? paymentMethod,
+    String? referenceNumber,
     String? notes,
   }) {
     return _db.into(_db.payments).insert(
@@ -52,6 +53,7 @@ class PaymentRepository {
             amount: amount,
             paymentDate: paymentDate,
             paymentMethod: Value(paymentMethod),
+            referenceNumber: Value(referenceNumber),
             notes: Value(notes),
           ),
         );
@@ -63,6 +65,7 @@ class PaymentRepository {
     double? amount,
     DateTime? paymentDate,
     String? paymentMethod,
+    String? referenceNumber,
     String? notes,
   }) {
     return _db.update(_db.payments).replace(
@@ -73,6 +76,8 @@ class PaymentRepository {
                 paymentDate != null ? Value(paymentDate) : const Value.absent(),
             paymentMethod:
                 paymentMethod != null ? Value(paymentMethod) : const Value.absent(),
+            referenceNumber:
+                referenceNumber != null ? Value(referenceNumber) : const Value.absent(),
             notes: notes != null ? Value(notes) : const Value.absent(),
             updatedAt: Value(DateTime.now()),
           ),

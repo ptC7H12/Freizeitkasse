@@ -86,6 +86,10 @@ class ExpenseRepository {
     String? paymentMethod,
     String? receiptNumber,
     String? vendor,
+    String? referenceNumber,
+    String? paidBy,
+    String? receiptFile,
+    bool reimbursed = false,
     String? notes,
   }) async {
     final companion = ExpensesCompanion(
@@ -97,6 +101,10 @@ class ExpenseRepository {
       paymentMethod: Value(paymentMethod),
       receiptNumber: Value(receiptNumber),
       vendor: Value(vendor),
+      referenceNumber: Value(referenceNumber),
+      paidBy: Value(paidBy),
+      receiptFile: Value(receiptFile),
+      reimbursed: Value(reimbursed),
       notes: Value(notes),
       isActive: const Value(true),
       createdAt: Value(DateTime.now()),
@@ -116,6 +124,10 @@ class ExpenseRepository {
     String? paymentMethod,
     String? receiptNumber,
     String? vendor,
+    String? referenceNumber,
+    String? paidBy,
+    String? receiptFile,
+    bool? reimbursed,
     String? notes,
   }) async {
     final existing = await getExpenseById(id);
@@ -132,6 +144,10 @@ class ExpenseRepository {
       paymentMethod: paymentMethod != null ? Value(paymentMethod) : const Value.absent(),
       receiptNumber: receiptNumber != null ? Value(receiptNumber) : const Value.absent(),
       vendor: vendor != null ? Value(vendor) : const Value.absent(),
+      referenceNumber: referenceNumber != null ? Value(referenceNumber) : const Value.absent(),
+      paidBy: paidBy != null ? Value(paidBy) : const Value.absent(),
+      receiptFile: receiptFile != null ? Value(receiptFile) : const Value.absent(),
+      reimbursed: reimbursed != null ? Value(reimbursed) : const Value.absent(),
       notes: notes != null ? Value(notes) : const Value.absent(),
       updatedAt: Value(DateTime.now()),
     );

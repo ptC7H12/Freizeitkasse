@@ -24,11 +24,14 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   final _descriptionController = TextEditingController();
   final _vendorController = TextEditingController();
   final _receiptNumberController = TextEditingController();
+  final _referenceNumberController = TextEditingController();
+  final _paidByController = TextEditingController();
   final _notesController = TextEditingController();
 
   String _selectedCategory = 'Verpflegung';
   DateTime _selectedDate = DateTime.now();
   String? _selectedPaymentMethod;
+  bool _reimbursed = false;
 
   bool _isLoading = false;
   bool _isDeleting = false;
@@ -70,6 +73,9 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         _descriptionController.text = expense.description ?? '';
         _vendorController.text = expense.vendor ?? '';
         _receiptNumberController.text = expense.receiptNumber ?? '';
+        _referenceNumberController.text = expense.referenceNumber ?? '';
+        _paidByController.text = expense.paidBy ?? '';
+        _reimbursed = expense.reimbursed;
         _selectedPaymentMethod = expense.paymentMethod;
         _notesController.text = expense.notes ?? '';
       });
@@ -82,6 +88,8 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     _descriptionController.dispose();
     _vendorController.dispose();
     _receiptNumberController.dispose();
+    _referenceNumberController.dispose();
+    _paidByController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -133,6 +141,9 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
           description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
           vendor: _vendorController.text.isEmpty ? null : _vendorController.text,
           receiptNumber: _receiptNumberController.text.isEmpty ? null : _receiptNumberController.text,
+          referenceNumber: _referenceNumberController.text.isEmpty ? null : _referenceNumberController.text,
+          paidBy: _paidByController.text.isEmpty ? null : _paidByController.text,
+          reimbursed: _reimbursed,
           paymentMethod: _selectedPaymentMethod,
           notes: _notesController.text.isEmpty ? null : _notesController.text,
         );
@@ -146,6 +157,9 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
           description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
           vendor: _vendorController.text.isEmpty ? null : _vendorController.text,
           receiptNumber: _receiptNumberController.text.isEmpty ? null : _receiptNumberController.text,
+          referenceNumber: _referenceNumberController.text.isEmpty ? null : _referenceNumberController.text,
+          paidBy: _paidByController.text.isEmpty ? null : _paidByController.text,
+          reimbursed: _reimbursed,
           paymentMethod: _selectedPaymentMethod,
           notes: _notesController.text.isEmpty ? null : _notesController.text,
         );
@@ -433,6 +447,37 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                         prefixIcon: Icon(Icons.receipt),
                         helperText: 'Rechnungs- oder Belegnummer',
                       ),
+                    ),
+                    const SizedBox(height: AppConstants.spacing),
+                    TextFormField(
+                      controller: _referenceNumberController,
+                      decoration: const InputDecoration(
+                        labelText: 'Referenznummer',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.receipt_long),
+                        helperText: 'Interne Referenz',
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacing),
+                    TextFormField(
+                      controller: _paidByController,
+                      decoration: const InputDecoration(
+                        labelText: 'Bezahlt von',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person),
+                        helperText: 'Wer hat die Ausgabe ausgelegt?',
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacing),
+                    SwitchListTile(
+                      title: const Text('Erstattet'),
+                      subtitle: const Text('Wurde die Ausgabe bereits erstattet?'),
+                      value: _reimbursed,
+                      onChanged: (value) {
+                        setState(() {
+                          _reimbursed = value;
+                        });
+                      },
                     ),
                   ],
                 ),
