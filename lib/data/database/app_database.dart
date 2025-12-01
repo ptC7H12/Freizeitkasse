@@ -33,17 +33,12 @@ class Participants extends Table {
   DateTimeColumn get birthDate => dateTime()();
   TextColumn get gender => text().withLength(max: 20).nullable()();
   TextColumn get street => text().withLength(max: 200).nullable()();
-  TextColumn get houseNumber => text().withLength(max: 20).nullable()();
   TextColumn get postalCode => text().withLength(max: 10).nullable()();
   TextColumn get city => text().withLength(max: 100).nullable()();
-  TextColumn get country => text().withLength(max: 100).nullable()();
   TextColumn get phone => text().withLength(max: 50).nullable()();
-  TextColumn get mobile => text().withLength(max: 50).nullable()();
   TextColumn get email => text().withLength(max: 100).nullable()();
   TextColumn get emergencyContactName => text().withLength(max: 200).nullable()();
   TextColumn get emergencyContactPhone => text().withLength(max: 50).nullable()();
-  TextColumn get medicalNotes => text().nullable()();
-  TextColumn get medicalInfo => text().nullable()();
   TextColumn get medications => text().nullable()();
   TextColumn get allergies => text().nullable()();
   TextColumn get dietaryRestrictions => text().nullable()();
@@ -241,7 +236,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   // ============================================================================
   // MIGRATION LOGIC (entspricht Alembic-Migrationen)
@@ -254,7 +249,12 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        // Migrations werden hier hinzugefügt wenn Schema sich ändert
+        // Migration von Version 2 zu 3: Entferne nicht benötigte Felder
+        if (from < 3) {
+          // Die Spalten houseNumber, country, mobile, medicalNotes, medicalInfo
+          // wurden entfernt. Drift wird diese automatisch löschen.
+          await m.recreateAllViews();
+        }
       },
     );
   }

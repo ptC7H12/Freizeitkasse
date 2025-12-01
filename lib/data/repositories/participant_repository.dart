@@ -85,17 +85,12 @@ class ParticipantRepository {
     required DateTime birthDate,
     String? gender,
     String? street,
-    String? houseNumber,
     String? postalCode,
     String? city,
-    String? country,
     String? phone,
-    String? mobile,
     String? email,
     String? emergencyContactName,
     String? emergencyContactPhone,
-    String? medicalNotes,
-    String? medicalInfo,
     String? medications,
     String? allergies,
     String? dietaryRestrictions,
@@ -123,17 +118,12 @@ class ParticipantRepository {
       birthDate: birthDate,
       gender: Value(gender),
       street: Value(street),
-      houseNumber: Value(houseNumber),
       postalCode: Value(postalCode),
       city: Value(city),
-      country: Value(country),
       phone: Value(phone),
-      mobile: Value(mobile),
       email: Value(email),
       emergencyContactName: Value(emergencyContactName),
       emergencyContactPhone: Value(emergencyContactPhone),
-      medicalNotes: Value(medicalNotes),
-      medicalInfo: Value(medicalInfo),
       medications: Value(medications),
       allergies: Value(allergies),
       dietaryRestrictions: Value(dietaryRestrictions),
@@ -171,9 +161,11 @@ class ParticipantRepository {
     String? email,
     String? emergencyContactName,
     String? emergencyContactPhone,
-    String? medicalNotes,
+    String? medications,
     String? allergies,
     String? dietaryRestrictions,
+    String? swimAbility,
+    String? notes,
     bool? bildungUndTeilhabe,
     int? roleId,
     int? familyId,
@@ -220,12 +212,16 @@ class ParticipantRepository {
           emergencyContactName != null ? Value(emergencyContactName) : const Value.absent(),
       emergencyContactPhone:
           emergencyContactPhone != null ? Value(emergencyContactPhone) : const Value.absent(),
-      medicalNotes:
-          medicalNotes != null ? Value(medicalNotes) : const Value.absent(),
+      medications:
+          medications != null ? Value(medications) : const Value.absent(),
       allergies: allergies != null ? Value(allergies) : const Value.absent(),
       dietaryRestrictions: dietaryRestrictions != null
           ? Value(dietaryRestrictions)
           : const Value.absent(),
+      swimAbility:
+          swimAbility != null ? Value(swimAbility) : const Value.absent(),
+      notes:
+          notes != null ? Value(notes) : const Value.absent(),
       bildungUndTeilhabe: bildungUndTeilhabe != null
           ? Value(bildungUndTeilhabe)
           : const Value.absent(),
