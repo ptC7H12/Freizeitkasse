@@ -4,6 +4,7 @@ import '../../providers/current_event_provider.dart';
 import '../../providers/participant_provider.dart';
 import '../../providers/pdf_export_provider.dart';
 import '../../providers/database_provider.dart';
+import '../../providers/participant_excel_provider.dart';
 import '../../data/database/app_database.dart';
 import '../../utils/date_utils.dart';
 import '../../utils/route_helpers.dart';
@@ -290,6 +291,97 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
     );
   }
 
+  /// Excel Export
+  Future<void> _exportToExcel(List<Participant> participants) async {
+    try {
+      final currentEvent = ref.read(currentEventProvider);
+      if (currentEvent == null) return;
+
+      final excelService = ref.read(participantExcelServiceProvider);
+      final file = await excelService.exportParticipants(
+        participants: participants,
+        eventName: currentEvent.name,
+      );
+
+      if (mounted) {
+        context.showSuccess('Excel exportiert: ${file.path}');
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showError('Fehler beim Exportieren: $e');
+      }
+    }
+  }
+
+  /// Excel Import
+  Future<void> _importFromExcel() async {
+    try {
+      final currentEvent = ref.read(currentEventProvider);
+      if (currentEvent == null) {
+        if (mounted) {
+          context.showError('Kein Event ausgewählt');
+        }
+        return;
+      }
+
+      final excelService = ref.read(participantExcelServiceProvider);
+      final result = await excelService.importParticipants(
+        eventId: currentEvent.id,
+      );
+
+      if (mounted) {
+        if (result.success) {
+          context.showSuccess(result.message);
+
+          // Zeige Fehler-Details falls vorhanden
+          if (result.errors.isNotEmpty) {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Import-Fehler'),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: result.errors.map((e) => Text('• $e')).toList(),
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          }
+        } else {
+          context.showError(result.message);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showError('Fehler beim Importieren: $e');
+      }
+    }
+  }
+
+  /// Download Import Template
+  Future<void> _downloadTemplate() async {
+    try {
+      final excelService = ref.read(participantExcelServiceProvider);
+      final file = await excelService.createImportTemplate();
+
+      if (mounted) {
+        context.showSuccess('Vorlage erstellt: ${file.path}');
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showError('Fehler beim Erstellen der Vorlage: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final participantsAsync = ref.watch(participantsProvider);
@@ -306,17 +398,60 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
             onPressed: _showFilterDialog,
             tooltip: 'Filter',
           ),
-          IconButton(
-            icon: const Icon(Icons.upload_file),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ParticipantImportScreen(),
-                ),
-              );
+          // Excel Import/Export Menu
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.table_chart),
+            tooltip: 'Excel Import/Export',
+            onSelected: (value) {
+              final participantsValue = ref.read(participantsProvider).value;
+              switch (value) {
+                case 'import':
+                  _importFromExcel();
+                  break;
+                case 'export':
+                  if (participantsValue != null && participantsValue.isNotEmpty) {
+                    _exportToExcel(participantsValue);
+                  } else {
+                    context.showError('Keine Teilnehmer zum Exportieren');
+                  }
+                  break;
+                case 'template':
+                  _downloadTemplate();
+                  break;
+              }
             },
-            tooltip: 'Excel importieren',
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'import',
+                child: Row(
+                  children: [
+                    Icon(Icons.upload_file),
+                    SizedBox(width: 8),
+                    Text('Excel importieren'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'export',
+                child: Row(
+                  children: [
+                    Icon(Icons.download),
+                    SizedBox(width: 8),
+                    Text('Excel exportieren'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'template',
+                child: Row(
+                  children: [
+                    Icon(Icons.description),
+                    SizedBox(width: 8),
+                    Text('Vorlage herunterladen'),
+                  ],
+                ),
+              ),
+            ],
           ),
           IconButton(
             icon: const Icon(Icons.picture_as_pdf),

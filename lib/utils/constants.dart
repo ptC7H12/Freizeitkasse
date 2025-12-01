@@ -149,6 +149,18 @@ class AppConstants {
     'Sonstige',
   ];
 
+  // ===== SCHWIMMFÄHIGKEITEN =====
+
+  /// Standard Schwimmfähigkeiten
+  static const List<String> swimAbilities = [
+    'Nichtschwimmer',
+    'Seepferdchen',
+    'Bronze',
+    'Silber',
+    'Gold',
+    'Rettungsschwimmer',
+  ];
+
   // ===== VALIDIERUNGS-KONSTANTEN =====
 
   /// Minimale Passwort-Länge (falls später benötigt)

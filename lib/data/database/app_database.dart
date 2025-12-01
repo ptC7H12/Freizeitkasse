@@ -88,6 +88,7 @@ class Payments extends Table {
   RealColumn get amount => real()();
   DateTimeColumn get paymentDate => dateTime()();
   TextColumn get paymentMethod => text().withLength(max: 50).nullable()();
+  TextColumn get referenceNumber => text().withLength(max: 100).nullable()();
   TextColumn get notes => text().nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
@@ -105,6 +106,10 @@ class Expenses extends Table {
   TextColumn get receiptNumber => text().withLength(max: 100).nullable()();
   TextColumn get vendor => text().withLength(max: 200).nullable()();
   TextColumn get paymentMethod => text().withLength(max: 50).nullable()();
+  TextColumn get referenceNumber => text().withLength(max: 100).nullable()();
+  TextColumn get paidBy => text().withLength(max: 200).nullable()();
+  TextColumn get receiptFile => text().nullable()();
+  BoolColumn get reimbursed => boolean().withDefault(const Constant(false))();
   TextColumn get notes => text().nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

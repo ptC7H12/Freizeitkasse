@@ -33,6 +33,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
 
   // Form Controllers
   final _amountController = TextEditingController();
+  final _referenceNumberController = TextEditingController();
   final _notesController = TextEditingController();
 
   // Form State
@@ -72,6 +73,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
           _amountController.text = payment.amount.toStringAsFixed(2);
           _paymentDate = payment.paymentDate;
           _paymentMethod = payment.paymentMethod;
+          _referenceNumberController.text = payment.referenceNumber ?? '';
           _notesController.text = payment.notes ?? '';
           _selectedParticipantId = payment.participantId;
           _selectedFamilyId = payment.familyId;
@@ -90,6 +92,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
   @override
   void dispose() {
     _amountController.dispose();
+    _referenceNumberController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -219,6 +222,18 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               _buildFamilyDropdown(),
 
             const SizedBox(height: AppConstants.spacingL),
+
+            // Referenznummer
+            TextFormField(
+              controller: _referenceNumberController,
+              decoration: const InputDecoration(
+                labelText: 'Referenznummer / Verwendungszweck',
+                prefixIcon: Icon(Icons.receipt_long),
+                hintText: 'z.B. Rechnung-2024-001',
+              ),
+            ),
+
+            const SizedBox(height: AppConstants.spacing),
 
             // Notizen
             TextFormField(
@@ -370,6 +385,9 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
           amount: amount,
           paymentDate: _paymentDate,
           paymentMethod: _paymentMethod,
+          referenceNumber: _referenceNumberController.text.isNotEmpty
+              ? _referenceNumberController.text
+              : null,
           notes: _notesController.text.isNotEmpty ? _notesController.text : null,
         );
 
@@ -384,6 +402,9 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
           amount: amount,
           paymentDate: _paymentDate,
           paymentMethod: _paymentMethod,
+          referenceNumber: _referenceNumberController.text.isNotEmpty
+              ? _referenceNumberController.text
+              : null,
           notes: _notesController.text.isNotEmpty ? _notesController.text : null,
         );
 
