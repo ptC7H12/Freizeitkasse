@@ -1235,30 +1235,310 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
   // ========== TAB 3: ZUSCHÜSSE ==========
   Widget _buildSubsidiesTab(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
+    return StreamBuilder<List<Participant>>(
+      stream: (database.select(database.participants)
+            ..where((tbl) => tbl.eventId.equals(eventId))
+            ..where((tbl) => tbl.isActive.equals(true)))
+          .watch(),
+      builder: (context, participantSnapshot) {
+        if (!participantSnapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return StreamBuilder<List<Role>>(
+          stream: (database.select(database.roles)
+                ..where((tbl) => tbl.eventId.equals(eventId)))
+              .watch(),
+          builder: (context, roleSnapshot) {
+            if (!roleSnapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final participants = participantSnapshot.data!;
+            final roles = roleSnapshot.data!;
+
+            // Nur Teilnehmer OHNE manualPriceOverride (regelwerk-basierte Preise)
+            final rulesetParticipants = participants
+                .where((p) => p.manualPriceOverride == null && p.discountPercent > 0)
+                .toList();
+
+            return _buildSubsidiesContent(context, rulesetParticipants, roles);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSubsidiesContent(BuildContext context, List<Participant> participants, List<Role> roles) {
+    // Helper: Berechne Zuschuss-Betrag
+    double calculateSubsidy(Participant p) {
+      if (p.discountPercent <= 0) return 0;
+      // Subsidy = calculatedPrice * (discountPercent / (100 - discountPercent))
+      return p.calculatedPrice * (p.discountPercent / (100 - p.discountPercent));
+    }
+
+    // Bereich 1: Zuschüsse nach Rolle
+    final Map<int?, List<Participant>> byRole = {};
+    for (final p in participants) {
+      if (!byRole.containsKey(p.roleId)) {
+        byRole[p.roleId] = [];
+      }
+      byRole[p.roleId]!.add(p);
+    }
+
+    // Bereich 2: Zuschüsse nach Rabatttyp
+    final Map<String, List<Participant>> byDiscountType = {};
+    for (final p in participants) {
+      String discountType = 'Sonstige';
+
+      if (p.bildungUndTeilhabe) {
+        discountType = 'Bildung & Teilhabe';
+      } else if (p.discountReason != null && p.discountReason!.isNotEmpty) {
+        discountType = p.discountReason!;
+      }
+
+      if (!byDiscountType.containsKey(discountType)) {
+        byDiscountType[discountType] = [];
+      }
+      byDiscountType[discountType]!.add(p);
+    }
+
     return ListView(
       padding: AppConstants.paddingAll16,
       children: [
+        // Bereich 1: Zuschüsse nach Rolle
         Card(
           child: Padding(
             padding: AppConstants.paddingAll16,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    Icon(Icons.card_giftcard, color: const Color(0xFF4CAF50), size: 24),
-                    const SizedBox(width: AppConstants.spacingS),
-                    const Text(
+                    Icon(Icons.groups, color: Color(0xFF2196F3), size: 20),
+                    SizedBox(width: AppConstants.spacingS),
+                    Text(
                       'Zuschüsse nach Rolle',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppConstants.spacing),
-                const Text('Zuschüsse-Übersicht wird in Kürze implementiert.'),
+
+                if (byRole.isEmpty)
+                  const Text(
+                    'Keine Zuschüsse nach Rolle gefunden',
+                    style: TextStyle(color: Colors.grey),
+                  )
+                else
+                  DataTable(
+                    columnSpacing: 24,
+                    headingRowColor: MaterialStateProperty.all(Colors.grey[100]),
+                    columns: const [
+                      DataColumn(label: Text('Rolle', style: TextStyle(fontWeight: FontWeight.bold))),
+                      DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                      DataColumn(label: Text('Gesamtrabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                    ],
+                    rows: byRole.entries.map((entry) {
+                      final roleId = entry.key;
+                      final roleParticipants = entry.value;
+
+                      String roleName = 'Teilnehmer (keine Rolle)';
+                      if (roleId != null) {
+                        final role = roles.firstWhere(
+                          (r) => r.id == roleId,
+                          orElse: () => roles.first,
+                        );
+                        roleName = role.displayName;
+                      }
+
+                      final totalSubsidy = roleParticipants.fold<double>(
+                        0.0,
+                        (sum, p) => sum + calculateSubsidy(p),
+                      );
+
+                      return DataRow(
+                        cells: [
+                          DataCell(Text(roleName)),
+                          DataCell(Text('${roleParticipants.length}')),
+                          DataCell(
+                            Text(
+                              NumberFormat.currency(locale: 'de_DE', symbol: '€').format(totalSubsidy),
+                              style: const TextStyle(
+                                color: Color(0xFF4CAF50),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppConstants.spacing),
+
+        // Bereich 2: Zuschüsse nach Rabatttyp
+        Card(
+          child: Padding(
+            padding: AppConstants.paddingAll16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.discount, color: Color(0xFFFF9800), size: 20),
+                    SizedBox(width: AppConstants.spacingS),
+                    Text(
+                      'Zuschüsse nach Rabatttyp',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacing),
+
+                if (byDiscountType.isEmpty)
+                  const Text(
+                    'Keine Zuschüsse nach Rabatttyp gefunden',
+                    style: TextStyle(color: Colors.grey),
+                  )
+                else
+                  DataTable(
+                    columnSpacing: 24,
+                    headingRowColor: MaterialStateProperty.all(Colors.grey[100]),
+                    columns: const [
+                      DataColumn(label: Text('Rabatttyp', style: TextStyle(fontWeight: FontWeight.bold))),
+                      DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                      DataColumn(label: Text('Durchschn. Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                      DataColumn(label: Text('Gesamtrabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                    ],
+                    rows: byDiscountType.entries.map((entry) {
+                      final discountType = entry.key;
+                      final discountParticipants = entry.value;
+
+                      final totalSubsidy = discountParticipants.fold<double>(
+                        0.0,
+                        (sum, p) => sum + calculateSubsidy(p),
+                      );
+
+                      final avgDiscountPercent = discountParticipants.fold<double>(
+                        0.0,
+                        (sum, p) => sum + p.discountPercent,
+                      ) / discountParticipants.length;
+
+                      return DataRow(
+                        cells: [
+                          DataCell(
+                            SizedBox(
+                              width: 150,
+                              child: Text(
+                                discountType,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                          DataCell(Text('${discountParticipants.length}')),
+                          DataCell(Text('${avgDiscountPercent.toStringAsFixed(1)}%')),
+                          DataCell(
+                            Text(
+                              NumberFormat.currency(locale: 'de_DE', symbol: '€').format(totalSubsidy),
+                              style: const TextStyle(
+                                color: Color(0xFFFF9800),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppConstants.spacing),
+
+        // Zusammenfassung
+        Card(
+          color: const Color(0xFFF5F5F5),
+          child: Padding(
+            padding: AppConstants.paddingAll16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.summarize, color: Color(0xFF607D8B), size: 20),
+                    SizedBox(width: AppConstants.spacingS),
+                    Text(
+                      'Zusammenfassung',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacing),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Gesamt-Teilnehmer mit Zuschuss:',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      '${participants.length}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2196F3),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacingS),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Gesamt-Zuschüsse:',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      NumberFormat.currency(locale: 'de_DE', symbol: '€').format(
+                        participants.fold<double>(0.0, (sum, p) => sum + calculateSubsidy(p)),
+                      ),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4CAF50),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacing),
+                const Divider(),
+                const SizedBox(height: AppConstants.spacingXs),
+                const Text(
+                  'Hinweis: Nur regelwerk-basierte Zuschüsse werden angezeigt. Manuelle Preisüberschreibungen sind ausgeschlossen.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
               ],
             ),
           ),
