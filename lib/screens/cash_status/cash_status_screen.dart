@@ -13,6 +13,29 @@ import '../../data/database/app_database.dart';
 import '../../utils/constants.dart';
 import '../../extensions/context_extensions.dart';
 
+// Unified Transaction class für Transaktionshistorie
+class Transaction {
+  final int id;
+  final DateTime date;
+  final String type; // 'Zahlung', 'Einnahme', 'Ausgabe'
+  final String? reference;
+  final String description;
+  final String? participantOrFamily;
+  final double amount; // Positive für Einnahmen, Negativ für Ausgaben
+  final double runningBalance; // Laufender Saldo
+
+  Transaction({
+    required this.id,
+    required this.date,
+    required this.type,
+    this.reference,
+    required this.description,
+    this.participantOrFamily,
+    required this.amount,
+    required this.runningBalance,
+  });
+}
+
 class CashStatusScreen extends ConsumerStatefulWidget {
   const CashStatusScreen({super.key});
 
@@ -23,15 +46,27 @@ class CashStatusScreen extends ConsumerStatefulWidget {
 class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  // Filter für Transaktionshistorie
+  DateTime? _startDateFilter;
+  DateTime? _endDateFilter;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchText = '';
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _searchController.addListener(() {
+      setState(() {
+        _searchText = _searchController.text.toLowerCase();
+      });
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -738,9 +773,333 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
   // ========== TAB 2: TRANSAKTIONSHISTORIE ==========
   Widget _buildTransactionsTab(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
+    return StreamBuilder<List<Payment>>(
+      stream: (database.select(database.payments)
+            ..where((tbl) => tbl.eventId.equals(eventId))
+            ..where((tbl) => tbl.isActive.equals(true)))
+          .watch(),
+      builder: (context, paymentSnapshot) {
+        if (!paymentSnapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return StreamBuilder<List<Income>>(
+          stream: (database.select(database.incomes)
+                ..where((tbl) => tbl.eventId.equals(eventId))
+                ..where((tbl) => tbl.isActive.equals(true)))
+              .watch(),
+          builder: (context, incomeSnapshot) {
+            if (!incomeSnapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            return StreamBuilder<List<Expense>>(
+              stream: (database.select(database.expenses)
+                    ..where((tbl) => tbl.eventId.equals(eventId))
+                    ..where((tbl) => tbl.isActive.equals(true)))
+                  .watch(),
+              builder: (context, expenseSnapshot) {
+                if (!expenseSnapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                return StreamBuilder<List<Participant>>(
+                  stream: (database.select(database.participants)
+                        ..where((tbl) => tbl.eventId.equals(eventId))
+                        ..where((tbl) => tbl.isActive.equals(true)))
+                      .watch(),
+                  builder: (context, participantSnapshot) {
+                    if (!participantSnapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    return StreamBuilder<List<Family>>(
+                      stream: (database.select(database.families)
+                            ..where((tbl) => tbl.eventId.equals(eventId)))
+                          .watch(),
+                      builder: (context, familySnapshot) {
+                        if (!familySnapshot.hasData) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+
+                        // Daten zusammenführen und Transaction-Objekte erstellen
+                        final transactions = _buildTransactionList(
+                          paymentSnapshot.data!,
+                          incomeSnapshot.data!,
+                          expenseSnapshot.data!,
+                          participantSnapshot.data!,
+                          familySnapshot.data!,
+                        );
+
+                        return _buildTransactionHistoryContent(context, transactions);
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  List<Transaction> _buildTransactionList(
+    List<Payment> payments,
+    List<Income> incomes,
+    List<Expense> expenses,
+    List<Participant> participants,
+    List<Family> families,
+  ) {
+    final List<Transaction> transactions = [];
+
+    // Helper: Finde Teilnehmer-Name
+    String? getParticipantName(int? participantId) {
+      if (participantId == null) return null;
+      final participant = participants.firstWhere(
+        (p) => p.id == participantId,
+        orElse: () => participants.first,
+      );
+      return '${participant.firstName} ${participant.lastName}';
+    }
+
+    // Helper: Finde Familien-Name
+    String? getFamilyName(int? familyId) {
+      if (familyId == null) return null;
+      final family = families.firstWhere(
+        (f) => f.id == familyId,
+        orElse: () => families.first,
+      );
+      return family.familyName;
+    }
+
+    // 1. Zahlungseingänge hinzufügen (positive Beträge)
+    for (final payment in payments) {
+      String? participantOrFamily;
+      if (payment.participantId != null) {
+        participantOrFamily = getParticipantName(payment.participantId);
+      } else if (payment.familyId != null) {
+        participantOrFamily = 'Familie ${getFamilyName(payment.familyId)}';
+      }
+
+      transactions.add(Transaction(
+        id: payment.id,
+        date: payment.paymentDate,
+        type: 'Zahlung',
+        reference: payment.referenceNumber,
+        description: payment.notes ?? payment.paymentMethod ?? 'Zahlung',
+        participantOrFamily: participantOrFamily,
+        amount: payment.amount,
+        runningBalance: 0, // Wird später berechnet
+      ));
+    }
+
+    // 2. Sonstige Einnahmen hinzufügen (positive Beträge)
+    for (final income in incomes) {
+      transactions.add(Transaction(
+        id: income.id,
+        date: income.incomeDate,
+        type: 'Einnahme',
+        reference: income.referenceNumber,
+        description: income.description ?? income.category,
+        participantOrFamily: income.source,
+        amount: income.amount,
+        runningBalance: 0, // Wird später berechnet
+      ));
+    }
+
+    // 3. Ausgaben hinzufügen (negative Beträge)
+    for (final expense in expenses) {
+      transactions.add(Transaction(
+        id: expense.id,
+        date: expense.expenseDate,
+        type: 'Ausgabe',
+        reference: expense.receiptNumber ?? expense.referenceNumber,
+        description: expense.description ?? expense.category,
+        participantOrFamily: expense.vendor ?? expense.paidBy,
+        amount: -expense.amount, // Negativ!
+        runningBalance: 0, // Wird später berechnet
+      ));
+    }
+
+    // Nach Datum sortieren
+    transactions.sort((a, b) => a.date.compareTo(b.date));
+
+    // Laufenden Saldo berechnen
+    double runningBalance = 0;
+    final List<Transaction> transactionsWithBalance = [];
+    for (final transaction in transactions) {
+      runningBalance += transaction.amount;
+      transactionsWithBalance.add(Transaction(
+        id: transaction.id,
+        date: transaction.date,
+        type: transaction.type,
+        reference: transaction.reference,
+        description: transaction.description,
+        participantOrFamily: transaction.participantOrFamily,
+        amount: transaction.amount,
+        runningBalance: runningBalance,
+      ));
+    }
+
+    return transactionsWithBalance;
+  }
+
+  Widget _buildTransactionHistoryContent(BuildContext context, List<Transaction> allTransactions) {
+    // Filter anwenden
+    List<Transaction> filteredTransactions = allTransactions;
+
+    // Datumsfilter
+    if (_startDateFilter != null) {
+      filteredTransactions = filteredTransactions
+          .where((t) => t.date.isAfter(_startDateFilter!) || t.date.isAtSameMomentAs(_startDateFilter!))
+          .toList();
+    }
+    if (_endDateFilter != null) {
+      filteredTransactions = filteredTransactions
+          .where((t) => t.date.isBefore(_endDateFilter!) || t.date.isAtSameMomentAs(_endDateFilter!))
+          .toList();
+    }
+
+    // Suchfilter
+    if (_searchText.isNotEmpty) {
+      filteredTransactions = filteredTransactions.where((t) {
+        final searchLower = _searchText.toLowerCase();
+        return t.type.toLowerCase().contains(searchLower) ||
+            (t.reference?.toLowerCase().contains(searchLower) ?? false) ||
+            t.description.toLowerCase().contains(searchLower) ||
+            (t.participantOrFamily?.toLowerCase().contains(searchLower) ?? false);
+      }).toList();
+    }
+
     return ListView(
       padding: AppConstants.paddingAll16,
       children: [
+        // Filter-Bereich
+        Card(
+          child: Padding(
+            padding: AppConstants.paddingAll16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.filter_list, color: Color(0xFF2196F3), size: 20),
+                    SizedBox(width: AppConstants.spacingS),
+                    Text(
+                      'Filter',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacing),
+
+                // Suchfeld
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Suchen...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchText.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacingS),
+
+                // Datumsfilter
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: _startDateFilter ?? DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                            locale: const Locale('de', 'DE'),
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              _startDateFilter = picked;
+                            });
+                          }
+                        },
+                        icon: const Icon(Icons.calendar_today, size: 18),
+                        label: Text(
+                          _startDateFilter != null
+                              ? 'Von: ${DateFormat('dd.MM.yyyy').format(_startDateFilter!)}'
+                              : 'Von Datum',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppConstants.spacingS),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: _endDateFilter ?? DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                            locale: const Locale('de', 'DE'),
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              _endDateFilter = picked;
+                            });
+                          }
+                        },
+                        icon: const Icon(Icons.calendar_today, size: 18),
+                        label: Text(
+                          _endDateFilter != null
+                              ? 'Bis: ${DateFormat('dd.MM.yyyy').format(_endDateFilter!)}'
+                              : 'Bis Datum',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Filter zurücksetzen
+                if (_startDateFilter != null || _endDateFilter != null || _searchText.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppConstants.spacingS),
+                    child: TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _startDateFilter = null;
+                          _endDateFilter = null;
+                          _searchController.clear();
+                        });
+                      },
+                      icon: const Icon(Icons.clear_all, size: 18),
+                      label: const Text('Alle Filter zurücksetzen'),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppConstants.spacing),
+
+        // Transaktionsliste
         Card(
           child: Padding(
             padding: AppConstants.paddingAll16,
@@ -749,19 +1108,123 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
               children: [
                 Row(
                   children: [
-                    Icon(Icons.history, color: const Color(0xFF2196F3), size: 24),
+                    const Icon(Icons.history, color: Color(0xFF2196F3), size: 20),
                     const SizedBox(width: AppConstants.spacingS),
                     const Text(
                       'Alle Transaktionen',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${filteredTransactions.length} Transaktionen',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppConstants.spacing),
-                const Text('Transaktionshistorie wird in Kürze implementiert.'),
+
+                if (filteredTransactions.isEmpty)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: Text(
+                        'Keine Transaktionen gefunden',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  )
+                else
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: DataTable(
+                      columnSpacing: 16,
+                      headingRowColor: MaterialStateProperty.all(Colors.grey[100]),
+                      columns: const [
+                        DataColumn(label: Text('Datum', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Typ', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Referenz', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Beschreibung', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Teilnehmer/Familie', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Betrag', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                        DataColumn(label: Text('Saldo', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                      ],
+                      rows: filteredTransactions.map((transaction) {
+                        final Color typeColor = transaction.type == 'Zahlung'
+                            ? const Color(0xFF2196F3)
+                            : transaction.type == 'Einnahme'
+                                ? const Color(0xFF4CAF50)
+                                : const Color(0xFFE91E63);
+
+                        final Color amountColor = transaction.amount >= 0
+                            ? const Color(0xFF4CAF50)
+                            : const Color(0xFFE91E63);
+
+                        final Color saldoColor = transaction.runningBalance >= 0
+                            ? const Color(0xFF4CAF50)
+                            : const Color(0xFFE91E63);
+
+                        return DataRow(
+                          cells: [
+                            DataCell(Text(DateFormat('dd.MM.yyyy').format(transaction.date))),
+                            DataCell(
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: typeColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  transaction.type,
+                                  style: TextStyle(
+                                    color: typeColor,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            DataCell(Text(transaction.reference ?? '-')),
+                            DataCell(
+                              SizedBox(
+                                width: 200,
+                                child: Text(
+                                  transaction.description,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                ),
+                              ),
+                            ),
+                            DataCell(Text(transaction.participantOrFamily ?? '-')),
+                            DataCell(
+                              Text(
+                                NumberFormat.currency(locale: 'de_DE', symbol: '€').format(transaction.amount),
+                                style: TextStyle(
+                                  color: amountColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                NumberFormat.currency(locale: 'de_DE', symbol: '€').format(transaction.runningBalance),
+                                style: TextStyle(
+                                  color: saldoColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
               ],
             ),
           ),
