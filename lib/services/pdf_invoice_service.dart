@@ -317,7 +317,7 @@ class PdfInvoiceService {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text('${participant.firstName} ${participant.lastName}'),
-        if (participant.street != null) pw.Text('${participant.street}${participant.houseNumber != null ? " ${participant.houseNumber}" : ""}'),
+        if (participant.street != null) pw.Text(participant.street!),
         if (participant.postalCode != null && participant.city != null)
           pw.Text('${participant.postalCode} ${participant.city}'),
       ],
