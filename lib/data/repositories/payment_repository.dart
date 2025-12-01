@@ -53,7 +53,7 @@ class PaymentRepository {
             amount: amount,
             paymentDate: paymentDate,
             paymentMethod: Value(paymentMethod),
-            referenceNumber: Value(referenceNumber),
+            // TODO: Aktivieren nach build_runner: referenceNumber: Value(referenceNumber),
             notes: Value(notes),
           ),
         );
@@ -76,8 +76,8 @@ class PaymentRepository {
                 paymentDate != null ? Value(paymentDate) : const Value.absent(),
             paymentMethod:
                 paymentMethod != null ? Value(paymentMethod) : const Value.absent(),
-            referenceNumber:
-                referenceNumber != null ? Value(referenceNumber) : const Value.absent(),
+            // TODO: Aktivieren nach build_runner:
+            // referenceNumber: referenceNumber != null ? Value(referenceNumber) : const Value.absent(),
             notes: notes != null ? Value(notes) : const Value.absent(),
             updatedAt: Value(DateTime.now()),
           ),
