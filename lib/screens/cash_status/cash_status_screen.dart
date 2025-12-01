@@ -6,16 +6,37 @@ import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/income_provider.dart';
+import '../../providers/payment_provider.dart';
+import '../../providers/participant_provider.dart';
 import '../../providers/pdf_export_provider.dart';
 import '../../data/database/app_database.dart';
 import '../../utils/constants.dart';
 import '../../extensions/context_extensions.dart';
 
-class CashStatusScreen extends ConsumerWidget {
+class CashStatusScreen extends ConsumerStatefulWidget {
   const CashStatusScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CashStatusScreen> createState() => _CashStatusScreenState();
+}
+
+class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentEvent = ref.watch(currentEventProvider);
     final database = ref.watch(databaseProvider);
 
@@ -71,28 +92,24 @@ class CashStatusScreen extends ConsumerWidget {
             tooltip: 'PDF Export',
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(icon: Icon(Icons.analytics), text: 'Übersicht'),
+            Tab(icon: Icon(Icons.history), text: 'Transaktionen'),
+            Tab(icon: Icon(Icons.card_giftcard), text: 'Zuschüsse'),
+          ],
+        ),
       ),
-      body: ListView(
-        padding: AppConstants.paddingAll16,
+      body: TabBarView(
+        controller: _tabController,
         children: [
-          // Summary Card
-          _buildSummaryCard(context, ref, currentEvent.id),
-          const SizedBox(height: AppConstants.spacingL),
-
-          // Income vs Expense Chart
-          _buildIncomeExpenseChart(context, ref, currentEvent.id),
-          const SizedBox(height: AppConstants.spacingL),
-
-          // Expense by Category Chart
-          _buildExpenseByCategoryChart(context, ref, currentEvent.id),
-          const SizedBox(height: AppConstants.spacingL),
-
-          // Income by Source Chart
-          _buildIncomeBySourceChart(context, ref, currentEvent.id),
-          const SizedBox(height: AppConstants.spacingL),
-
-          // Detailed Breakdown
-          _buildDetailedBreakdown(context, ref, database, currentEvent.id),
+          // Tab 1: Übersicht
+          _buildOverviewTab(context, ref, database, currentEvent.id),
+          // Tab 2: Transaktionshistorie
+          _buildTransactionsTab(context, ref, database, currentEvent.id),
+          // Tab 3: Zuschüsse
+          _buildSubsidiesTab(context, ref, database, currentEvent.id),
         ],
       ),
     );
@@ -676,6 +693,169 @@ class CashStatusScreen extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  // ========== TAB 1: ÜBERSICHT ==========
+  Widget _buildOverviewTab(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
+    return ListView(
+      padding: AppConstants.paddingAll16,
+      children: [
+        // Bereich 1: SOLL-Werte
+        _buildSectionCard(
+          context,
+          'Zu erwartende Werte (SOLL)',
+          Icons.request_quote,
+          const Color(0xFF2196F3),
+          _buildSollSection(context, ref, database, eventId),
+        ),
+        const SizedBox(height: AppConstants.spacing),
+
+        // Bereich 2: IST-Werte
+        _buildSectionCard(
+          context,
+          'Getätigte Zahlungen (IST) - Aktueller Stand',
+          Icons.check_circle,
+          const Color(0xFF4CAF50),
+          _buildIstSection(context, ref, database, eventId),
+        ),
+        const SizedBox(height: AppConstants.spacing),
+
+        // Bereich 3: DIFFERENZEN
+        _buildSectionCard(
+          context,
+          'Differenzen (SOLL - IST)',
+          Icons.compare_arrows,
+          const Color(0xFFFF9800),
+          _buildDifferenzenSection(context, ref, database, eventId),
+        ),
+        const SizedBox(height: AppConstants.spacing),
+
+        // Bereich 4: Ausgaben nach Kategorie
+        _buildExpensesByCategorySection(context, ref),
+      ],
+    );
+  }
+
+  // ========== TAB 2: TRANSAKTIONSHISTORIE ==========
+  Widget _buildTransactionsTab(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
+    return ListView(
+      padding: AppConstants.paddingAll16,
+      children: [
+        Card(
+          child: Padding(
+            padding: AppConstants.paddingAll16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.history, color: const Color(0xFF2196F3), size: 24),
+                    const SizedBox(width: AppConstants.spacingS),
+                    const Text(
+                      'Alle Transaktionen',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacing),
+                const Text('Transaktionshistorie wird in Kürze implementiert.'),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ========== TAB 3: ZUSCHÜSSE ==========
+  Widget _buildSubsidiesTab(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
+    return ListView(
+      padding: AppConstants.paddingAll16,
+      children: [
+        Card(
+          child: Padding(
+            padding: AppConstants.paddingAll16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.card_giftcard, color: const Color(0xFF4CAF50), size: 24),
+                    const SizedBox(width: AppConstants.spacingS),
+                    const Text(
+                      'Zuschüsse nach Rolle',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacing),
+                const Text('Zuschüsse-Übersicht wird in Kürze implementiert.'),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ========== HELPER METHODS ==========
+
+  Widget _buildSectionCard(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color color,
+    Widget child,
+  ) {
+    return Card(
+      child: Padding(
+        padding: AppConstants.paddingAll16,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: color, size: 24),
+                const SizedBox(width: AppConstants.spacingS),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppConstants.spacing),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSollSection(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
+    return const Text('SOLL-Bereich wird implementiert');
+  }
+
+  Widget _buildIstSection(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
+    return const Text('IST-Bereich wird implementiert');
+  }
+
+  Widget _buildDifferenzenSection(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
+    return const Text('Differenzen-Bereich wird implementiert');
+  }
+
+  Widget _buildExpensesByCategorySection(BuildContext context, WidgetRef ref) {
+    return const Text('Ausgaben nach Kategorie wird implementiert');
   }
 
   Color _getCategoryColor(String category) {
