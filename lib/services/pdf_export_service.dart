@@ -124,11 +124,10 @@ class PdfExportService {
             pw.SizedBox(height: 15),
 
             _buildSection('Adresse', [
-              if (participant.street != null && participant.houseNumber != null)
-                _buildField('Straße', '${participant.street} ${participant.houseNumber}'),
+              if (participant.street != null)
+                _buildField('Straße', participant.street!),
               if (participant.postalCode != null && participant.city != null)
                 _buildField('Ort', '${participant.postalCode} ${participant.city}'),
-              if (participant.country != null) _buildField('Land', participant.country!),
             ]),
 
             pw.SizedBox(height: 15),
@@ -136,7 +135,6 @@ class PdfExportService {
             _buildSection('Kontakt', [
               if (participant.email != null) _buildField('E-Mail', participant.email!),
               if (participant.phone != null) _buildField('Telefon', participant.phone!),
-              if (participant.mobile != null) _buildField('Mobil', participant.mobile!),
             ]),
 
             pw.SizedBox(height: 15),
