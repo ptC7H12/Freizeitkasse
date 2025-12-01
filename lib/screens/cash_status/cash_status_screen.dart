@@ -843,19 +843,386 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   }
 
   Widget _buildSollSection(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
-    return const Text('SOLL-Bereich wird implementiert');
+    return StreamBuilder<List<Participant>>(
+      stream: (database.select(database.participants)
+            ..where((tbl) => tbl.eventId.equals(eventId))
+            ..where((tbl) => tbl.isActive.equals(true)))
+          .watch(),
+      builder: (context, participantSnapshot) {
+        final participants = participantSnapshot.data ?? [];
+        final einnahmenTeilnehmer = participants.fold<double>(
+          0.0,
+          (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
+        );
+
+        return StreamBuilder<List<Income>>(
+          stream: (database.select(database.incomes)
+                ..where((tbl) => tbl.eventId.equals(eventId))
+                ..where((tbl) => tbl.isActive.equals(true)))
+              .watch(),
+          builder: (context, incomeSnapshot) {
+            final incomes = incomeSnapshot.data ?? [];
+            final sonstigeEinnahmen = incomes.fold<double>(
+              0.0,
+              (sum, income) => sum + income.amount,
+            );
+
+            return StreamBuilder<List<Expense>>(
+              stream: (database.select(database.expenses)
+                    ..where((tbl) => tbl.eventId.equals(eventId))
+                    ..where((tbl) => tbl.isActive.equals(true)))
+                  .watch(),
+              builder: (context, expenseSnapshot) {
+                final expenses = expenseSnapshot.data ?? [];
+                final ausgaben = expenses.fold<double>(
+                  0.0,
+                  (sum, expense) => sum + expense.amount,
+                );
+
+                final saldo = einnahmenTeilnehmer + sonstigeEinnahmen - ausgaben;
+
+                return Column(
+                  children: [
+                    _buildStatRow(
+                      context,
+                      'Einnahmen (Teilnehmer)',
+                      einnahmenTeilnehmer,
+                      'Teilnahmegebühren',
+                      const Color(0xFF2196F3),
+                    ),
+                    const SizedBox(height: AppConstants.spacingS),
+                    _buildStatRow(
+                      context,
+                      'Sonstige Einnahmen',
+                      sonstigeEinnahmen,
+                      'Zuschüsse',
+                      const Color(0xFF4CAF50),
+                    ),
+                    const SizedBox(height: AppConstants.spacingS),
+                    _buildStatRow(
+                      context,
+                      'Ausgaben',
+                      ausgaben,
+                      null,
+                      const Color(0xFFE91E63),
+                    ),
+                    const Divider(height: 24),
+                    _buildStatRow(
+                      context,
+                      'Saldo',
+                      saldo,
+                      null,
+                      saldo >= 0 ? const Color(0xFF4CAF50) : const Color(0xFFE91E63),
+                      isBold: true,
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _buildIstSection(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
-    return const Text('IST-Bereich wird implementiert');
+    return StreamBuilder<List<Payment>>(
+      stream: (database.select(database.payments)
+            ..where((tbl) => tbl.eventId.equals(eventId))
+            ..where((tbl) => tbl.isActive.equals(true)))
+          .watch(),
+      builder: (context, paymentSnapshot) {
+        final payments = paymentSnapshot.data ?? [];
+        final einnahmenTeilnehmer = payments.fold<double>(
+          0.0,
+          (sum, payment) => sum + payment.amount,
+        );
+
+        return StreamBuilder<List<Income>>(
+          stream: (database.select(database.incomes)
+                ..where((tbl) => tbl.eventId.equals(eventId))
+                ..where((tbl) => tbl.isActive.equals(true)))
+              .watch(),
+          builder: (context, incomeSnapshot) {
+            final incomes = incomeSnapshot.data ?? [];
+            final sonstigeEinnahmen = incomes.fold<double>(
+              0.0,
+              (sum, income) => sum + income.amount,
+            );
+
+            return StreamBuilder<List<Expense>>(
+              stream: (database.select(database.expenses)
+                    ..where((tbl) => tbl.eventId.equals(eventId))
+                    ..where((tbl) => tbl.isActive.equals(true)))
+                  .watch(),
+              builder: (context, expenseSnapshot) {
+                final expenses = expenseSnapshot.data ?? [];
+                final beglicheneAusgaben = expenses
+                    .where((e) => e.reimbursed)
+                    .fold<double>(0.0, (sum, expense) => sum + expense.amount);
+
+                final saldo = einnahmenTeilnehmer + sonstigeEinnahmen - beglicheneAusgaben;
+
+                return Column(
+                  children: [
+                    _buildStatRow(
+                      context,
+                      'Einnahmen (Teilnehmer)',
+                      einnahmenTeilnehmer,
+                      null,
+                      const Color(0xFF2196F3),
+                    ),
+                    const SizedBox(height: AppConstants.spacingS),
+                    _buildStatRow(
+                      context,
+                      'Sonstige Einnahmen',
+                      sonstigeEinnahmen,
+                      null,
+                      const Color(0xFF4CAF50),
+                    ),
+                    const SizedBox(height: AppConstants.spacingS),
+                    _buildStatRow(
+                      context,
+                      'Ausgaben (Beglichene)',
+                      beglicheneAusgaben,
+                      null,
+                      const Color(0xFFE91E63),
+                    ),
+                    const Divider(height: 24),
+                    _buildStatRow(
+                      context,
+                      'Saldo',
+                      saldo,
+                      null,
+                      saldo >= 0 ? const Color(0xFF4CAF50) : const Color(0xFFE91E63),
+                      isBold: true,
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _buildDifferenzenSection(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
-    return const Text('Differenzen-Bereich wird implementiert');
+    return StreamBuilder<List<Participant>>(
+      stream: (database.select(database.participants)
+            ..where((tbl) => tbl.eventId.equals(eventId))
+            ..where((tbl) => tbl.isActive.equals(true)))
+          .watch(),
+      builder: (context, participantSnapshot) {
+        final participants = participantSnapshot.data ?? [];
+        final sollEinnahmenTN = participants.fold<double>(
+          0.0,
+          (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
+        );
+
+        return StreamBuilder<List<Payment>>(
+          stream: (database.select(database.payments)
+                ..where((tbl) => tbl.eventId.equals(eventId))
+                ..where((tbl) => tbl.isActive.equals(true)))
+              .watch(),
+          builder: (context, paymentSnapshot) {
+            final payments = paymentSnapshot.data ?? [];
+            final istEinnahmenTN = payments.fold<double>(
+              0.0,
+              (sum, payment) => sum + payment.amount,
+            );
+
+            return StreamBuilder<List<Income>>(
+              stream: (database.select(database.incomes)
+                    ..where((tbl) => tbl.eventId.equals(eventId))
+                    ..where((tbl) => tbl.isActive.equals(true)))
+                  .watch(),
+              builder: (context, incomeSnapshot) {
+                final incomes = incomeSnapshot.data ?? [];
+                final sonstigeEinnahmen = incomes.fold<double>(0.0, (sum, income) => sum + income.amount);
+
+                return StreamBuilder<List<Expense>>(
+                  stream: (database.select(database.expenses)
+                        ..where((tbl) => tbl.eventId.equals(eventId))
+                        ..where((tbl) => tbl.isActive.equals(true)))
+                      .watch(),
+                  builder: (context, expenseSnapshot) {
+                    final expenses = expenseSnapshot.data ?? [];
+                    final sollAusgaben = expenses.fold<double>(0.0, (sum, expense) => sum + expense.amount);
+                    final beglicheneAusgaben = expenses
+                        .where((e) => e.reimbursed)
+                        .fold<double>(0.0, (sum, expense) => sum + expense.amount);
+
+                    final einnahmenAusstehend = sollEinnahmenTN - istEinnahmenTN;
+                    final ausgabenZuBegleichen = sollAusgaben - beglicheneAusgaben;
+                    final sollSaldo = sollEinnahmenTN + sonstigeEinnahmen - sollAusgaben;
+                    final istSaldo = istEinnahmenTN + sonstigeEinnahmen - beglicheneAusgaben;
+                    final saldoDiff = sollSaldo - istSaldo;
+
+                    return Column(
+                      children: [
+                        _buildStatRow(
+                          context,
+                          'Einnahmen (ausstehend)',
+                          einnahmenAusstehend,
+                          null,
+                          einnahmenAusstehend > 0 ? const Color(0xFFFF9800) : const Color(0xFF4CAF50),
+                        ),
+                        const SizedBox(height: AppConstants.spacingS),
+                        _buildStatRow(
+                          context,
+                          'Sonstige Einnahmen',
+                          0.0,
+                          'bereits vollständig',
+                          const Color(0xFF4CAF50),
+                        ),
+                        const SizedBox(height: AppConstants.spacingS),
+                        _buildStatRow(
+                          context,
+                          'Ausgaben (noch zu begleichen)',
+                          ausgabenZuBegleichen,
+                          null,
+                          ausgabenZuBegleichen > 0 ? const Color(0xFFFF9800) : const Color(0xFF4CAF50),
+                        ),
+                        const Divider(height: 24),
+                        _buildStatRow(
+                          context,
+                          'Saldo',
+                          saldoDiff,
+                          null,
+                          saldoDiff >= 0 ? const Color(0xFF4CAF50) : const Color(0xFFFF9800),
+                          isBold: true,
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _buildExpensesByCategorySection(BuildContext context, WidgetRef ref) {
-    return const Text('Ausgaben nach Kategorie wird implementiert');
+    final expensesByCategoryAsync = ref.watch(expensesByCategoryProvider);
+
+    return Card(
+      child: Padding(
+        padding: AppConstants.paddingAll16,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.category, color: const Color(0xFFE91E63), size: 24),
+                const SizedBox(width: AppConstants.spacingS),
+                const Text(
+                  'Ausgaben nach Kategorie',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppConstants.spacing),
+            expensesByCategoryAsync.when(
+              data: (byCategory) {
+                if (byCategory.isEmpty) {
+                  return const Text(
+                    'Keine Ausgaben vorhanden',
+                    style: TextStyle(color: Colors.grey),
+                  );
+                }
+
+                return DataTable(
+                  columns: const [
+                    DataColumn(label: Text('Kategorie', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Betrag', style: TextStyle(fontWeight: FontWeight.bold))),
+                  ],
+                  rows: byCategory.entries.map((entry) {
+                    // Count basierend auf dem Betrag / durchschnittlicher Ausgabe - vereinfacht
+                    return DataRow(cells: [
+                      DataCell(Row(
+                        children: [
+                          Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: _getCategoryColor(entry.key),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(entry.key),
+                        ],
+                      )),
+                      DataCell(Text('-')), // Anzahl könnte aus einer anderen Query kommen
+                      DataCell(Text(
+                        NumberFormat.currency(locale: 'de_DE', symbol: '€').format(entry.value),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      )),
+                    ]);
+                  }).toList(),
+                );
+              },
+              loading: () => const CircularProgressIndicator(),
+              error: (_, __) => const Text('Fehler beim Laden'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatRow(
+    BuildContext context,
+    String label,
+    double value,
+    String? subtitle,
+    Color color, {
+    bool isBold = false,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: isBold ? 16 : 14,
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                  color: Colors.grey[700],
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        Text(
+          NumberFormat.currency(locale: 'de_DE', symbol: '€').format(value),
+          style: TextStyle(
+            fontSize: isBold ? 20 : 16,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
   }
 
   Color _getCategoryColor(String category) {
