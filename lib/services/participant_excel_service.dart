@@ -27,18 +27,13 @@ class ParticipantExcelService {
       'Nachname',
       'Geburtsdatum',
       'Geschlecht',
-      'Straße',
-      'Hausnummer',
+      'Straße und Hausnummer',
       'PLZ',
       'Ort',
-      'Land',
       'Telefon',
-      'Mobil',
       'E-Mail',
       'Notfallkontakt Name',
       'Notfallkontakt Telefon',
-      'Med. Informationen',
-      'Med. Hinweise',
       'Medikamente',
       'Allergien',
       'Ernährungseinschränkungen',
@@ -59,7 +54,7 @@ class ParticipantExcelService {
       cell.value = TextCellValue(headers[i]);
       cell.cellStyle = CellStyle(
         bold: true,
-        backgroundColorHex: ExcelColor.gray25,
+        backgroundColorHex: ExcelColor.fromHexString('#D3D3D3'),
       );
     }
 
@@ -75,17 +70,12 @@ class ParticipantExcelService {
         _formatDate(participant.birthDate),
         participant.gender ?? '',
         participant.street ?? '',
-        participant.houseNumber ?? '',
         participant.postalCode ?? '',
         participant.city ?? '',
-        participant.country ?? '',
         participant.phone ?? '',
-        participant.mobile ?? '',
         participant.email ?? '',
         participant.emergencyContactName ?? '',
         participant.emergencyContactPhone ?? '',
-        participant.medicalInfo ?? '',
-        participant.medicalNotes ?? '',
         participant.medications ?? '',
         participant.allergies ?? '',
         participant.dietaryRestrictions ?? '',
@@ -133,7 +123,7 @@ class ParticipantExcelService {
     try {
       // File Picker
       final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
+        type: FileType.any,
         allowedExtensions: ['xlsx', 'xls'],
       );
 
@@ -210,23 +200,18 @@ class ParticipantExcelService {
             birthDate: birthDate,
             gender: _getCellValue(row, 4).isNotEmpty ? _getCellValue(row, 4) : null,
             street: _getCellValue(row, 5).isNotEmpty ? _getCellValue(row, 5) : null,
-            houseNumber: _getCellValue(row, 6).isNotEmpty ? _getCellValue(row, 6) : null,
-            postalCode: _getCellValue(row, 7).isNotEmpty ? _getCellValue(row, 7) : null,
-            city: _getCellValue(row, 8).isNotEmpty ? _getCellValue(row, 8) : null,
-            country: _getCellValue(row, 9).isNotEmpty ? _getCellValue(row, 9) : null,
-            phone: _getCellValue(row, 10).isNotEmpty ? _getCellValue(row, 10) : null,
-            mobile: _getCellValue(row, 11).isNotEmpty ? _getCellValue(row, 11) : null,
-            email: _getCellValue(row, 12).isNotEmpty ? _getCellValue(row, 12) : null,
-            emergencyContactName: _getCellValue(row, 13).isNotEmpty ? _getCellValue(row, 13) : null,
-            emergencyContactPhone: _getCellValue(row, 14).isNotEmpty ? _getCellValue(row, 14) : null,
-            medicalInfo: _getCellValue(row, 15).isNotEmpty ? _getCellValue(row, 15) : null,
-            medicalNotes: _getCellValue(row, 16).isNotEmpty ? _getCellValue(row, 16) : null,
-            medications: _getCellValue(row, 17).isNotEmpty ? _getCellValue(row, 17) : null,
-            allergies: _getCellValue(row, 18).isNotEmpty ? _getCellValue(row, 18) : null,
-            dietaryRestrictions: _getCellValue(row, 19).isNotEmpty ? _getCellValue(row, 19) : null,
-            swimAbility: _getCellValue(row, 20).isNotEmpty ? _getCellValue(row, 20) : null,
-            notes: _getCellValue(row, 21).isNotEmpty ? _getCellValue(row, 21) : null,
-            bildungUndTeilhabe: _getCellValue(row, 22).toLowerCase() == 'ja',
+            postalCode: _getCellValue(row, 6).isNotEmpty ? _getCellValue(row, 6) : null,
+            city: _getCellValue(row, 7).isNotEmpty ? _getCellValue(row, 7) : null,
+            phone: _getCellValue(row, 8).isNotEmpty ? _getCellValue(row, 8) : null,
+            email: _getCellValue(row, 9).isNotEmpty ? _getCellValue(row, 9) : null,
+            emergencyContactName: _getCellValue(row, 10).isNotEmpty ? _getCellValue(row, 10) : null,
+            emergencyContactPhone: _getCellValue(row, 11).isNotEmpty ? _getCellValue(row, 11) : null,
+            medications: _getCellValue(row, 12).isNotEmpty ? _getCellValue(row, 12) : null,
+            allergies: _getCellValue(row, 13).isNotEmpty ? _getCellValue(row, 13) : null,
+            dietaryRestrictions: _getCellValue(row, 14).isNotEmpty ? _getCellValue(row, 14) : null,
+            swimAbility: _getCellValue(row, 15).isNotEmpty ? _getCellValue(row, 15) : null,
+            notes: _getCellValue(row, 16).isNotEmpty ? _getCellValue(row, 16) : null,
+            bildungUndTeilhabe: _getCellValue(row, 17).toLowerCase() == 'ja',
           );
 
           imported++;
@@ -261,18 +246,13 @@ class ParticipantExcelService {
       'Nachname *',
       'Geburtsdatum * (TT.MM.JJJJ)',
       'Geschlecht',
-      'Straße',
-      'Hausnummer',
+      'Straße und Hausnummer',
       'PLZ',
       'Ort',
-      'Land',
       'Telefon',
-      'Mobil',
       'E-Mail',
       'Notfallkontakt Name',
       'Notfallkontakt Telefon',
-      'Med. Informationen',
-      'Med. Hinweise',
       'Medikamente',
       'Allergien',
       'Ernährungseinschränkungen',
@@ -287,8 +267,8 @@ class ParticipantExcelService {
       cell.value = TextCellValue(headers[i]);
       cell.cellStyle = CellStyle(
         bold: true,
-        backgroundColorHex: ExcelColor.blue,
-        fontColorHex: ExcelColor.white,
+        backgroundColorHex: ExcelColor.fromHexString('#4472C4'),
+        fontColorHex: ExcelColor.fromHexString('#FFFFFF'),
       );
     }
 
@@ -299,18 +279,13 @@ class ParticipantExcelService {
       'Mustermann',
       '01.01.2010',
       'Männlich',
-      'Musterstraße',
-      '123',
+      'Musterstraße 123',
       '12345',
       'Musterstadt',
-      'Deutschland',
       '0123456789',
-      '0987654321',
       'max@example.com',
       'Maria Mustermann',
       '0123456789',
-      '',
-      'Keine',
       '',
       'Keine',
       'Vegetarisch',
@@ -324,7 +299,7 @@ class ParticipantExcelService {
       cell.value = TextCellValue(example[i]);
       cell.cellStyle = CellStyle(
         italic: true,
-        fontColorHex: ExcelColor.gray50,
+        fontColorHex: ExcelColor.fromHexString('#808080'),
       );
     }
 

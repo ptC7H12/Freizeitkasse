@@ -36,17 +36,12 @@ class _ParticipantFormScreenState
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _streetController = TextEditingController();
-  final _houseNumberController = TextEditingController();
   final _postalCodeController = TextEditingController();
   final _cityController = TextEditingController();
-  final _countryController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _mobileController = TextEditingController();
   final _emailController = TextEditingController();
   final _emergencyContactController = TextEditingController();
   final _emergencyPhoneController = TextEditingController();
-  final _medicalNotesController = TextEditingController();
-  final _medicalInfoController = TextEditingController();
   final _medicationsController = TextEditingController();
   final _allergiesController = TextEditingController();
   final _dietaryRestrictionsController = TextEditingController();
@@ -90,17 +85,12 @@ class _ParticipantFormScreenState
           _birthDate = participant.birthDate;
           _gender = participant.gender;
           _streetController.text = participant.street ?? '';
-          _houseNumberController.text = participant.houseNumber ?? '';
           _postalCodeController.text = participant.postalCode ?? '';
           _cityController.text = participant.city ?? '';
-          _countryController.text = participant.country ?? '';
           _phoneController.text = participant.phone ?? '';
-          _mobileController.text = participant.mobile ?? '';
           _emailController.text = participant.email ?? '';
           _emergencyContactController.text = participant.emergencyContactName ?? '';
           _emergencyPhoneController.text = participant.emergencyContactPhone ?? '';
-          _medicalNotesController.text = participant.medicalNotes ?? '';
-          _medicalInfoController.text = participant.medicalInfo ?? '';
           _medicationsController.text = participant.medications ?? '';
           _allergiesController.text = participant.allergies ?? '';
           _dietaryRestrictionsController.text =
@@ -136,17 +126,12 @@ class _ParticipantFormScreenState
     _firstNameController.dispose();
     _lastNameController.dispose();
     _streetController.dispose();
-    _houseNumberController.dispose();
     _postalCodeController.dispose();
     _cityController.dispose();
-    _countryController.dispose();
     _phoneController.dispose();
-    _mobileController.dispose();
     _emailController.dispose();
     _emergencyContactController.dispose();
     _emergencyPhoneController.dispose();
-    _medicalNotesController.dispose();
-    _medicalInfoController.dispose();
     _medicationsController.dispose();
     _allergiesController.dispose();
     _dietaryRestrictionsController.dispose();
@@ -208,24 +193,9 @@ class _ParticipantFormScreenState
 
             // Adresse
             _buildSectionHeader('Adresse'),
-            Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: _buildTextField(
-                    controller: _streetController,
-                    label: 'Straße',
-                  ),
-                ),
-                const SizedBox(width: AppConstants.spacing),
-                Expanded(
-                  flex: 1,
-                  child: _buildTextField(
-                    controller: _houseNumberController,
-                    label: 'Nr.',
-                  ),
-                ),
-              ],
+            _buildTextField(
+              controller: _streetController,
+              label: 'Straße und Hausnummer',
             ),
             const SizedBox(height: AppConstants.spacing),
             Row(
@@ -249,11 +219,6 @@ class _ParticipantFormScreenState
                 ),
               ],
             ),
-            const SizedBox(height: AppConstants.spacing),
-            _buildTextField(
-              controller: _countryController,
-              label: 'Land',
-            ),
 
             const SizedBox(height: AppConstants.spacingL),
 
@@ -262,13 +227,6 @@ class _ParticipantFormScreenState
             _buildTextField(
               controller: _phoneController,
               label: 'Telefon',
-              keyboardType: TextInputType.phone,
-              validator: Validators.phone,
-            ),
-            const SizedBox(height: AppConstants.spacing),
-            _buildTextField(
-              controller: _mobileController,
-              label: 'Mobil',
               keyboardType: TextInputType.phone,
               validator: Validators.phone,
             ),
@@ -300,18 +258,6 @@ class _ParticipantFormScreenState
 
             // Medizinische Informationen
             _buildSectionHeader('Medizinische Informationen'),
-            _buildTextField(
-              controller: _medicalInfoController,
-              label: 'Medizinische Informationen',
-              maxLines: 3,
-            ),
-            const SizedBox(height: AppConstants.spacing),
-            _buildTextField(
-              controller: _medicalNotesController,
-              label: 'Medizinische Hinweise',
-              maxLines: 3,
-            ),
-            const SizedBox(height: AppConstants.spacing),
             _buildTextField(
               controller: _medicationsController,
               label: 'Medikamente',
@@ -470,7 +416,6 @@ class _ParticipantFormScreenState
       items: const [
         DropdownMenuItem(value: 'Männlich', child: Text('Männlich')),
         DropdownMenuItem(value: 'Weiblich', child: Text('Weiblich')),
-        DropdownMenuItem(value: 'Divers', child: Text('Divers')),
       ],
       onChanged: (value) {
         setState(() {
@@ -695,25 +640,16 @@ class _ParticipantFormScreenState
           birthDate: _birthDate!,
           gender: _gender,
           street: _streetController.text.isNotEmpty ? _streetController.text : null,
-          houseNumber: _houseNumberController.text.isNotEmpty ? _houseNumberController.text : null,
           postalCode:
               _postalCodeController.text.isNotEmpty ? _postalCodeController.text : null,
           city: _cityController.text.isNotEmpty ? _cityController.text : null,
-          country: _countryController.text.isNotEmpty ? _countryController.text : null,
           phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
-          mobile: _mobileController.text.isNotEmpty ? _mobileController.text : null,
           email: _emailController.text.isNotEmpty ? _emailController.text : null,
           emergencyContactName: _emergencyContactController.text.isNotEmpty
               ? _emergencyContactController.text
               : null,
           emergencyContactPhone: _emergencyPhoneController.text.isNotEmpty
               ? _emergencyPhoneController.text
-              : null,
-          medicalInfo: _medicalInfoController.text.isNotEmpty
-              ? _medicalInfoController.text
-              : null,
-          medicalNotes: _medicalNotesController.text.isNotEmpty
-              ? _medicalNotesController.text
               : null,
           medications: _medicationsController.text.isNotEmpty
               ? _medicationsController.text
@@ -748,25 +684,16 @@ class _ParticipantFormScreenState
           birthDate: _birthDate!,
           gender: _gender,
           street: _streetController.text.isNotEmpty ? _streetController.text : null,
-          houseNumber: _houseNumberController.text.isNotEmpty ? _houseNumberController.text : null,
           postalCode:
               _postalCodeController.text.isNotEmpty ? _postalCodeController.text : null,
           city: _cityController.text.isNotEmpty ? _cityController.text : null,
-          country: _countryController.text.isNotEmpty ? _countryController.text : null,
           phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
-          mobile: _mobileController.text.isNotEmpty ? _mobileController.text : null,
           email: _emailController.text.isNotEmpty ? _emailController.text : null,
           emergencyContactName: _emergencyContactController.text.isNotEmpty
               ? _emergencyContactController.text
               : null,
           emergencyContactPhone: _emergencyPhoneController.text.isNotEmpty
               ? _emergencyPhoneController.text
-              : null,
-          medicalInfo: _medicalInfoController.text.isNotEmpty
-              ? _medicalInfoController.text
-              : null,
-          medicalNotes: _medicalNotesController.text.isNotEmpty
-              ? _medicalNotesController.text
               : null,
           medications: _medicationsController.text.isNotEmpty
               ? _medicationsController.text
