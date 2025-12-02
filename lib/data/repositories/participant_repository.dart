@@ -358,7 +358,11 @@ class ParticipantRepository {
   }
 
   /// Parse JSON-String zu Map/List (Drift speichert JSON als TEXT)
-  dynamic _parseJsonField(String jsonString) {
+  dynamic _parseJsonField(String? jsonString) {
+    if (jsonString == null || jsonString.isEmpty) {
+      return <String, dynamic>{};
+    }
+
     try {
       // TODO: Implement JSON parsing
       // Für jetzt: Return leere Struktur
