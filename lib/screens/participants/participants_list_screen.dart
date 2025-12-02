@@ -12,6 +12,7 @@ import 'participant_form_screen.dart';
 /// import 'participant_import_screen.dart';
 import '../../utils/constants.dart';
 import '../../extensions/context_extensions.dart';
+import '../../widgets/responsive_scaffold.dart';
 
 /// Participants List Screen
 ///
@@ -393,66 +394,64 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
       return _buildContent(participantsAsync);
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text('Teilnehmer'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.filter_list,
-              color: (_ageFilter != null || _genderFilter != null) ? Colors.orange : null,
-            ),
-            onPressed: _showFilterDialog,
-            tooltip: 'Filter',
+    return ResponsiveScaffold(
+      title: 'Teilnehmer',
+      selectedIndex: 1,
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.filter_list,
+            color: (_ageFilter != null || _genderFilter != null) ? Colors.orange : null,
           ),
-          IconButton(
-            icon: const Icon(Icons.upload_file),
-            onPressed: _importFromExcel,
-            tooltip: 'Excel importieren',
-          ),
-          IconButton(
-            icon: const Icon(Icons.download),
-            onPressed: () {
-              final participantsValue = ref.read(participantsProvider).value;
-              if (participantsValue != null && participantsValue.isNotEmpty) {
-                _exportToExcel(participantsValue);
-              } else {
-                context.showError('Keine Teilnehmer zum Exportieren');
-              }
-            },
-            tooltip: 'Excel exportieren',
-          ),
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
-            onPressed: () async {
-              final participantsValue = ref.read(participantsProvider).value;
-              final currentEvent = ref.read(currentEventProvider);
+          onPressed: _showFilterDialog,
+          tooltip: 'Filter',
+        ),
+        IconButton(
+          icon: const Icon(Icons.upload_file),
+          onPressed: _importFromExcel,
+          tooltip: 'Excel importieren',
+        ),
+        IconButton(
+          icon: const Icon(Icons.download),
+          onPressed: () {
+            final participantsValue = ref.read(participantsProvider).value;
+            if (participantsValue != null && participantsValue.isNotEmpty) {
+              _exportToExcel(participantsValue);
+            } else {
+              context.showError('Keine Teilnehmer zum Exportieren');
+            }
+          },
+          tooltip: 'Excel exportieren',
+        ),
+        IconButton(
+          icon: const Icon(Icons.picture_as_pdf),
+          onPressed: () async {
+            final participantsValue = ref.read(participantsProvider).value;
+            final currentEvent = ref.read(currentEventProvider);
 
-              if (participantsValue == null || participantsValue.isEmpty) {
-                context.showError('Keine Teilnehmer zum Exportieren');
-                return;
-              }
+            if (participantsValue == null || participantsValue.isEmpty) {
+              context.showError('Keine Teilnehmer zum Exportieren');
+              return;
+            }
 
-              final pdfService = ref.read(pdfExportServiceProvider);
-              try {
-                final filePath = await pdfService.exportParticipantsList(
-                  participants: participantsValue,
-                  eventName: currentEvent?.name ?? 'Veranstaltung',
-                );
-                if (context.mounted) {
-                  context.showSuccess('PDF gespeichert: $filePath');
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  context.showError('Fehler beim PDF-Export: $e');
-                }
+            final pdfService = ref.read(pdfExportServiceProvider);
+            try {
+              final filePath = await pdfService.exportParticipantsList(
+                participants: participantsValue,
+                eventName: currentEvent?.name ?? 'Veranstaltung',
+              );
+              if (context.mounted) {
+                context.showSuccess('PDF gespeichert: $filePath');
               }
-            },
-            tooltip: 'PDF exportieren',
-          ),
-        ],
-      ),
+            } catch (e) {
+              if (context.mounted) {
+                context.showError('Fehler beim PDF-Export: $e');
+              }
+            }
+          },
+          tooltip: 'PDF exportieren',
+        ),
+      ],
       body: _buildContent(participantsAsync),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
