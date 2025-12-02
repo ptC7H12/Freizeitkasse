@@ -101,103 +101,198 @@ class ResponsiveScaffold extends ConsumerWidget {
   }
 
   Widget _buildNavigationRail(BuildContext context, WidgetRef ref) {
-    return NavigationRail(
-      extended: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      selectedIndex: selectedIndex >= 0 ? selectedIndex : 0,
-      destinations: const [
-        NavigationRailDestination(
-          icon: Icon(Icons.dashboard),
-          label: Text('Dashboard'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.people),
-          label: Text('Teilnehmer'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.family_restroom),
-          label: Text('Familien'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.payment),
-          label: Text('Zahlungen'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.shopping_cart),
-          label: Text('Ausgaben'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.attach_money),
-          label: Text('Einnahmen'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.receipt_long),
-          label: Text('Kassenstand'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.rule),
-          label: Text('Regelwerke'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.badge),
-          label: Text('Rollen'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.task_alt),
-          label: Text('Aufgaben'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.settings),
-          label: Text('Einstellungen'),
-        ),
-      ],
-      onDestinationSelected: (index) {
-        // Avoid navigating if already on the selected screen
-        if (index == selectedIndex) return;
+    return Container(
+      width: 280,
+      color: const Color(0xFF2196F3),
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          // Header mit Logo
+          SafeArea(
+            bottom: false,
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              child: Row(
+                children: [
+                  Container(
+                    padding: AppConstants.paddingAll8,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.account_balance_wallet,
+                      size: 28,
+                      color: Color(0xFF2196F3),
+                    ),
+                  ),
+                  const SizedBox(width: AppConstants.spacingM),
+                  const Text(
+                    'Freizeitkasse',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Divider(color: Colors.white24, height: 1),
+          const SizedBox(height: AppConstants.spacing),
 
-        Widget screen;
-        switch (index) {
-          case 0:
-            screen = const DashboardScreen();
-            break;
-          case 1:
-            screen = const ParticipantsListScreen();
-            break;
-          case 2:
-            screen = const FamiliesListScreen();
-            break;
-          case 3:
-            screen = const PaymentsListScreen();
-            break;
-          case 4:
-            screen = const ExpensesListScreen();
-            break;
-          case 5:
-            screen = const IncomesListScreen();
-            break;
-          case 6:
-            screen = const CashStatusScreen();
-            break;
-          case 7:
-            screen = const RulesetsListScreen();
-            break;
-          case 8:
-            screen = const RolesListScreen();
-            break;
-          case 9:
-            screen = const TasksScreen();
-            break;
-          case 10:
-            screen = const SettingsScreen();
-            break;
-          default:
-            return;
-        }
+          // VERWALTUNG Section
+          _buildNavigationSectionHeader('VERWALTUNG'),
+          _buildNavigationItem(
+            context,
+            Icons.dashboard,
+            'Dashboard',
+            selectedIndex == 0 ? null : () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const DashboardScreen()),
+              );
+            },
+            isSelected: selectedIndex == 0,
+          ),
+          _buildNavigationItem(
+            context,
+            Icons.people,
+            'Teilnehmer & Familien',
+            selectedIndex == 1 ? null : () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const ParticipantsListScreen()),
+              );
+            },
+            isSelected: selectedIndex == 1,
+          ),
+          _buildNavigationItem(
+            context,
+            Icons.task_alt,
+            'Aufgaben',
+            selectedIndex == 9 ? null : () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const TasksScreen()),
+              );
+            },
+            isSelected: selectedIndex == 9,
+          ),
 
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => screen),
-        );
-      },
+          const SizedBox(height: AppConstants.spacingL),
+          const Divider(color: Colors.white24, height: 1),
+          const SizedBox(height: AppConstants.spacingL),
+
+          // FINANZEN Section
+          _buildNavigationSectionHeader('FINANZEN'),
+          _buildNavigationItem(
+            context,
+            Icons.payment,
+            'Zahlungseingänge',
+            selectedIndex == 3 ? null : () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const PaymentsListScreen()),
+              );
+            },
+            isSelected: selectedIndex == 3,
+          ),
+          _buildNavigationItem(
+            context,
+            Icons.attach_money,
+            'Sonstige Einnahmen',
+            selectedIndex == 5 ? null : () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const IncomesListScreen()),
+              );
+            },
+            isSelected: selectedIndex == 5,
+          ),
+          _buildNavigationItem(
+            context,
+            Icons.shopping_cart,
+            'Ausgaben',
+            selectedIndex == 4 ? null : () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
+              );
+            },
+            isSelected: selectedIndex == 4,
+          ),
+          _buildNavigationItem(
+            context,
+            Icons.receipt_long,
+            'Kassenstand',
+            selectedIndex == 6 ? null : () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const CashStatusScreen()),
+              );
+            },
+            isSelected: selectedIndex == 6,
+          ),
+
+          const SizedBox(height: AppConstants.spacingL),
+          const Divider(color: Colors.white24, height: 1),
+          const SizedBox(height: AppConstants.spacingL),
+
+          // EINSTELLUNGEN Section
+          _buildNavigationSectionHeader('EINSTELLUNGEN'),
+          _buildNavigationItem(
+            context,
+            Icons.settings,
+            'Einstellungen',
+            selectedIndex == 10 ? null : () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+            isSelected: selectedIndex == 10,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.6),
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback? onTap, {
+    bool isSelected = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.white),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+        onTap: onTap,
+        hoverColor: Colors.white.withOpacity(0.1),
+        dense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      ),
     );
   }
 
