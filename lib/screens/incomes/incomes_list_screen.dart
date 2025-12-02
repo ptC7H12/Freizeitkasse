@@ -236,7 +236,7 @@ class IncomesListScreen extends ConsumerWidget {
           child: Text('Fehler beim Laden der Einnahmen: $error'),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
             context,
@@ -245,7 +245,8 @@ class IncomesListScreen extends ConsumerWidget {
             ),
           );
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Einnahme'),
       ),
     );
   }

@@ -149,9 +149,7 @@ class ResponsiveScaffold extends ConsumerWidget {
             Icons.dashboard,
             'Dashboard',
             selectedIndex == 0 ? null : () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const DashboardScreen()),
-              );
+              _navigateWithoutAnimation(context, const DashboardScreen());
             },
             isSelected: selectedIndex == 0,
           ),
@@ -160,9 +158,7 @@ class ResponsiveScaffold extends ConsumerWidget {
             Icons.people,
             'Teilnehmer & Familien',
             selectedIndex == 1 ? null : () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const ParticipantsListScreen()),
-              );
+              _navigateWithoutAnimation(context, const ParticipantsListScreen());
             },
             isSelected: selectedIndex == 1,
           ),
@@ -171,9 +167,7 @@ class ResponsiveScaffold extends ConsumerWidget {
             Icons.task_alt,
             'Aufgaben',
             selectedIndex == 9 ? null : () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const TasksScreen()),
-              );
+              _navigateWithoutAnimation(context, const TasksScreen());
             },
             isSelected: selectedIndex == 9,
           ),
@@ -189,9 +183,7 @@ class ResponsiveScaffold extends ConsumerWidget {
             Icons.payment,
             'Zahlungseingänge',
             selectedIndex == 3 ? null : () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const PaymentsListScreen()),
-              );
+              _navigateWithoutAnimation(context, const PaymentsListScreen());
             },
             isSelected: selectedIndex == 3,
           ),
@@ -200,9 +192,7 @@ class ResponsiveScaffold extends ConsumerWidget {
             Icons.attach_money,
             'Sonstige Einnahmen',
             selectedIndex == 5 ? null : () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const IncomesListScreen()),
-              );
+              _navigateWithoutAnimation(context, const IncomesListScreen());
             },
             isSelected: selectedIndex == 5,
           ),
@@ -211,9 +201,7 @@ class ResponsiveScaffold extends ConsumerWidget {
             Icons.shopping_cart,
             'Ausgaben',
             selectedIndex == 4 ? null : () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
-              );
+              _navigateWithoutAnimation(context, const ExpensesListScreen());
             },
             isSelected: selectedIndex == 4,
           ),
@@ -222,9 +210,7 @@ class ResponsiveScaffold extends ConsumerWidget {
             Icons.receipt_long,
             'Kassenstand',
             selectedIndex == 6 ? null : () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const CashStatusScreen()),
-              );
+              _navigateWithoutAnimation(context, const CashStatusScreen());
             },
             isSelected: selectedIndex == 6,
           ),
@@ -240,9 +226,7 @@ class ResponsiveScaffold extends ConsumerWidget {
             Icons.settings,
             'Einstellungen',
             selectedIndex == 10 ? null : () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
+              _navigateWithoutAnimation(context, const SettingsScreen());
             },
             isSelected: selectedIndex == 10,
           ),
@@ -292,6 +276,17 @@ class ResponsiveScaffold extends ConsumerWidget {
         hoverColor: Colors.white.withOpacity(0.1),
         dense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      ),
+    );
+  }
+
+  /// Navigate without animation (für bessere UX beim Menü-Wechsel)
+  void _navigateWithoutAnimation(BuildContext context, Widget screen) {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => screen,
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
       ),
     );
   }
@@ -392,9 +387,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                     () {
                       Navigator.of(context).pop();
                       if (selectedIndex != 0) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const DashboardScreen()),
-                        );
+                        _navigateWithoutAnimation(context, const DashboardScreen());
                       }
                     },
                     isSelected: selectedIndex == 0,
@@ -406,9 +399,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                     () {
                       Navigator.of(context).pop();
                       if (selectedIndex != 1) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const ParticipantsListScreen()),
-                        );
+                        _navigateWithoutAnimation(context, const ParticipantsListScreen());
                       }
                     },
                     isSelected: selectedIndex == 1,
@@ -420,9 +411,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                     () {
                       Navigator.of(context).pop();
                       if (selectedIndex != 9) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const TasksScreen()),
-                        );
+                        _navigateWithoutAnimation(context, const TasksScreen());
                       }
                     },
                     isSelected: selectedIndex == 9,
@@ -441,9 +430,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                     () {
                       Navigator.of(context).pop();
                       if (selectedIndex != 3) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const PaymentsListScreen()),
-                        );
+                        _navigateWithoutAnimation(context, const PaymentsListScreen());
                       }
                     },
                     isSelected: selectedIndex == 3,
@@ -455,9 +442,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                     () {
                       Navigator.of(context).pop();
                       if (selectedIndex != 5) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const IncomesListScreen()),
-                        );
+                        _navigateWithoutAnimation(context, const IncomesListScreen());
                       }
                     },
                     isSelected: selectedIndex == 5,
@@ -469,9 +454,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                     () {
                       Navigator.of(context).pop();
                       if (selectedIndex != 4) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const ExpensesListScreen()),
-                        );
+                        _navigateWithoutAnimation(context, const ExpensesListScreen());
                       }
                     },
                     isSelected: selectedIndex == 4,
@@ -483,9 +466,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                     () {
                       Navigator.of(context).pop();
                       if (selectedIndex != 6) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const CashStatusScreen()),
-                        );
+                        _navigateWithoutAnimation(context, const CashStatusScreen());
                       }
                     },
                     isSelected: selectedIndex == 6,
@@ -504,9 +485,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                     () {
                       Navigator.of(context).pop();
                       if (selectedIndex != 10) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                        );
+                        _navigateWithoutAnimation(context, const SettingsScreen());
                       }
                     },
                     isSelected: selectedIndex == 10,

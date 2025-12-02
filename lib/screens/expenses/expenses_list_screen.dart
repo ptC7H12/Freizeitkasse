@@ -32,7 +32,7 @@ class ExpensesListScreen extends ConsumerWidget {
     return ResponsiveScaffold(
       title: 'Ausgaben',
       selectedIndex: 4,
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
             context,
@@ -41,7 +41,8 @@ class ExpensesListScreen extends ConsumerWidget {
             ),
           );
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Ausgabe'),
       ),
       body: expensesAsync.when(
         data: (expenses) {

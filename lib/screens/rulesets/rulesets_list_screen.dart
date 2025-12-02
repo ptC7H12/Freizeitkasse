@@ -165,7 +165,7 @@ class RulesetsListScreen extends ConsumerWidget {
           child: Text('Fehler beim Laden der Regelwerke: $error'),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
             context,
@@ -174,7 +174,8 @@ class RulesetsListScreen extends ConsumerWidget {
             ),
           );
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Regelwerk'),
       ),
     );
   }
