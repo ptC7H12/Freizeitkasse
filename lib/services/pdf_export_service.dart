@@ -43,7 +43,7 @@ class PdfExportService {
           // Participants Table
           pw.Table.fromTextArray(
             context: context,
-            headers: ['Nr', 'Name', 'Geburtsdatum', 'Alter', 'Preis (€)'],
+            headers: ['Nr', 'Name', 'Geburtsdatum', 'Alter', 'Preis (EUR)'],
             data: participants.asMap().entries.map((entry) {
               final index = entry.key;
               final p = entry.value;
@@ -54,7 +54,7 @@ class PdfExportService {
                 '${p.firstName} ${p.lastName}',
                 AppDateUtils.formatGerman(p.birthDate),
                 '$age',
-                price.toStringAsFixed(2),
+                '${price.toStringAsFixed(2)} EUR',
               ];
             }).toList(),
             headerStyle: pw.TextStyle(
@@ -72,7 +72,7 @@ class PdfExportService {
           pw.Container(
             alignment: pw.Alignment.centerRight,
             child: pw.Text(
-              'Gesamtpreis: ${participants.fold<double>(0, (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice)).toStringAsFixed(2)} €',
+              'Gesamtpreis: ${participants.fold<double>(0, (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice)).toStringAsFixed(2)} EUR',
               style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
             ),
           ),
@@ -151,12 +151,12 @@ class PdfExportService {
             _buildSection('Preis', [
               _buildField(
                 'Berechneter Preis',
-                '${participant.calculatedPrice.toStringAsFixed(2)} €',
+                '${participant.calculatedPrice.toStringAsFixed(2)} EUR',
               ),
               if (participant.manualPriceOverride != null)
                 _buildField(
                   'Manueller Preis',
-                  '${participant.manualPriceOverride!.toStringAsFixed(2)} €',
+                  '${participant.manualPriceOverride!.toStringAsFixed(2)} EUR',
                 ),
             ]),
           ],
@@ -307,7 +307,7 @@ class PdfExportService {
   }
 
   pw.Widget _buildSummaryRow(String label, double amount, PdfColor color) {
-    final formatter = NumberFormat.currency(locale: 'de_DE', symbol: '€');
+    final formatter = NumberFormat.currency(locale: 'de_DE', symbol: 'EUR');
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
@@ -325,7 +325,7 @@ class PdfExportService {
   }
 
   pw.Widget _buildCategoryTable(Map<String, double> data) {
-    final formatter = NumberFormat.currency(locale: 'de_DE', symbol: '€');
+    final formatter = NumberFormat.currency(locale: 'de_DE', symbol: 'EUR');
     return pw.Table.fromTextArray(
       headers: ['Kategorie', 'Betrag'],
       data: data.entries.map((e) => [e.key, formatter.format(e.value)]).toList(),
