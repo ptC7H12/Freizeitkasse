@@ -17,7 +17,9 @@ import '../../extensions/context_extensions.dart';
 ///
 /// Zeigt alle Teilnehmer des aktuellen Events mit Suche und Filtern
 class ParticipantsListScreen extends ConsumerStatefulWidget {
-  const ParticipantsListScreen({super.key});
+  final bool embedded;
+
+  const ParticipantsListScreen({super.key, this.embedded = false});
 
   @override
   ConsumerState<ParticipantsListScreen> createState() => _ParticipantsListScreenState();
@@ -386,6 +388,11 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
   Widget build(BuildContext context) {
     final participantsAsync = ref.watch(participantsProvider);
 
+    // Wenn embedded mode, nur den Content ohne Scaffold zurückgeben
+    if (widget.embedded) {
+      return _buildContent(participantsAsync);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Teilnehmer'),
@@ -483,186 +490,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: AppConstants.paddingAll16,
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Suche nach Name, E-Mail oder Stadt...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          setState(() {
-                            _searchController.clear();
-                            _searchQuery = '';
-                          });
-                        },
-                      )
-                    : null,
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-            ),
-          ),
-
-          // Filter chips
-          if (_ageFilter != null || _genderFilter != null || _paymentFilter != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Wrap(
-                spacing: 8,
-                children: [
-                  if (_ageFilter != null)
-                    Chip(
-                      label: Text(_getAgeFilterLabel(_ageFilter!)),
-                      onDeleted: () {
-                        setState(() {
-                          _ageFilter = null;
-                        });
-                      },
-                    ),
-                  if (_genderFilter != null)
-                    Chip(
-                      label: Text(_genderFilter!),
-                      onDeleted: () {
-                        setState(() {
-                          _genderFilter = null;
-                        });
-                      },
-                    ),
-                  if (_paymentFilter != null)
-                    Chip(
-                      label: Text(_getPaymentFilterLabel(_paymentFilter!)),
-                      onDeleted: () {
-                        setState(() {
-                          _paymentFilter = null;
-                        });
-                      },
-                    ),
-                ],
-              ),
-            ),
-
-          // Participants List
-          Expanded(
-            child: participantsAsync.when(
-              data: (participants) {
-                if (participants.isEmpty) {
-                  return _buildEmptyState(context);
-                }
-
-                final filteredParticipants = _filterParticipants(participants);
-
-                if (filteredParticipants.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.search_off, size: 80, color: Colors.grey),
-                        const SizedBox(height: AppConstants.spacing),
-                        const Text(
-                          'Keine Ergebnisse gefunden',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: AppConstants.spacingS),
-                        const Text('Versuchen Sie eine andere Suche oder Filter'),
-                        const SizedBox(height: AppConstants.spacing),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _searchController.clear();
-                              _searchQuery = '';
-                              _ageFilter = null;
-                              _genderFilter = null;
-                            });
-                          },
-                          child: const Text('Filter zurücksetzen'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Text(
-                        '${filteredParticipants.length} von ${participants.length} Teilnehmern',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        padding: AppConstants.paddingAll16,
-                        itemCount: filteredParticipants.length,
-                        itemBuilder: (context, index) {
-                          final participant = filteredParticipants[index];
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                child: Text(
-                                  participant.firstName[0].toUpperCase(),
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              title: Text(
-                                '${participant.firstName} ${participant.lastName}',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Geb.: ${AppDateUtils.formatGerman(participant.birthDate)} (${AppDateUtils.calculateAge(participant.birthDate)} Jahre)',
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Preis: ${_getDisplayPrice(participant).toStringAsFixed(2)} €',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.green,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              trailing: const Icon(Icons.chevron_right),
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => ParticipantFormScreen(
-                                      participantId: participant.id,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Text('Fehler: $error'),
-              ),
-            ),
-          ),
-        ],
-      ),
+      body: _buildContent(participantsAsync),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
@@ -674,6 +502,189 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
         icon: const Icon(Icons.add),
         label: const Text('Teilnehmer'),
       ),
+    );
+  }
+
+  Widget _buildContent(AsyncValue<List<Participant>> participantsAsync) {
+    return Column(
+      children: [
+        // Search Bar
+        Padding(
+          padding: AppConstants.paddingAll16,
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Suche nach Name, E-Mail oder Stadt...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _searchController.clear();
+                          _searchQuery = '';
+                        });
+                      },
+                    )
+                  : null,
+              border: const OutlineInputBorder(),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+          ),
+        ),
+
+        // Filter chips
+        if (_ageFilter != null || _genderFilter != null || _paymentFilter != null)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Wrap(
+              spacing: 8,
+              children: [
+                if (_ageFilter != null)
+                  Chip(
+                    label: Text(_getAgeFilterLabel(_ageFilter!)),
+                    onDeleted: () {
+                      setState(() {
+                        _ageFilter = null;
+                      });
+                    },
+                  ),
+                if (_genderFilter != null)
+                  Chip(
+                    label: Text(_genderFilter!),
+                    onDeleted: () {
+                      setState(() {
+                        _genderFilter = null;
+                      });
+                    },
+                  ),
+                if (_paymentFilter != null)
+                  Chip(
+                    label: Text(_getPaymentFilterLabel(_paymentFilter!)),
+                    onDeleted: () {
+                      setState(() {
+                        _paymentFilter = null;
+                      });
+                    },
+                  ),
+              ],
+            ),
+          ),
+
+        // Participants List
+        Expanded(
+          child: participantsAsync.when(
+            data: (participants) {
+              if (participants.isEmpty) {
+                return _buildEmptyState(context);
+              }
+
+              final filteredParticipants = _filterParticipants(participants);
+
+              if (filteredParticipants.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.search_off, size: 80, color: Colors.grey),
+                      const SizedBox(height: AppConstants.spacing),
+                      const Text(
+                        'Keine Ergebnisse gefunden',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: AppConstants.spacingS),
+                      const Text('Versuchen Sie eine andere Suche oder Filter'),
+                      const SizedBox(height: AppConstants.spacing),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _searchController.clear();
+                            _searchQuery = '';
+                            _ageFilter = null;
+                            _genderFilter = null;
+                          });
+                        },
+                        child: const Text('Filter zurücksetzen'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text(
+                      '${filteredParticipants.length} von ${participants.length} Teilnehmern',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: AppConstants.paddingAll16,
+                      itemCount: filteredParticipants.length,
+                      itemBuilder: (context, index) {
+                        final participant = filteredParticipants[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              child: Text(
+                                participant.firstName[0].toUpperCase(),
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            title: Text(
+                              '${participant.firstName} ${participant.lastName}',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Geb.: ${AppDateUtils.formatGerman(participant.birthDate)} (${AppDateUtils.calculateAge(participant.birthDate)} Jahre)',
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Preis: ${_getDisplayPrice(participant).toStringAsFixed(2)} €',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ParticipantFormScreen(
+                                    participantId: participant.id,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
+              child: Text('Fehler: $error'),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

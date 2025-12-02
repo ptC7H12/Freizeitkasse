@@ -3,13 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import '../../providers/family_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
-import '../../data/database/app_database.dart';
+import '../../data/database/app_database.dart' as db;
 import '../../utils/constants.dart';
 import 'family_form_screen.dart';
 
 /// Families List Screen
 class FamiliesListScreen extends ConsumerStatefulWidget {
-  const FamiliesListScreen({super.key});
+  final bool embedded;
+
+  const FamiliesListScreen({super.key, this.embedded = false});
 
   @override
   ConsumerState<FamiliesListScreen> createState() => _FamiliesListScreenState();
@@ -189,6 +191,11 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
   Widget build(BuildContext context) {
     final familiesAsync = ref.watch(familiesProvider);
 
+    // Wenn embedded mode, nur den Content ohne Scaffold zurückgeben
+    if (widget.embedded) {
+      return _buildContent(familiesAsync);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Familien'),
@@ -203,139 +210,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: AppConstants.paddingAll16,
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Suche nach Familienname, Kontaktperson, E-Mail...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          setState(() {
-                            _searchController.clear();
-                            _searchQuery = '';
-                          });
-                        },
-                      )
-                    : null,
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-            ),
-          ),
-
-          // Filter chips
-          if (_paymentFilter != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Wrap(
-                spacing: 8,
-                children: [
-                  Chip(
-                    label: Text(_getPaymentFilterLabel(_paymentFilter!)),
-                    onDeleted: () {
-                      setState(() {
-                        _paymentFilter = null;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-          // Families List
-          Expanded(
-            child: familiesAsync.when(
-              data: (families) {
-                if (families.isEmpty) {
-                  return _buildEmptyState();
-                }
-
-                final filteredFamilies = _filterFamilies(families);
-
-                if (filteredFamilies.isEmpty) {
-                  return _buildNoResultsState();
-                }
-
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Text(
-                        '${filteredFamilies.length} von ${families.length} Familien',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        padding: AppConstants.paddingAll16,
-                        itemCount: filteredFamilies.length,
-                        itemBuilder: (context, index) {
-                          final family = filteredFamilies[index];
-                          final expectedPrice = _familyExpectedPrices[family.id] ?? 0.0;
-                          final totalPaid = _familyPayments[family.id] ?? 0.0;
-
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              leading: const CircleAvatar(
-                                child: Icon(Icons.family_restroom),
-                              ),
-                              title: Text(
-                                family.familyName,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (family.contactPerson != null)
-                                    Text('Kontakt: ${family.contactPerson}'),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Erwartet: ${expectedPrice.toStringAsFixed(2)} € | '
-                                    'Bezahlt: ${totalPaid.toStringAsFixed(2)} €',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: totalPaid >= expectedPrice ? Colors.green : Colors.orange,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              trailing: const Icon(Icons.chevron_right),
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => FamilyFormScreen(
-                                      familyId: family.id,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text('Fehler: $error')),
-            ),
-          ),
-        ],
-      ),
+      body: _buildContent(familiesAsync),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
@@ -347,6 +222,142 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
         icon: const Icon(Icons.add),
         label: const Text('Familie'),
       ),
+    );
+  }
+
+  Widget _buildContent(AsyncValue<List<db.Family>> familiesAsync) {
+    return Column(
+      children: [
+        // Search Bar
+        Padding(
+          padding: AppConstants.paddingAll16,
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Suche nach Familienname, Kontaktperson, E-Mail...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _searchController.clear();
+                          _searchQuery = '';
+                        });
+                      },
+                    )
+                  : null,
+              border: const OutlineInputBorder(),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+          ),
+        ),
+
+        // Filter chips
+        if (_paymentFilter != null)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Wrap(
+              spacing: 8,
+              children: [
+                Chip(
+                  label: Text(_getPaymentFilterLabel(_paymentFilter!)),
+                  onDeleted: () {
+                    setState(() {
+                      _paymentFilter = null;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+
+        // Families List
+        Expanded(
+          child: familiesAsync.when(
+            data: (families) {
+              if (families.isEmpty) {
+                return _buildEmptyState();
+              }
+
+              final filteredFamilies = _filterFamilies(families);
+
+              if (filteredFamilies.isEmpty) {
+                return _buildNoResultsState();
+              }
+
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text(
+                      '${filteredFamilies.length} von ${families.length} Familien',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: AppConstants.paddingAll16,
+                      itemCount: filteredFamilies.length,
+                      itemBuilder: (context, index) {
+                        final family = filteredFamilies[index];
+                        final expectedPrice = _familyExpectedPrices[family.id] ?? 0.0;
+                        final totalPaid = _familyPayments[family.id] ?? 0.0;
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            leading: const CircleAvatar(
+                              child: Icon(Icons.family_restroom),
+                            ),
+                            title: Text(
+                              family.familyName,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (family.contactPerson != null)
+                                  Text('Kontakt: ${family.contactPerson}'),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Erwartet: ${expectedPrice.toStringAsFixed(2)} € | '
+                                  'Bezahlt: ${totalPaid.toStringAsFixed(2)} €',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: totalPaid >= expectedPrice ? Colors.green : Colors.orange,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => FamilyFormScreen(
+                                    familyId: family.id,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(child: Text('Fehler: $error')),
+          ),
+        ),
+      ],
     );
   }
 
