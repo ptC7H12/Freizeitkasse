@@ -634,7 +634,7 @@ class DashboardScreen extends ConsumerWidget {
                                     const Color(0xFF2196F3),
                                     () => Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (context) => const ParticipantsListScreen(),
+                                        builder: (context) => const ParticipantsFamiliesScreen(),
                                       ),
                                     ),
                                   ),
@@ -649,7 +649,7 @@ class DashboardScreen extends ConsumerWidget {
                                     const Color(0xFF4CAF50),
                                     () => Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (context) => const FamiliesListScreen(),
+                                        builder: (context) => const ParticipantsFamiliesScreen(),
                                       ),
                                     ),
                                   ),
@@ -666,7 +666,7 @@ class DashboardScreen extends ConsumerWidget {
                                   const Color(0xFF2196F3),
                                   () => Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (context) => const ParticipantsListScreen(),
+                                      builder: (context) => const ParticipantsFamiliesScreen(),
                                     ),
                                   ),
                                 ),
@@ -679,7 +679,7 @@ class DashboardScreen extends ConsumerWidget {
                                   const Color(0xFF4CAF50),
                                   () => Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (context) => const FamiliesListScreen(),
+                                      builder: (context) => const ParticipantsFamiliesScreen(),
                                     ),
                                   ),
                                 ),
