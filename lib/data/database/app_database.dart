@@ -236,7 +236,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   // ============================================================================
   // MIGRATION LOGIC (entspricht Alembic-Migrationen)
@@ -259,6 +259,55 @@ class AppDatabase extends _$AppDatabase {
         // Migration von Version 3 zu 4: Füge github_ruleset_path zur Settings-Tabelle hinzu
         if (from < 4) {
           await m.addColumn(settings, settings.githubRulesetPath);
+        }
+
+        // Migration von Version 4 zu 5: Mache Rulesets-Felder nullable
+        if (from < 5) {
+          // SQLite unterstützt kein ALTER COLUMN, daher müssen wir die Tabelle neu erstellen
+          // 1. Erstelle temporäre Tabelle mit altem Schema
+          await customStatement('''
+            CREATE TABLE rulesets_backup (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              event_id INTEGER NOT NULL,
+              name TEXT NOT NULL,
+              description TEXT,
+              valid_from INTEGER NOT NULL,
+              valid_until INTEGER,
+              is_active INTEGER DEFAULT 0,
+              yaml_content TEXT NOT NULL,
+              age_groups TEXT,
+              role_discounts TEXT,
+              family_discount TEXT,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL
+            )
+          ''');
+
+          // 2. Kopiere Daten in Backup-Tabelle
+          await customStatement('''
+            INSERT INTO rulesets_backup
+            SELECT id, event_id, name, description, valid_from, valid_until, is_active,
+                   yaml_content, age_groups, role_discounts, family_discount, created_at, updated_at
+            FROM rulesets
+          ''');
+
+          // 3. Lösche alte Tabelle
+          await m.deleteTable('rulesets');
+
+          // 4. Erstelle neue Tabelle mit nullable Feldern
+          await m.createTable(rulesets);
+
+          // 5. Kopiere Daten zurück
+          await customStatement('''
+            INSERT INTO rulesets (id, event_id, name, description, valid_from, valid_until, is_active,
+                                  yaml_content, age_groups, role_discounts, family_discount, created_at, updated_at)
+            SELECT id, event_id, name, description, valid_from, valid_until, is_active,
+                   yaml_content, age_groups, role_discounts, family_discount, created_at, updated_at
+            FROM rulesets_backup
+          ''');
+
+          // 6. Lösche Backup-Tabelle
+          await customStatement('DROP TABLE rulesets_backup');
         }
       },
     );
