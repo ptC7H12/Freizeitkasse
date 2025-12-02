@@ -236,7 +236,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   // ============================================================================
   // MIGRATION LOGIC (entspricht Alembic-Migrationen)
@@ -254,6 +254,11 @@ class AppDatabase extends _$AppDatabase {
           // Die Spalten houseNumber, country, mobile, medicalNotes, medicalInfo
           // wurden entfernt. Drift wird diese automatisch löschen.
           await m.recreateAllViews();
+        }
+
+        // Migration von Version 3 zu 4: Füge github_ruleset_path zur Settings-Tabelle hinzu
+        if (from < 4) {
+          await m.addColumn(settings, settings.githubRulesetPath);
         }
       },
     );
