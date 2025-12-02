@@ -169,7 +169,17 @@ class EventSelectionScreen extends ConsumerWidget {
                             ],
                           ],
                         ),
-                        trailing: const Icon(Icons.arrow_forward_ios),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline, color: Colors.red),
+                              onPressed: () => _showDeleteEventDialog(context, ref, event),
+                              tooltip: 'Event löschen',
+                            ),
+                            const Icon(Icons.arrow_forward_ios),
+                          ],
+                        ),
                         onTap: () => _selectEvent(context, ref, event),
                       ),
                     );
@@ -191,6 +201,79 @@ class EventSelectionScreen extends ConsumerWidget {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const DashboardScreen(),
+      ),
+    );
+  }
+
+  void _showDeleteEventDialog(BuildContext context, WidgetRef ref, Event event) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Event löschen?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Möchten Sie das Event "${event.name}" wirklich löschen?',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: AppConstants.spacing),
+            const Text(
+              'WARNUNG: Alle zugehörigen Daten werden ebenfalls gelöscht:',
+              style: TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: AppConstants.spacingS),
+            const Text('• Teilnehmer'),
+            const Text('• Familien'),
+            const Text('• Zahlungen'),
+            const Text('• Einnahmen'),
+            const Text('• Ausgaben'),
+            const Text('• Aufgaben'),
+            const Text('• Regelwerke'),
+            const SizedBox(height: AppConstants.spacing),
+            const Text(
+              'Diese Aktion kann nicht rückgängig gemacht werden!',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Abbrechen'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final database = ref.read(databaseProvider);
+
+              // Event löschen (Cascade Delete sollte alle zugehörigen Daten löschen)
+              await (database.delete(database.events)
+                    ..where((tbl) => tbl.id.equals(event.id)))
+                  .go();
+
+              if (dialogContext.mounted) {
+                Navigator.of(dialogContext).pop();
+
+                // Erfolgsmeldung anzeigen
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Event "${event.name}" wurde gelöscht'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Löschen'),
+          ),
+        ],
       ),
     );
   }
