@@ -909,31 +909,64 @@ class _XxxListScreenState extends ConsumerState<XxxListScreen> {
 
 ## Navigation Structure
 
+### Menu Organization (Desktop & Mobile)
+
+The menu is organized into three logical groups:
+
+**📊 VERWALTUNG (Administration)**
+- Dashboard
+- Teilnehmer & Familien (Participants & Families - combined with tabs)
+- Aufgaben (Tasks)
+
+**💰 FINANZEN (Finance)**
+- Zahlungseingänge (Payment Receipts)
+- Sonstige Einnahmen (Other Income)
+- Ausgaben (Expenses)
+- Kassenstand (Cash Status)
+
+**⚙️ EINSTELLUNGEN (Settings)**
+- Einstellungen (includes Regelwerke management in Tab 2)
+
+### Screen Hierarchy
+
 ```
 EventSelectionScreen (/)
   └─> DashboardScreen
-       ├─> ParticipantsListScreen
-       │    ├─> ParticipantFormScreen (create/edit)
-       │    └─> ParticipantImportScreen (Excel)
-       ├─> FamiliesListScreen
-       │    └─> FamilyFormScreen
-       ├─> PaymentsListScreen
-       │    └─> PaymentFormScreen
-       ├─> ExpensesListScreen
-       │    └─> ExpenseFormScreen
-       ├─> IncomesListScreen
-       │    └─> IncomeFormScreen
-       ├─> RulesetsListScreen
-       │    └─> RulesetFormScreen (YAML editor)
-       ├─> RolesListScreen
-       │    └─> RoleFormScreen
-       ├─> TasksScreen (integrated form dialog)
-       ├─> CashStatusScreen (charts + PDF export)
-       └─> SettingsScreen
-            └─> CategoriesManagementScreen
-                 ├─> Expenses tab (create/edit/delete/reorder)
-                 └─> Incomes tab (create/edit/delete/reorder)
+       │
+       ├─> [VERWALTUNG]
+       │   ├─> ParticipantsFamiliesScreen (Tabs: Participants | Families)
+       │   │    ├─> Tab 1: ParticipantsListScreen
+       │   │    │    ├─> ParticipantFormScreen (create/edit)
+       │   │    │    └─> ParticipantImportScreen (Excel)
+       │   │    └─> Tab 2: FamiliesListScreen
+       │   │         └─> FamilyFormScreen
+       │   └─> TasksScreen (integrated form dialog)
+       │
+       ├─> [FINANZEN]
+       │   ├─> PaymentsListScreen
+       │   │    └─> PaymentFormScreen
+       │   ├─> IncomesListScreen
+       │   │    └─> IncomeFormScreen
+       │   ├─> ExpensesListScreen
+       │   │    └─> ExpenseFormScreen
+       │   └─> CashStatusScreen (charts + PDF export)
+       │
+       └─> [EINSTELLUNGEN]
+            └─> SettingsScreen (Tabs: Allgemein | Regelwerk | Kategorien | App-Info)
+                 ├─> Tab 1: General settings
+                 ├─> Tab 2: RulesetsManagementScreen (Regelwerk)
+                 │    └─> RulesetFormScreen (YAML editor)
+                 ├─> Tab 3: CategoriesManagementScreen
+                 │    ├─> Expenses tab (create/edit/delete/reorder)
+                 │    └─> Incomes tab (create/edit/delete/reorder)
+                 └─> Tab 4: App Info
 ```
+
+### Notes
+- **Rollen (Roles):** No longer in main navigation - roles are derived from Regelwerke (rulesets)
+- **Desktop:** Uses custom blue sidebar (280px) with grouped navigation
+- **Mobile:** Uses Drawer with same grouped structure and blue theme
+- **Terminology:** "Zahlungen" → "Zahlungseingänge" for clarity
 
 **Navigation Pattern (NEW):**
 ```dart
