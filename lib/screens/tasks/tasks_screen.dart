@@ -6,6 +6,8 @@ import '../../providers/task_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../widgets/adaptive_list_item.dart';
+import '../../extensions/context_extensions.dart';
 import 'task_form_screen.dart';
 
 class TasksScreen extends ConsumerStatefulWidget {
@@ -95,8 +97,55 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 return ListView.builder(
                   padding: AppConstants.paddingAll16,
                   itemCount: filteredTasks.length,
-                  itemBuilder: (context, index) =>
-                      _TaskListItem(task: filteredTasks[index], onTap: () => _navigateToTaskForm(context, filteredTasks[index])),
+                  itemBuilder: (context, index) {
+                    final task = filteredTasks[index];
+                    final isOverdue = task.status == 'pending' && (task.dueDate?.isBefore(DateTime.now()) ?? false);
+
+                    return AdaptiveListItem(
+                      leading: Icon(
+                        task.status == 'completed' ? Icons.check_circle : Icons.radio_button_unchecked,
+                        color: task.status == 'completed' ? Colors.green : (isOverdue ? Colors.red : Colors.grey),
+                      ),
+                      title: Text(
+                        task.title,
+                        style: TextStyle(
+                          decoration: task.status == 'completed' ? TextDecoration.lineThrough : null,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (task.description != null)
+                            Text(task.description!, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          if (task.dueDate != null)
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today, size: 12, color: isOverdue ? Colors.red : Colors.grey),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Fällig: ${DateFormat('dd.MM.yyyy', 'de_DE').format(task.dueDate!)}',
+                                  style: TextStyle(
+                                    color: isOverdue ? Colors.red : null,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                      onTap: () => _navigateToTaskForm(context, task),
+                      onEdit: () => _navigateToTaskForm(context, task),
+                      onDelete: () async {
+                        final repo = ref.read(taskRepositoryProvider);
+                        await repo.deleteTask(task.id);
+                        if (context.mounted) {
+                          context.showSuccess('Aufgabe gelöscht');
+                        }
+                      },
+                      deleteConfirmMessage: 'Aufgabe "${task.title}" wirklich löschen?',
+                    );
+                  },
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -154,52 +203,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       MaterialPageRoute(
         builder: (context) => TaskFormScreen(taskId: task?.id),
       ),
-    );
-  }
-}
-
-class _TaskListItem extends StatelessWidget {
-  final Task task;
-  final VoidCallback onTap;
-
-  const _TaskListItem({required this.task, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final isOverdue = task.status == 'pending' && (task.dueDate?.isBefore(DateTime.now()) ?? false);
-    return Card(
-      child: ListTile(
-        leading: Icon(
-          task.status == 'completed' ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: task.status == 'completed' ? Colors.green : (isOverdue ? Colors.red : Colors.grey),
-        ),
-        title: Text(task.title, style: TextStyle(decoration: task.status == 'completed' ? TextDecoration.lineThrough : null)),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (task.description != null) Text(task.description!, maxLines: 1, overflow: TextOverflow.ellipsis),
-            if (task.dueDate != null) Text('Fällig: ${DateFormat('dd.MM.yyyy', 'de_DE').format(task.dueDate!)}', style: TextStyle(color: isOverdue ? Colors.red : null)),
-          ],
-        ),
-        trailing: _PriorityBadge(priority: task.priority),
-        onTap: onTap,
-      ),
-    );
-  }
-}
-
-class _PriorityBadge extends StatelessWidget {
-  final String priority;
-  const _PriorityBadge({required this.priority});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = priority == 'high' ? Colors.red : (priority == 'medium' ? Colors.orange : Colors.grey);
-    final label = priority == 'high' ? 'Hoch' : (priority == 'medium' ? 'Mittel' : 'Niedrig');
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-      child: Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
     );
   }
 }

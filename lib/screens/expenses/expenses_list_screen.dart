@@ -9,6 +9,8 @@ import '../../data/repositories/expense_repository.dart';
 import 'expense_form_screen.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../widgets/adaptive_list_item.dart';
+import '../../extensions/context_extensions.dart';
 
 class ExpensesListScreen extends ConsumerWidget {
   const ExpensesListScreen({super.key});
@@ -213,7 +215,7 @@ class ExpensesListScreen extends ConsumerWidget {
                   itemCount: expenses.length,
                   itemBuilder: (context, index) {
                     final expense = expenses[index];
-                    return _ExpenseListItem(expense: expense);
+                    return _ExpenseListItem(expense: expense, ref: ref);
                   },
                 ),
               ),
@@ -278,8 +280,9 @@ class ExpensesListScreen extends ConsumerWidget {
 
 class _ExpenseListItem extends ConsumerWidget {
   final Expense expense;
+  final WidgetRef ref;
 
-  const _ExpenseListItem({required this.expense});
+  const _ExpenseListItem({required this.expense, required this.ref});
 
   IconData _getCategoryIcon(String category) {
     switch (category.toLowerCase()) {
@@ -345,178 +348,111 @@ class _ExpenseListItem extends ConsumerWidget {
     final categoryIcon = _getCategoryIcon(expense.category);
     final dateFormat = DateFormat('dd.MM.yyyy', 'de_DE');
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ExpenseFormScreen(expenseId: expense.id),
+    return AdaptiveListItem(
+      leading: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: categoryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          categoryIcon,
+          color: categoryColor,
+        ),
+      ),
+      title: Row(
+        children: [
+          Text(
+            expense.category,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          if (expense.vendor != null) ...[
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                '• ${expense.vendor}',
+                style: TextStyle(color: Colors.grey[600]),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          );
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: AppConstants.paddingAll16,
-          child: Row(
+          ],
+          const Spacer(),
+          Text(
+            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(expense.amount),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.red[700],
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (expense.description != null)
+            Text(
+              expense.description!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          const SizedBox(height: 4),
+          Row(
             children: [
-              // Category icon
+              Icon(Icons.calendar_today, size: 12, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Text(
+                dateFormat.format(expense.expenseDate),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              const SizedBox(width: 12),
               Container(
-                width: 48,
-                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: categoryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: expense.reimbursed
+                      ? Colors.green.withOpacity(0.1)
+                      : Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  categoryIcon,
-                  color: categoryColor,
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacing),
-
-              // Expense details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          expense.category,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        if (expense.vendor != null) ...[
-                          const SizedBox(width: AppConstants.spacingS),
-                          Flexible(
-                            child: Text(
-                              '• ${expense.vendor}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    if (expense.description != null)
-                      Text(
-                        expense.description!,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          size: 14,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          dateFormat.format(expense.expenseDate),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[600],
-                              ),
-                        ),
-                        if (expense.paymentMethod != null) ...[
-                          const SizedBox(width: AppConstants.spacingM),
-                          Icon(
-                            Icons.payment,
-                            size: 14,
-                            color: Colors.grey[600],
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            expense.paymentMethod!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              // Amount and Status
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    NumberFormat.currency(locale: 'de_DE', symbol: '€').format(expense.amount),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red[700],
-                        ),
+                child: Text(
+                  expense.reimbursed ? 'Erstattet' : 'Offen',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: expense.reimbursed ? Colors.green : Colors.orange,
                   ),
-                  const SizedBox(height: AppConstants.spacingS),
-                  // Status-Chip (klickbar zum Togglen)
-                  InkWell(
-                    onTap: () => _toggleReimbursedStatus(ref),
-                    borderRadius: AppConstants.borderRadius8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: expense.reimbursed
-                            ? const Color(0xFF4CAF50).withOpacity(0.1)
-                            : const Color(0xFFFF9800).withOpacity(0.1),
-                        borderRadius: AppConstants.borderRadius8,
-                        border: Border.all(
-                          color: expense.reimbursed
-                              ? const Color(0xFF4CAF50)
-                              : const Color(0xFFFF9800),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            expense.reimbursed ? Icons.check_circle : Icons.hourglass_empty,
-                            size: 16,
-                            color: expense.reimbursed
-                                ? const Color(0xFF4CAF50)
-                                : const Color(0xFFFF9800),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            expense.reimbursed ? 'Erstattet' : 'Offen',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: expense.reimbursed
-                                  ? const Color(0xFF4CAF50)
-                                  : const Color(0xFFFF9800),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (expense.receiptNumber != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Beleg: ${expense.receiptNumber}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                    ),
-                  ],
-                ],
+                ),
               ),
             ],
           ),
-        ),
+        ],
       ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ExpenseFormScreen(expenseId: expense.id),
+          ),
+        );
+      },
+      onEdit: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ExpenseFormScreen(expenseId: expense.id),
+          ),
+        );
+      },
+      onDelete: () async {
+        final database = ref.read(databaseProvider);
+        final repository = ExpenseRepository(database);
+        await repository.deleteExpense(expense.id);
+        if (context.mounted) {
+          context.showSuccess('Ausgabe gelöscht');
+        }
+      },
+      deleteConfirmMessage: 'Ausgabe "${expense.category}" (${NumberFormat.currency(locale: 'de_DE', symbol: '€').format(expense.amount)}) wirklich löschen?',
     );
   }
 }
