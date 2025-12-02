@@ -9,7 +9,7 @@ import '../../providers/income_provider.dart';
 import '../../providers/payment_provider.dart';
 import '../../providers/participant_provider.dart';
 import '../../providers/pdf_export_provider.dart';
-import '../../data/database/app_database.dart';
+import '../../data/database/app_database.dart' as db;
 import '../../utils/constants.dart';
 import '../../extensions/context_extensions.dart';
 
@@ -731,7 +731,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   }
 
   // ========== TAB 1: ÜBERSICHT ==========
-  Widget _buildOverviewTab(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
+  Widget _buildOverviewTab(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
     return ListView(
       padding: AppConstants.paddingAll16,
       children: [
@@ -772,8 +772,8 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   }
 
   // ========== TAB 2: TRANSAKTIONSHISTORIE ==========
-  Widget _buildTransactionsTab(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
-    return StreamBuilder<List<Payment>>(
+  Widget _buildTransactionsTab(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
+    return StreamBuilder<List<db.Payment>>(
       stream: (database.select(database.payments)
             ..where((tbl) => tbl.eventId.equals(eventId))
             ..where((tbl) => tbl.isActive.equals(true)))
@@ -783,7 +783,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
           return const Center(child: CircularProgressIndicator());
         }
 
-        return StreamBuilder<List<Income>>(
+        return StreamBuilder<List<db.Income>>(
           stream: (database.select(database.incomes)
                 ..where((tbl) => tbl.eventId.equals(eventId))
                 ..where((tbl) => tbl.isActive.equals(true)))
@@ -793,7 +793,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
               return const Center(child: CircularProgressIndicator());
             }
 
-            return StreamBuilder<List<Expense>>(
+            return StreamBuilder<List<db.Expense>>(
               stream: (database.select(database.expenses)
                     ..where((tbl) => tbl.eventId.equals(eventId))
                     ..where((tbl) => tbl.isActive.equals(true)))
@@ -803,7 +803,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                return StreamBuilder<List<Participant>>(
+                return StreamBuilder<List<db.Participant>>(
                   stream: (database.select(database.participants)
                         ..where((tbl) => tbl.eventId.equals(eventId))
                         ..where((tbl) => tbl.isActive.equals(true)))
@@ -813,7 +813,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                       return const Center(child: CircularProgressIndicator());
                     }
 
-                    return StreamBuilder<List<Family>>(
+                    return StreamBuilder<List<db.Family>>(
                       stream: (database.select(database.families)
                             ..where((tbl) => tbl.eventId.equals(eventId)))
                           .watch(),
@@ -845,32 +845,34 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   }
 
   List<Transaction> _buildTransactionList(
-    List<Payment> payments,
-    List<Income> incomes,
-    List<Expense> expenses,
-    List<Participant> participants,
-    List<Family> families,
+    List<db.Payment> payments,
+    List<db.Income> incomes,
+    List<db.Expense> expenses,
+    List<db.Participant> participants,
+    List<db.Family> families,
   ) {
     final List<Transaction> transactions = [];
 
     // Helper: Finde Teilnehmer-Name
     String? getParticipantName(int? participantId) {
       if (participantId == null) return null;
-      final participant = participants.firstWhere(
-        (p) => p.id == participantId,
-        orElse: () => participants.first,
-      );
-      return '${participant.firstName} ${participant.lastName}';
+      try {
+        final participant = participants.firstWhere((p) => p.id == participantId);
+        return '${participant.firstName} ${participant.lastName}';
+      } catch (e) {
+        return null;
+      }
     }
 
     // Helper: Finde Familien-Name
     String? getFamilyName(int? familyId) {
       if (familyId == null) return null;
-      final family = families.firstWhere(
-        (f) => f.id == familyId,
-        orElse: () => families.first,
-      );
-      return family.familyName;
+      try {
+        final family = families.firstWhere((f) => f.id == familyId);
+        return family.familyName;
+      } catch (e) {
+        return null;
+      }
     }
 
     // 1. Zahlungseingänge hinzufügen (positive Beträge)
@@ -1234,8 +1236,8 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   }
 
   // ========== TAB 3: ZUSCHÜSSE ==========
-  Widget _buildSubsidiesTab(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
-    return StreamBuilder<List<Participant>>(
+  Widget _buildSubsidiesTab(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
+    return StreamBuilder<List<db.Participant>>(
       stream: (database.select(database.participants)
             ..where((tbl) => tbl.eventId.equals(eventId))
             ..where((tbl) => tbl.isActive.equals(true)))
@@ -1245,7 +1247,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
           return const Center(child: CircularProgressIndicator());
         }
 
-        return StreamBuilder<List<Role>>(
+        return StreamBuilder<List<db.Role>>(
           stream: (database.select(database.roles)
                 ..where((tbl) => tbl.eventId.equals(eventId)))
               .watch(),
@@ -1269,16 +1271,16 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
     );
   }
 
-  Widget _buildSubsidiesContent(BuildContext context, List<Participant> participants, List<Role> roles) {
+  Widget _buildSubsidiesContent(BuildContext context, List<db.Participant> participants, List<db.Role> roles) {
     // Helper: Berechne Zuschuss-Betrag
-    double calculateSubsidy(Participant p) {
+    double calculateSubsidy(db.Participant p) {
       if (p.discountPercent <= 0) return 0;
       // Subsidy = calculatedPrice * (discountPercent / (100 - discountPercent))
       return p.calculatedPrice * (p.discountPercent / (100 - p.discountPercent));
     }
 
     // Bereich 1: Zuschüsse nach Rolle
-    final Map<int?, List<Participant>> byRole = {};
+    final Map<int?, List<db.Participant>> byRole = {};
     for (final p in participants) {
       if (!byRole.containsKey(p.roleId)) {
         byRole[p.roleId] = [];
@@ -1287,7 +1289,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
     }
 
     // Bereich 2: Zuschüsse nach Rabatttyp
-    final Map<String, List<Participant>> byDiscountType = {};
+    final Map<String, List<db.Participant>> byDiscountType = {};
     for (final p in participants) {
       String discountType = 'Sonstige';
 
@@ -1530,7 +1532,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                 ),
                 const SizedBox(height: AppConstants.spacing),
                 const Divider(),
-                const SizedBox(height: AppConstants.spacingXs),
+                const SizedBox(height: AppConstants.spacingS),
                 const Text(
                   'Hinweis: Nur regelwerk-basierte Zuschüsse werden angezeigt. Manuelle Preisüberschreibungen sind ausgeschlossen.',
                   style: TextStyle(
@@ -1585,8 +1587,8 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
     );
   }
 
-  Widget _buildSollSection(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
-    return StreamBuilder<List<Participant>>(
+  Widget _buildSollSection(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
+    return StreamBuilder<List<db.Participant>>(
       stream: (database.select(database.participants)
             ..where((tbl) => tbl.eventId.equals(eventId))
             ..where((tbl) => tbl.isActive.equals(true)))
@@ -1598,7 +1600,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
           (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
         );
 
-        return StreamBuilder<List<Income>>(
+        return StreamBuilder<List<db.Income>>(
           stream: (database.select(database.incomes)
                 ..where((tbl) => tbl.eventId.equals(eventId))
                 ..where((tbl) => tbl.isActive.equals(true)))
@@ -1610,7 +1612,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
               (sum, income) => sum + income.amount,
             );
 
-            return StreamBuilder<List<Expense>>(
+            return StreamBuilder<List<db.Expense>>(
               stream: (database.select(database.expenses)
                     ..where((tbl) => tbl.eventId.equals(eventId))
                     ..where((tbl) => tbl.isActive.equals(true)))
@@ -1668,8 +1670,8 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
     );
   }
 
-  Widget _buildIstSection(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
-    return StreamBuilder<List<Payment>>(
+  Widget _buildIstSection(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
+    return StreamBuilder<List<db.Payment>>(
       stream: (database.select(database.payments)
             ..where((tbl) => tbl.eventId.equals(eventId))
             ..where((tbl) => tbl.isActive.equals(true)))
@@ -1681,7 +1683,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
           (sum, payment) => sum + payment.amount,
         );
 
-        return StreamBuilder<List<Income>>(
+        return StreamBuilder<List<db.Income>>(
           stream: (database.select(database.incomes)
                 ..where((tbl) => tbl.eventId.equals(eventId))
                 ..where((tbl) => tbl.isActive.equals(true)))
@@ -1693,7 +1695,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
               (sum, income) => sum + income.amount,
             );
 
-            return StreamBuilder<List<Expense>>(
+            return StreamBuilder<List<db.Expense>>(
               stream: (database.select(database.expenses)
                     ..where((tbl) => tbl.eventId.equals(eventId))
                     ..where((tbl) => tbl.isActive.equals(true)))
@@ -1750,8 +1752,8 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
     );
   }
 
-  Widget _buildDifferenzenSection(BuildContext context, WidgetRef ref, AppDatabase database, int eventId) {
-    return StreamBuilder<List<Participant>>(
+  Widget _buildDifferenzenSection(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
+    return StreamBuilder<List<db.Participant>>(
       stream: (database.select(database.participants)
             ..where((tbl) => tbl.eventId.equals(eventId))
             ..where((tbl) => tbl.isActive.equals(true)))
@@ -1763,7 +1765,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
           (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
         );
 
-        return StreamBuilder<List<Payment>>(
+        return StreamBuilder<List<db.Payment>>(
           stream: (database.select(database.payments)
                 ..where((tbl) => tbl.eventId.equals(eventId))
                 ..where((tbl) => tbl.isActive.equals(true)))
@@ -1775,7 +1777,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
               (sum, payment) => sum + payment.amount,
             );
 
-            return StreamBuilder<List<Income>>(
+            return StreamBuilder<List<db.Income>>(
               stream: (database.select(database.incomes)
                     ..where((tbl) => tbl.eventId.equals(eventId))
                     ..where((tbl) => tbl.isActive.equals(true)))
@@ -1784,7 +1786,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                 final incomes = incomeSnapshot.data ?? [];
                 final sonstigeEinnahmen = incomes.fold<double>(0.0, (sum, income) => sum + income.amount);
 
-                return StreamBuilder<List<Expense>>(
+                return StreamBuilder<List<db.Expense>>(
                   stream: (database.select(database.expenses)
                         ..where((tbl) => tbl.eventId.equals(eventId))
                         ..where((tbl) => tbl.isActive.equals(true)))
