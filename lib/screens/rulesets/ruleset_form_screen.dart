@@ -648,7 +648,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
 
   Widget _buildParsedDataSummary(Map<String, dynamic> data) {
     final ageGroups = data['age_groups'] as List;
-    final roleDiscounts = data['role_discounts'] as List;
+    final roleDiscounts = data['role_discounts'] as Map<String, dynamic>;
     final hasFamilyDiscount = data['family_discount'] != null;
 
     return Column(

@@ -208,7 +208,7 @@ class RulesetRepository {
         'name': ruleset.name,
         'validFrom': ruleset.validFrom,
         'ageGroupCount': (parsed['age_groups'] as List).length,
-        'roleDiscountCount': (parsed['role_discounts'] as List).length,
+        'roleDiscountCount': (parsed['role_discounts'] as Map<String, dynamic>).length,
         'hasFamilyDiscount': parsed['family_discount'] != null,
         'parsed': parsed,
       };

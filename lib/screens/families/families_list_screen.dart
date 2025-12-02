@@ -6,6 +6,7 @@ import '../../providers/database_provider.dart';
 import '../../data/database/app_database.dart' as db;
 import '../../utils/constants.dart';
 import 'family_form_screen.dart';
+import '../../widgets/responsive_scaffold.dart';
 
 /// Families List Screen
 class FamiliesListScreen extends ConsumerStatefulWidget {
@@ -196,20 +197,19 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
       return _buildContent(familiesAsync);
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Familien'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.filter_list,
-              color: _paymentFilter != null ? Colors.orange : null,
-            ),
-            onPressed: _showFilterDialog,
-            tooltip: 'Filter',
+    return ResponsiveScaffold(
+      title: 'Familien',
+      selectedIndex: 2,
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.filter_list,
+            color: _paymentFilter != null ? Colors.orange : null,
           ),
-        ],
-      ),
+          onPressed: _showFilterDialog,
+          tooltip: 'Filter',
+        ),
+      ],
       body: _buildContent(familiesAsync),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

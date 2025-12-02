@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
-/// import '../../providers/database_provider.dart';
-/// import '../../providers/current_event_provider.dart';
-/// import '../../data/database/app_database.dart' as db;
-///import 'package:drift/drift.dart' as drift;
+import '../../providers/settings_provider.dart';
+import '../../providers/current_event_provider.dart';
+import '../../extensions/context_extensions.dart';
+import '../../services/github_ruleset_import_service.dart';
+import '../../data/repositories/ruleset_repository.dart';
+import '../../providers/database_provider.dart';
 import 'categories_management_screen.dart';
 import 'rulesets_management_screen.dart';
 
@@ -300,11 +302,185 @@ class _RulesetSettingsTab extends ConsumerStatefulWidget {
 
 class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
   final _githubPathController = TextEditingController();
+  bool _isLoading = false;
+  bool _isImporting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
 
   @override
   void dispose() {
     _githubPathController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSettings() async {
+    final currentEvent = ref.read(currentEventProvider);
+    if (currentEvent == null) return;
+
+    final repository = ref.read(settingsRepositoryProvider);
+    final settings = await repository.getOrCreateSettings(currentEvent.id);
+
+    if (mounted) {
+      setState(() {
+        _githubPathController.text = settings.githubRulesetPath ?? '';
+      });
+    }
+  }
+
+  Future<void> _saveSettings() async {
+    final currentEvent = ref.read(currentEventProvider);
+    if (currentEvent == null) {
+      if (mounted) {
+        context.showError('Kein Event ausgewählt');
+      }
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final repository = ref.read(settingsRepositoryProvider);
+      await repository.updateSettings(
+        eventId: currentEvent.id,
+        githubRulesetPath: _githubPathController.text.trim().isEmpty
+            ? null
+            : _githubPathController.text.trim(),
+      );
+
+      if (mounted) {
+        context.showSuccess('Einstellungen gespeichert');
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showError('Fehler beim Speichern: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _importFromGithub() async {
+    final currentEvent = ref.read(currentEventProvider);
+    if (currentEvent == null) {
+      if (mounted) {
+        context.showError('Kein Event ausgewählt');
+      }
+      return;
+    }
+
+    final githubPath = _githubPathController.text.trim();
+    if (githubPath.isEmpty) {
+      if (mounted) {
+        context.showError('Bitte geben Sie einen GitHub-Pfad ein');
+      }
+      return;
+    }
+
+    setState(() {
+      _isImporting = true;
+    });
+
+    try {
+      final database = ref.read(databaseProvider);
+      final rulesetRepository = RulesetRepository(database);
+
+      final result = await GithubRulesetImportService.importRulesetsFromGithub(
+        githubUrl: githubPath,
+        onImport: (yamlContent, filename) async {
+          // Extract name from filename (remove .yaml or .yml extension)
+          final name = filename.replaceAll(RegExp(r'\.(yaml|yml)$'), '');
+
+          // Import the ruleset
+          await rulesetRepository.createRuleset(
+            eventId: currentEvent.id,
+            name: name,
+            yamlContent: yamlContent,
+          );
+
+          return 0; // Return dummy id
+        },
+      );
+
+      if (mounted) {
+        if (result['success']) {
+          context.showSuccess(result['message']);
+
+          // Show details if there were errors
+          if ((result['errors'] as List).isNotEmpty) {
+            _showImportResultDialog(result);
+          }
+        } else {
+          context.showError(result['message']);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showError('Fehler beim Import: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isImporting = false;
+        });
+      }
+    }
+  }
+
+  void _showImportResultDialog(Map<String, dynamic> result) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Import-Ergebnis'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '✅ Erfolgreich importiert: ${result['imported']} von ${result['total']}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              if ((result['importedFiles'] as List).isNotEmpty) ...[
+                const SizedBox(height: AppConstants.spacingS),
+                const Text('Importierte Dateien:'),
+                ...(result['importedFiles'] as List).map((file) => Padding(
+                  padding: const EdgeInsets.only(left: 16, top: 4),
+                  child: Text('• $file', style: const TextStyle(color: Colors.green)),
+                )),
+              ],
+              if ((result['errors'] as List).isNotEmpty) ...[
+                const SizedBox(height: AppConstants.spacing),
+                Text(
+                  '❌ Fehler: ${(result['errors'] as List).length}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                ),
+                const SizedBox(height: AppConstants.spacingS),
+                ...(result['errors'] as List).map((error) => Padding(
+                  padding: const EdgeInsets.only(left: 16, top: 4),
+                  child: Text('• $error', style: const TextStyle(fontSize: 12)),
+                )),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -336,7 +512,7 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                     labelText: 'Pfad zum Regelwerk',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.link),
-                    hintText: 'z.B. https://github.com/user/repo/rules',
+                    hintText: 'https://github.com/ptC7H12/MGBFreizeitplaner/tree/main/rulesets/valid',
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingS),
@@ -345,6 +521,21 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacing),
+                FilledButton.icon(
+                  onPressed: _isLoading ? null : _saveSettings,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save),
+                  label: Text(_isLoading ? 'Wird gespeichert...' : 'Speichern'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.all(16),
                   ),
                 ),
               ],
@@ -372,23 +563,47 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                   ],
                 ),
                 const SizedBox(height: AppConstants.spacing),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const RulesetsManagementScreen(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const RulesetsManagementScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.rule),
+                        label: const Text('Regelwerk-Verwaltung'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(16),
+                        ),
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.rule),
-                  label: const Text('Regelwerk-Verwaltung öffnen'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
-                  ),
+                    ),
+                    const SizedBox(width: AppConstants.spacingS),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: _isImporting ? null : _importFromGithub,
+                        icon: _isImporting
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.cloud_download),
+                        label: Text(_isImporting ? 'Importiere...' : 'Von GitHub importieren'),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.all(16),
+                          backgroundColor: const Color(0xFF4CAF50),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: AppConstants.spacingS),
                 Text(
-                  'Importieren Sie Regelwerk-Dateien (YAML) zur Preisberechnung.',
+                  'Importieren Sie Regelwerk-Dateien (YAML) direkt von GitHub oder verwalten Sie vorhandene Regelwerke.',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
