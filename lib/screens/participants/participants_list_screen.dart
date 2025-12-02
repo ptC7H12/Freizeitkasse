@@ -405,60 +405,22 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
             onPressed: _showFilterDialog,
             tooltip: 'Filter',
           ),
-          // Excel Import/Export Menu
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.table_chart),
-            tooltip: 'Excel Import/Export',
-            onSelected: (value) {
+          IconButton(
+            icon: const Icon(Icons.upload_file),
+            onPressed: _importFromExcel,
+            tooltip: 'Excel importieren',
+          ),
+          IconButton(
+            icon: const Icon(Icons.download),
+            onPressed: () {
               final participantsValue = ref.read(participantsProvider).value;
-              switch (value) {
-                case 'import':
-                  _importFromExcel();
-                  break;
-                case 'export':
-                  if (participantsValue != null && participantsValue.isNotEmpty) {
-                    _exportToExcel(participantsValue);
-                  } else {
-                    context.showError('Keine Teilnehmer zum Exportieren');
-                  }
-                  break;
-                case 'template':
-                  _downloadTemplate();
-                  break;
+              if (participantsValue != null && participantsValue.isNotEmpty) {
+                _exportToExcel(participantsValue);
+              } else {
+                context.showError('Keine Teilnehmer zum Exportieren');
               }
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'import',
-                child: Row(
-                  children: [
-                    Icon(Icons.upload_file),
-                    SizedBox(width: 8),
-                    Text('Excel importieren'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'export',
-                child: Row(
-                  children: [
-                    Icon(Icons.download),
-                    SizedBox(width: 8),
-                    Text('Excel exportieren'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'template',
-                child: Row(
-                  children: [
-                    Icon(Icons.description),
-                    SizedBox(width: 8),
-                    Text('Vorlage herunterladen'),
-                  ],
-                ),
-              ),
-            ],
+            tooltip: 'Excel exportieren',
           ),
           IconButton(
             icon: const Icon(Icons.picture_as_pdf),
@@ -467,7 +429,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
               final currentEvent = ref.read(currentEventProvider);
 
               if (participantsValue == null || participantsValue.isEmpty) {
-                context.showSuccess('Keine Teilnehmer zum Exportieren');
+                context.showError('Keine Teilnehmer zum Exportieren');
                 return;
               }
 
@@ -478,20 +440,20 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                   eventName: currentEvent?.name ?? 'Veranstaltung',
                 );
                 if (context.mounted) {
-                  context.showError('PDF gespeichert: $filePath');
+                  context.showSuccess('PDF gespeichert: $filePath');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  context.showError('Fehler beim Export: $e');
+                  context.showError('Fehler beim PDF-Export: $e');
                 }
               }
             },
-            tooltip: 'PDF Export',
+            tooltip: 'PDF exportieren',
           ),
         ],
       ),
       body: _buildContent(participantsAsync),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -499,8 +461,8 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
             ),
           );
         },
-        icon: const Icon(Icons.add),
-        label: const Text('Teilnehmer'),
+        tooltip: 'Teilnehmer hinzufügen',
+        child: const Icon(Icons.add),
       ),
     );
   }

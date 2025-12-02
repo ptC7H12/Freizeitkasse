@@ -94,13 +94,13 @@ class ExcelImportService {
     data['first_name'] = _getCellValue(row, 0);
     data['last_name'] = _getCellValue(row, 1);
 
-    // Parse birth date
-    final birthDateStr = _getCellValue(row, 2);
-    if (birthDateStr != null) {
+    // Parse birth date (handles both Excel date format and string)
+    final birthDateCell = row.length > 2 ? row[2] : null;
+    if (birthDateCell != null && birthDateCell.value != null) {
       try {
-        data['birth_date'] = _parseDate(birthDateStr);
+        data['birth_date'] = _parseDateFromCell(birthDateCell);
       } catch (e) {
-        throw Exception('Ungültiges Geburtsdatum: $birthDateStr');
+        throw Exception('Ungültiges Geburtsdatum: ${birthDateCell.value}');
       }
     }
 
@@ -133,6 +133,39 @@ class ExcelImportService {
     }
 
     return cell.value.toString().trim();
+  }
+
+  /// Parse date from Excel cell (handles both DateCellValue and string formats)
+  DateTime _parseDateFromCell(Data cell) {
+    final value = cell.value;
+
+    // Handle DateCellValue (native Excel date)
+    if (value is DateCellValue) {
+      return DateTime(value.year, value.month, value.day);
+    }
+
+    // Handle DateTimeCellValue
+    if (value is DateTimeCellValue) {
+      return DateTime(value.year, value.month, value.day);
+    }
+
+    // Handle numeric value (Excel serial date number)
+    if (value is IntCellValue || value is DoubleCellValue) {
+      final numValue = value is IntCellValue ? value.value.toDouble() : (value as DoubleCellValue).value;
+      // Excel date starts from 1900-01-01 (with a quirk for leap year 1900)
+      // Excel serial date 1 = 1900-01-01
+      final excelEpoch = DateTime(1899, 12, 30); // 30.12.1899 (Excel starts counting from 1)
+      return excelEpoch.add(Duration(days: numValue.toInt()));
+    }
+
+    // Handle string formats
+    if (value is TextCellValue) {
+      return _parseDate(value.value);
+    }
+
+    // Fallback: try to parse as string
+    final dateStr = value.toString();
+    return _parseDate(dateStr);
   }
 
   /// Parse date string (supports DD.MM.YYYY, YYYY-MM-DD, etc.)
