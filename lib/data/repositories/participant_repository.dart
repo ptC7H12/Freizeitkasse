@@ -246,14 +246,26 @@ class ParticipantRepository {
 
   /// Soft-Delete: Setzt isActive=false und deletedAt
   Future<bool> deleteParticipant(int id) async {
-    final companion = ParticipantsCompanion(
-      id: Value(id),
-      isActive: const Value(false),
-      deletedAt: Value(DateTime.now()),
-      updatedAt: Value(DateTime.now()),
-    );
+    try {
+      final rowsAffected = await (_db.update(_db.participants)
+            ..where((tbl) => tbl.id.equals(id)))
+          .write(
+        const ParticipantsCompanion(
+          isActive: Value(false),
+          deletedAt: Value.absentIfNull(null), // Will be set by trigger or default
+          updatedAt: Value.absentIfNull(null), // Will be set by trigger or default
+        ).copyWith(
+          deletedAt: Value(DateTime.now()),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
 
-    return await _db.update(_db.participants).replace(companion);
+      AppLogger.info('Soft-deleted participant', {'id': id, 'rowsAffected': rowsAffected});
+      return rowsAffected > 0;
+    } catch (e, stack) {
+      AppLogger.error('Failed to delete participant', error: e, stackTrace: stack);
+      return false;
+    }
   }
 
   /// Hard-Delete: Löscht tatsächlich aus DB (nur für Tests!)
