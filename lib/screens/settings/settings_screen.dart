@@ -5,6 +5,7 @@ import '../../providers/settings_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../extensions/context_extensions.dart';
 import '../../services/github_ruleset_import_service.dart';
+import '../../services/ruleset_parser_service.dart';
 import '../../data/repositories/ruleset_repository.dart';
 import '../../providers/database_provider.dart';
 import 'categories_management_screen.dart';
@@ -400,11 +401,22 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
           // Extract name from filename (remove .yaml or .yml extension)
           final name = filename.replaceAll(RegExp(r'\.(yaml|yml)$'), '');
 
+          // Parse YAML to get validFrom date
+          DateTime validFrom;
+          try {
+            final parsed = RulesetParserService.parseRuleset(yamlContent);
+            validFrom = parsed['valid_from'] as DateTime;
+          } catch (e) {
+            // Fallback to current date if parsing fails
+            validFrom = DateTime.now();
+          }
+
           // Import the ruleset
           await rulesetRepository.createRuleset(
             eventId: currentEvent.id,
             name: name,
             yamlContent: yamlContent,
+            validFrom: validFrom,
           );
 
           return 0; // Return dummy id
@@ -412,15 +424,15 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
       );
 
       if (mounted) {
-        if (result['success']) {
-          context.showSuccess(result['message']);
+        if (result['success'] == true) {
+          context.showSuccess(result['message'] as String);
 
           // Show details if there were errors
           if ((result['errors'] as List).isNotEmpty) {
             _showImportResultDialog(result);
           }
         } else {
-          context.showError(result['message']);
+          context.showError(result['message'] as String);
         }
       }
     } catch (e) {
