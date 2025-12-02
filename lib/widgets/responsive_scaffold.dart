@@ -288,6 +288,8 @@ class ResponsiveScaffold extends ConsumerWidget {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
+                  // VERWALTUNG Section
+                  _buildDrawerSectionHeader('VERWALTUNG'),
                   _buildDrawerItem(
                     context,
                     Icons.dashboard,
@@ -302,11 +304,10 @@ class ResponsiveScaffold extends ConsumerWidget {
                     },
                     isSelected: selectedIndex == 0,
                   ),
-                  const Divider(color: Colors.white24, height: 1),
                   _buildDrawerItem(
                     context,
                     Icons.people,
-                    'Teilnehmer',
+                    'Teilnehmer & Familien',
                     () {
                       Navigator.of(context).pop();
                       if (selectedIndex != 1) {
@@ -319,19 +320,25 @@ class ResponsiveScaffold extends ConsumerWidget {
                   ),
                   _buildDrawerItem(
                     context,
-                    Icons.family_restroom,
-                    'Familien',
+                    Icons.task_alt,
+                    'Aufgaben',
                     () {
                       Navigator.of(context).pop();
-                      if (selectedIndex != 2) {
+                      if (selectedIndex != 9) {
                         Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const FamiliesListScreen()),
+                          MaterialPageRoute(builder: (context) => const TasksScreen()),
                         );
                       }
                     },
-                    isSelected: selectedIndex == 2,
+                    isSelected: selectedIndex == 9,
                   ),
+
+                  const SizedBox(height: AppConstants.spacingM),
                   const Divider(color: Colors.white24, height: 1),
+                  const SizedBox(height: AppConstants.spacingM),
+
+                  // FINANZEN Section
+                  _buildDrawerSectionHeader('FINANZEN'),
                   _buildDrawerItem(
                     context,
                     Icons.payment,
@@ -345,6 +352,20 @@ class ResponsiveScaffold extends ConsumerWidget {
                       }
                     },
                     isSelected: selectedIndex == 3,
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.attach_money,
+                    'Sonstige Einnahmen',
+                    () {
+                      Navigator.of(context).pop();
+                      if (selectedIndex != 5) {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => const IncomesListScreen()),
+                        );
+                      }
+                    },
+                    isSelected: selectedIndex == 5,
                   ),
                   _buildDrawerItem(
                     context,
@@ -362,21 +383,6 @@ class ResponsiveScaffold extends ConsumerWidget {
                   ),
                   _buildDrawerItem(
                     context,
-                    Icons.attach_money,
-                    'Sonstige Einnahmen',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 5) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const IncomesListScreen()),
-                        );
-                      }
-                    },
-                    isSelected: selectedIndex == 5,
-                  ),
-                  const Divider(color: Colors.white24, height: 1),
-                  _buildDrawerItem(
-                    context,
                     Icons.receipt_long,
                     'Kassenstand',
                     () {
@@ -389,49 +395,13 @@ class ResponsiveScaffold extends ConsumerWidget {
                     },
                     isSelected: selectedIndex == 6,
                   ),
-                  _buildDrawerItem(
-                    context,
-                    Icons.rule,
-                    'Regelwerke',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 7) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const RulesetsListScreen()),
-                        );
-                      }
-                    },
-                    isSelected: selectedIndex == 7,
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    Icons.badge,
-                    'Rollen',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 8) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const RolesListScreen()),
-                        );
-                      }
-                    },
-                    isSelected: selectedIndex == 8,
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    Icons.task_alt,
-                    'Aufgaben',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 9) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => const TasksScreen()),
-                        );
-                      }
-                    },
-                    isSelected: selectedIndex == 9,
-                  ),
+
+                  const SizedBox(height: AppConstants.spacingM),
                   const Divider(color: Colors.white24, height: 1),
+                  const SizedBox(height: AppConstants.spacingM),
+
+                  // EINSTELLUNGEN Section
+                  _buildDrawerSectionHeader('EINSTELLUNGEN'),
                   _buildDrawerItem(
                     context,
                     Icons.settings,
@@ -446,9 +416,12 @@ class ResponsiveScaffold extends ConsumerWidget {
                     },
                     isSelected: selectedIndex == 10,
                   ),
-                  const SizedBox(height: AppConstants.spacingL),
+
+                  const SizedBox(height: AppConstants.spacingXL),
                   const Divider(color: Colors.white24, height: 1),
                   const SizedBox(height: AppConstants.spacingM),
+
+                  // Freizeit wechseln (special item)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Container(
@@ -474,6 +447,21 @@ class ResponsiveScaffold extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.6),
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }
