@@ -6,6 +6,7 @@ import '../../providers/task_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/participant_provider.dart';
 import '../../utils/constants.dart';
+import '../../widgets/responsive_scaffold.dart';
 
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
@@ -24,23 +25,16 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final statsAsync = ref.watch(taskStatisticsProvider);
 
     if (currentEvent == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Aufgaben')),
+      return ResponsiveScaffold(
+        title: 'Aufgaben',
+        selectedIndex: 9,
         body: const Center(child: Text('Bitte wählen Sie zuerst eine Veranstaltung aus.')),
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Aufgaben'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showTaskDialog(context),
-            tooltip: 'Neue Aufgabe',
-          ),
-        ],
-      ),
+    return ResponsiveScaffold(
+      title: 'Aufgaben',
+      selectedIndex: 9,
       body: Column(
         children: [
           // Statistics Card

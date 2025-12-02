@@ -6,6 +6,7 @@ import '../../providers/income_provider.dart';
 import '../../providers/current_event_provider.dart';
 import 'income_form_screen.dart';
 import '../../utils/constants.dart';
+import '../../widgets/responsive_scaffold.dart';
 
 class IncomesListScreen extends ConsumerWidget {
   const IncomesListScreen({super.key});
@@ -16,34 +17,18 @@ class IncomesListScreen extends ConsumerWidget {
     final incomesAsync = ref.watch(incomesProvider);
 
     if (currentEvent == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Einnahmen'),
-        ),
+      return ResponsiveScaffold(
+        title: 'Sonstige Einnahmen',
+        selectedIndex: 5,
         body: const Center(
           child: Text('Bitte wählen Sie zuerst eine Veranstaltung aus.'),
         ),
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Einnahmen'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const IncomeFormScreen(),
-                ),
-              );
-            },
-            tooltip: 'Neue Einnahme',
-          ),
-        ],
-      ),
+    return ResponsiveScaffold(
+      title: 'Sonstige Einnahmen',
+      selectedIndex: 5,
       body: incomesAsync.when(
         data: (incomes) {
           if (incomes.isEmpty) {
