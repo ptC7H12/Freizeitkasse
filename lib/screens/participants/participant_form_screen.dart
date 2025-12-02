@@ -427,7 +427,7 @@ class _ParticipantFormScreenState
 
   Widget _buildSwimAbilityDropdown() {
     return DropdownButtonFormField<String>(
-      value: _swimAbility,
+      initialValue: _swimAbility,
       decoration: const InputDecoration(
         labelText: 'Schwimmfähigkeit',
         hintText: 'Bitte auswählen',

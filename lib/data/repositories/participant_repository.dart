@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import '../../utils/logger.dart';
 import '../database/app_database.dart';
 import '../../services/price_calculator_service.dart';
 import '../../utils/date_utils.dart';

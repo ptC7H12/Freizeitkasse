@@ -79,25 +79,25 @@ class RulesetOverviewScreen extends ConsumerWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.rule,
             size: 100,
             color: Colors.grey,
           ),
-          const SizedBox(height: AppConstants.spacing),
-          const Text(
+          SizedBox(height: AppConstants.spacing),
+          Text(
             'Kein aktives Regelwerk',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: AppConstants.spacingS),
-          const Text(
+          SizedBox(height: AppConstants.spacingS),
+          Text(
             'Importieren Sie ein Regelwerk in den Einstellungen',
             style: TextStyle(color: Colors.grey),
           ),
@@ -264,7 +264,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
                     ),
                   ),
                 );
-              }).toList(),
+              }),
           ],
         ),
       ),
@@ -348,7 +348,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
                     ),
                   ),
                 );
-              }).toList(),
+              }),
           ],
         ),
       ),

@@ -1164,7 +1164,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                     scrollDirection: Axis.horizontal,
                     child: DataTable(
                       columnSpacing: 16,
-                      headingRowColor: MaterialStateProperty.all(Colors.grey[100]),
+                      headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
                       columns: const [
                         DataColumn(label: Text('Datum', style: TextStyle(fontWeight: FontWeight.bold))),
                         DataColumn(label: Text('Typ', style: TextStyle(fontWeight: FontWeight.bold))),
@@ -1358,7 +1358,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                 else
                   DataTable(
                     columnSpacing: 24,
-                    headingRowColor: MaterialStateProperty.all(Colors.grey[100]),
+                    headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
                     columns: const [
                       DataColumn(label: Text('Rolle', style: TextStyle(fontWeight: FontWeight.bold))),
                       DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
@@ -1436,7 +1436,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                 else
                   DataTable(
                     columnSpacing: 24,
-                    headingRowColor: MaterialStateProperty.all(Colors.grey[100]),
+                    headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
                     columns: const [
                       DataColumn(label: Text('Rabatttyp', style: TextStyle(fontWeight: FontWeight.bold))),
                       DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),

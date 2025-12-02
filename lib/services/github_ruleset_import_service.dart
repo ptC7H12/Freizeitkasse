@@ -28,9 +28,9 @@ class GithubRulesetImportService {
       final repo = segments[1];
 
       // Remove 'tree' or 'blob' and branch name from path
-      final pathStartIndex = segments.indexOf('tree') != -1
+      final pathStartIndex = segments.contains('tree')
           ? segments.indexOf('tree') + 2  // Skip 'tree' and branch name
-          : segments.indexOf('blob') != -1
+          : segments.contains('blob')
               ? segments.indexOf('blob') + 2  // Skip 'blob' and branch name
               : 2;  // Just owner/repo/path
 
@@ -78,7 +78,11 @@ class GithubRulesetImportService {
         throw Exception('GitHub API error: ${response.statusCode} - ${response.body}');
       }
 
-      final List<dynamic> contents = json.decode(response.body);
+      final data = json.decode(response.body);
+      if (data is! List) {
+        throw Exception('Unexpected GitHub API response: expected an array');
+      }
+      final List<dynamic> contents = data;
 
       // Filter for YAML files
       final yamlFiles = contents.where((file) {

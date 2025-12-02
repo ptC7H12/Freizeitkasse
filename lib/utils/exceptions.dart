@@ -1,6 +1,7 @@
 /// Custom Exceptions für bessere Fehlerbehandlung
 ///
 /// Ermöglicht spezifischere Exception-Handling
+library;
 
 /// Basis-Exception für alle App-Exceptions
 abstract class AppException implements Exception {

@@ -7,7 +7,7 @@ import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/ruleset_provider.dart';
 import '../../services/github_ruleset_service.dart';
-import '../../utils/route_helpers.dart';
+//import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
 import '../dashboard/dashboard_screen.dart';
 

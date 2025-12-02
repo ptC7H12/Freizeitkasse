@@ -7019,9 +7019,9 @@ class $RulesetsTable extends Rulesets with TableInfo<$RulesetsTable, Ruleset> {
   late final GeneratedColumn<DateTime> validUntil = GeneratedColumn<DateTime>(
     'valid_until',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _isActiveMeta = const VerificationMeta(
     'isActive',
@@ -7056,9 +7056,9 @@ class $RulesetsTable extends Rulesets with TableInfo<$RulesetsTable, Ruleset> {
   late final GeneratedColumn<String> ageGroups = GeneratedColumn<String>(
     'age_groups',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _roleDiscountsMeta = const VerificationMeta(
     'roleDiscounts',
@@ -7067,9 +7067,9 @@ class $RulesetsTable extends Rulesets with TableInfo<$RulesetsTable, Ruleset> {
   late final GeneratedColumn<String> roleDiscounts = GeneratedColumn<String>(
     'role_discounts',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _familyDiscountMeta = const VerificationMeta(
     'familyDiscount',
@@ -7078,9 +7078,9 @@ class $RulesetsTable extends Rulesets with TableInfo<$RulesetsTable, Ruleset> {
   late final GeneratedColumn<String> familyDiscount = GeneratedColumn<String>(
     'family_discount',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -7175,8 +7175,6 @@ class $RulesetsTable extends Rulesets with TableInfo<$RulesetsTable, Ruleset> {
         _validUntilMeta,
         validUntil.isAcceptableOrUnknown(data['valid_until']!, _validUntilMeta),
       );
-    } else if (isInserting) {
-      context.missing(_validUntilMeta);
     }
     if (data.containsKey('is_active')) {
       context.handle(
@@ -7200,8 +7198,6 @@ class $RulesetsTable extends Rulesets with TableInfo<$RulesetsTable, Ruleset> {
         _ageGroupsMeta,
         ageGroups.isAcceptableOrUnknown(data['age_groups']!, _ageGroupsMeta),
       );
-    } else if (isInserting) {
-      context.missing(_ageGroupsMeta);
     }
     if (data.containsKey('role_discounts')) {
       context.handle(
@@ -7211,8 +7207,6 @@ class $RulesetsTable extends Rulesets with TableInfo<$RulesetsTable, Ruleset> {
           _roleDiscountsMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_roleDiscountsMeta);
     }
     if (data.containsKey('family_discount')) {
       context.handle(
@@ -7222,8 +7216,6 @@ class $RulesetsTable extends Rulesets with TableInfo<$RulesetsTable, Ruleset> {
           _familyDiscountMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_familyDiscountMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(
@@ -7269,7 +7261,7 @@ class $RulesetsTable extends Rulesets with TableInfo<$RulesetsTable, Ruleset> {
       validUntil: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}valid_until'],
-      )!,
+      ),
       isActive: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
@@ -7281,15 +7273,15 @@ class $RulesetsTable extends Rulesets with TableInfo<$RulesetsTable, Ruleset> {
       ageGroups: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}age_groups'],
-      )!,
+      ),
       roleDiscounts: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}role_discounts'],
-      )!,
+      ),
       familyDiscount: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}family_discount'],
-      )!,
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -7313,12 +7305,12 @@ class Ruleset extends DataClass implements Insertable<Ruleset> {
   final String name;
   final String? description;
   final DateTime validFrom;
-  final DateTime validUntil;
+  final DateTime? validUntil;
   final bool isActive;
   final String yamlContent;
-  final String ageGroups;
-  final String roleDiscounts;
-  final String familyDiscount;
+  final String? ageGroups;
+  final String? roleDiscounts;
+  final String? familyDiscount;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Ruleset({
@@ -7327,12 +7319,12 @@ class Ruleset extends DataClass implements Insertable<Ruleset> {
     required this.name,
     this.description,
     required this.validFrom,
-    required this.validUntil,
+    this.validUntil,
     required this.isActive,
     required this.yamlContent,
-    required this.ageGroups,
-    required this.roleDiscounts,
-    required this.familyDiscount,
+    this.ageGroups,
+    this.roleDiscounts,
+    this.familyDiscount,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -7346,12 +7338,20 @@ class Ruleset extends DataClass implements Insertable<Ruleset> {
       map['description'] = Variable<String>(description);
     }
     map['valid_from'] = Variable<DateTime>(validFrom);
-    map['valid_until'] = Variable<DateTime>(validUntil);
+    if (!nullToAbsent || validUntil != null) {
+      map['valid_until'] = Variable<DateTime>(validUntil);
+    }
     map['is_active'] = Variable<bool>(isActive);
     map['yaml_content'] = Variable<String>(yamlContent);
-    map['age_groups'] = Variable<String>(ageGroups);
-    map['role_discounts'] = Variable<String>(roleDiscounts);
-    map['family_discount'] = Variable<String>(familyDiscount);
+    if (!nullToAbsent || ageGroups != null) {
+      map['age_groups'] = Variable<String>(ageGroups);
+    }
+    if (!nullToAbsent || roleDiscounts != null) {
+      map['role_discounts'] = Variable<String>(roleDiscounts);
+    }
+    if (!nullToAbsent || familyDiscount != null) {
+      map['family_discount'] = Variable<String>(familyDiscount);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -7366,12 +7366,20 @@ class Ruleset extends DataClass implements Insertable<Ruleset> {
           ? const Value.absent()
           : Value(description),
       validFrom: Value(validFrom),
-      validUntil: Value(validUntil),
+      validUntil: validUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(validUntil),
       isActive: Value(isActive),
       yamlContent: Value(yamlContent),
-      ageGroups: Value(ageGroups),
-      roleDiscounts: Value(roleDiscounts),
-      familyDiscount: Value(familyDiscount),
+      ageGroups: ageGroups == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ageGroups),
+      roleDiscounts: roleDiscounts == null && nullToAbsent
+          ? const Value.absent()
+          : Value(roleDiscounts),
+      familyDiscount: familyDiscount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(familyDiscount),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -7388,12 +7396,12 @@ class Ruleset extends DataClass implements Insertable<Ruleset> {
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
       validFrom: serializer.fromJson<DateTime>(json['validFrom']),
-      validUntil: serializer.fromJson<DateTime>(json['validUntil']),
+      validUntil: serializer.fromJson<DateTime?>(json['validUntil']),
       isActive: serializer.fromJson<bool>(json['isActive']),
       yamlContent: serializer.fromJson<String>(json['yamlContent']),
-      ageGroups: serializer.fromJson<String>(json['ageGroups']),
-      roleDiscounts: serializer.fromJson<String>(json['roleDiscounts']),
-      familyDiscount: serializer.fromJson<String>(json['familyDiscount']),
+      ageGroups: serializer.fromJson<String?>(json['ageGroups']),
+      roleDiscounts: serializer.fromJson<String?>(json['roleDiscounts']),
+      familyDiscount: serializer.fromJson<String?>(json['familyDiscount']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -7407,12 +7415,12 @@ class Ruleset extends DataClass implements Insertable<Ruleset> {
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
       'validFrom': serializer.toJson<DateTime>(validFrom),
-      'validUntil': serializer.toJson<DateTime>(validUntil),
+      'validUntil': serializer.toJson<DateTime?>(validUntil),
       'isActive': serializer.toJson<bool>(isActive),
       'yamlContent': serializer.toJson<String>(yamlContent),
-      'ageGroups': serializer.toJson<String>(ageGroups),
-      'roleDiscounts': serializer.toJson<String>(roleDiscounts),
-      'familyDiscount': serializer.toJson<String>(familyDiscount),
+      'ageGroups': serializer.toJson<String?>(ageGroups),
+      'roleDiscounts': serializer.toJson<String?>(roleDiscounts),
+      'familyDiscount': serializer.toJson<String?>(familyDiscount),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -7424,12 +7432,12 @@ class Ruleset extends DataClass implements Insertable<Ruleset> {
     String? name,
     Value<String?> description = const Value.absent(),
     DateTime? validFrom,
-    DateTime? validUntil,
+    Value<DateTime?> validUntil = const Value.absent(),
     bool? isActive,
     String? yamlContent,
-    String? ageGroups,
-    String? roleDiscounts,
-    String? familyDiscount,
+    Value<String?> ageGroups = const Value.absent(),
+    Value<String?> roleDiscounts = const Value.absent(),
+    Value<String?> familyDiscount = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Ruleset(
@@ -7438,12 +7446,16 @@ class Ruleset extends DataClass implements Insertable<Ruleset> {
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
     validFrom: validFrom ?? this.validFrom,
-    validUntil: validUntil ?? this.validUntil,
+    validUntil: validUntil.present ? validUntil.value : this.validUntil,
     isActive: isActive ?? this.isActive,
     yamlContent: yamlContent ?? this.yamlContent,
-    ageGroups: ageGroups ?? this.ageGroups,
-    roleDiscounts: roleDiscounts ?? this.roleDiscounts,
-    familyDiscount: familyDiscount ?? this.familyDiscount,
+    ageGroups: ageGroups.present ? ageGroups.value : this.ageGroups,
+    roleDiscounts: roleDiscounts.present
+        ? roleDiscounts.value
+        : this.roleDiscounts,
+    familyDiscount: familyDiscount.present
+        ? familyDiscount.value
+        : this.familyDiscount,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -7536,12 +7548,12 @@ class RulesetsCompanion extends UpdateCompanion<Ruleset> {
   final Value<String> name;
   final Value<String?> description;
   final Value<DateTime> validFrom;
-  final Value<DateTime> validUntil;
+  final Value<DateTime?> validUntil;
   final Value<bool> isActive;
   final Value<String> yamlContent;
-  final Value<String> ageGroups;
-  final Value<String> roleDiscounts;
-  final Value<String> familyDiscount;
+  final Value<String?> ageGroups;
+  final Value<String?> roleDiscounts;
+  final Value<String?> familyDiscount;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const RulesetsCompanion({
@@ -7565,22 +7577,18 @@ class RulesetsCompanion extends UpdateCompanion<Ruleset> {
     required String name,
     this.description = const Value.absent(),
     required DateTime validFrom,
-    required DateTime validUntil,
+    this.validUntil = const Value.absent(),
     this.isActive = const Value.absent(),
     required String yamlContent,
-    required String ageGroups,
-    required String roleDiscounts,
-    required String familyDiscount,
+    this.ageGroups = const Value.absent(),
+    this.roleDiscounts = const Value.absent(),
+    this.familyDiscount = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : eventId = Value(eventId),
        name = Value(name),
        validFrom = Value(validFrom),
-       validUntil = Value(validUntil),
-       yamlContent = Value(yamlContent),
-       ageGroups = Value(ageGroups),
-       roleDiscounts = Value(roleDiscounts),
-       familyDiscount = Value(familyDiscount);
+       yamlContent = Value(yamlContent);
   static Insertable<Ruleset> custom({
     Expression<int>? id,
     Expression<int>? eventId,
@@ -7619,12 +7627,12 @@ class RulesetsCompanion extends UpdateCompanion<Ruleset> {
     Value<String>? name,
     Value<String?>? description,
     Value<DateTime>? validFrom,
-    Value<DateTime>? validUntil,
+    Value<DateTime?>? validUntil,
     Value<bool>? isActive,
     Value<String>? yamlContent,
-    Value<String>? ageGroups,
-    Value<String>? roleDiscounts,
-    Value<String>? familyDiscount,
+    Value<String?>? ageGroups,
+    Value<String?>? roleDiscounts,
+    Value<String?>? familyDiscount,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -15167,12 +15175,12 @@ typedef $$RulesetsTableCreateCompanionBuilder =
       required String name,
       Value<String?> description,
       required DateTime validFrom,
-      required DateTime validUntil,
+      Value<DateTime?> validUntil,
       Value<bool> isActive,
       required String yamlContent,
-      required String ageGroups,
-      required String roleDiscounts,
-      required String familyDiscount,
+      Value<String?> ageGroups,
+      Value<String?> roleDiscounts,
+      Value<String?> familyDiscount,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -15183,12 +15191,12 @@ typedef $$RulesetsTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String?> description,
       Value<DateTime> validFrom,
-      Value<DateTime> validUntil,
+      Value<DateTime?> validUntil,
       Value<bool> isActive,
       Value<String> yamlContent,
-      Value<String> ageGroups,
-      Value<String> roleDiscounts,
-      Value<String> familyDiscount,
+      Value<String?> ageGroups,
+      Value<String?> roleDiscounts,
+      Value<String?> familyDiscount,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -15514,12 +15522,12 @@ class $$RulesetsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<DateTime> validFrom = const Value.absent(),
-                Value<DateTime> validUntil = const Value.absent(),
+                Value<DateTime?> validUntil = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
                 Value<String> yamlContent = const Value.absent(),
-                Value<String> ageGroups = const Value.absent(),
-                Value<String> roleDiscounts = const Value.absent(),
-                Value<String> familyDiscount = const Value.absent(),
+                Value<String?> ageGroups = const Value.absent(),
+                Value<String?> roleDiscounts = const Value.absent(),
+                Value<String?> familyDiscount = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => RulesetsCompanion(
@@ -15544,12 +15552,12 @@ class $$RulesetsTableTableManager
                 required String name,
                 Value<String?> description = const Value.absent(),
                 required DateTime validFrom,
-                required DateTime validUntil,
+                Value<DateTime?> validUntil = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
                 required String yamlContent,
-                required String ageGroups,
-                required String roleDiscounts,
-                required String familyDiscount,
+                Value<String?> ageGroups = const Value.absent(),
+                Value<String?> roleDiscounts = const Value.absent(),
+                Value<String?> familyDiscount = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => RulesetsCompanion.insert(
