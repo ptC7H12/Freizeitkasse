@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
-/// import '../../providers/database_provider.dart';
-/// import '../../providers/current_event_provider.dart';
-/// import '../../data/database/app_database.dart' as db;
-///import 'package:drift/drift.dart' as drift;
+import '../../providers/settings_provider.dart';
+import '../../providers/current_event_provider.dart';
+import '../../extensions/context_extensions.dart';
 import 'categories_management_screen.dart';
 import 'rulesets_management_screen.dart';
 
@@ -300,11 +299,70 @@ class _RulesetSettingsTab extends ConsumerStatefulWidget {
 
 class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
   final _githubPathController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
 
   @override
   void dispose() {
     _githubPathController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSettings() async {
+    final currentEvent = ref.read(currentEventProvider);
+    if (currentEvent == null) return;
+
+    final repository = ref.read(settingsRepositoryProvider);
+    final settings = await repository.getOrCreateSettings(currentEvent.id);
+
+    if (mounted) {
+      setState(() {
+        _githubPathController.text = settings.githubRulesetPath ?? '';
+      });
+    }
+  }
+
+  Future<void> _saveSettings() async {
+    final currentEvent = ref.read(currentEventProvider);
+    if (currentEvent == null) {
+      if (mounted) {
+        context.showError('Kein Event ausgewählt');
+      }
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final repository = ref.read(settingsRepositoryProvider);
+      await repository.updateSettings(
+        eventId: currentEvent.id,
+        githubRulesetPath: _githubPathController.text.trim().isEmpty
+            ? null
+            : _githubPathController.text.trim(),
+      );
+
+      if (mounted) {
+        context.showSuccess('Einstellungen gespeichert');
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showError('Fehler beim Speichern: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -336,7 +394,7 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                     labelText: 'Pfad zum Regelwerk',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.link),
-                    hintText: 'z.B. https://github.com/user/repo/rules',
+                    hintText: 'https://github.com/ptC7H12/MGBFreizeitplaner/tree/main/rulesets/valid',
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingS),
@@ -345,6 +403,21 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacing),
+                FilledButton.icon(
+                  onPressed: _isLoading ? null : _saveSettings,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save),
+                  label: Text(_isLoading ? 'Wird gespeichert...' : 'Speichern'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.all(16),
                   ),
                 ),
               ],
