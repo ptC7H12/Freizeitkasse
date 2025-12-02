@@ -5,14 +5,10 @@ import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../data/database/app_database.dart';
 import '../participants/participants_families_screen.dart';
-import '../participants/participants_list_screen.dart';
-import '../families/families_list_screen.dart';
-import '../rulesets/rulesets_list_screen.dart';
 import '../payments/payments_list_screen.dart';
 import '../expenses/expenses_list_screen.dart';
 import '../incomes/incomes_list_screen.dart';
 import '../cash_status/cash_status_screen.dart';
-import '../roles/roles_list_screen.dart';
 import '../tasks/tasks_screen.dart';
 import '../settings/settings_screen.dart';
 import '../../utils/constants.dart';
@@ -141,101 +137,184 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildNavigationRail(BuildContext context, WidgetRef ref) {
-    return NavigationRail(
-      extended: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      selectedIndex: 0, // Dashboard ist immer selected
-      destinations: const [
-        NavigationRailDestination(
-          icon: Icon(Icons.dashboard),
-          label: Text('Dashboard'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.people),
-          label: Text('Teilnehmer & Familien'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.payment),
-          label: Text('Zahlungen'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.shopping_cart),
-          label: Text('Ausgaben'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.attach_money),
-          label: Text('Einnahmen'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.receipt_long),
-          label: Text('Kassenstand'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.badge),
-          label: Text('Rollen'),
-        ),
-        NavigationRailDestination(
-          icon: Icon(Icons.task_alt),
-          label: Text('Aufgaben'),
-        ),
-      ],
-      onDestinationSelected: (index) {
-        // Navigation basierend auf Index
-        switch (index) {
-          case 0:
-            // Dashboard - bereits da
-            break;
-          case 1:
-            Navigator.of(context).push(
+    return Container(
+      width: 280,
+      color: const Color(0xFF2196F3),
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          // Header mit Logo
+          Container(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              children: [
+                Container(
+                  padding: AppConstants.paddingAll8,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.account_balance_wallet,
+                    size: 28,
+                    color: Color(0xFF2196F3),
+                  ),
+                ),
+                const SizedBox(width: AppConstants.spacingM),
+                const Text(
+                  'Freizeitkasse',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(color: Colors.white24, height: 1),
+          const SizedBox(height: AppConstants.spacing),
+
+          // VERWALTUNG Section
+          _buildNavigationSectionHeader('VERWALTUNG'),
+          _buildNavigationItem(
+            context,
+            Icons.dashboard,
+            'Dashboard',
+            () => null, // Already on dashboard
+            isSelected: true,
+          ),
+          _buildNavigationItem(
+            context,
+            Icons.people,
+            'Teilnehmer & Familien',
+            () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const ParticipantsFamiliesScreen(),
               ),
-            );
-            break;
-          case 2:
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const PaymentsListScreen(),
-              ),
-            );
-            break;
-          case 3:
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const ExpensesListScreen(),
-              ),
-            );
-            break;
-          case 4:
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const IncomesListScreen(),
-              ),
-            );
-            break;
-          case 5:
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const CashStatusScreen(),
-              ),
-            );
-            break;
-          case 6:
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const RolesListScreen(),
-              ),
-            );
-            break;
-          case 7:
-            Navigator.of(context).push(
+            ),
+          ),
+          _buildNavigationItem(
+            context,
+            Icons.task_alt,
+            'Aufgaben',
+            () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const TasksScreen(),
               ),
-            );
-            break;
-        }
-      },
+            ),
+          ),
+
+          const SizedBox(height: AppConstants.spacingL),
+          const Divider(color: Colors.white24, height: 1),
+          const SizedBox(height: AppConstants.spacingL),
+
+          // FINANZEN Section
+          _buildNavigationSectionHeader('FINANZEN'),
+          _buildNavigationItem(
+            context,
+            Icons.payment,
+            'Zahlungseingänge',
+            () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const PaymentsListScreen(),
+              ),
+            ),
+          ),
+          _buildNavigationItem(
+            context,
+            Icons.attach_money,
+            'Sonstige Einnahmen',
+            () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const IncomesListScreen(),
+              ),
+            ),
+          ),
+          _buildNavigationItem(
+            context,
+            Icons.shopping_cart,
+            'Ausgaben',
+            () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const ExpensesListScreen(),
+              ),
+            ),
+          ),
+          _buildNavigationItem(
+            context,
+            Icons.receipt_long,
+            'Kassenstand',
+            () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const CashStatusScreen(),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: AppConstants.spacingL),
+          const Divider(color: Colors.white24, height: 1),
+          const SizedBox(height: AppConstants.spacingL),
+
+          // EINSTELLUNGEN Section
+          _buildNavigationSectionHeader('EINSTELLUNGEN'),
+          _buildNavigationItem(
+            context,
+            Icons.settings,
+            'Einstellungen',
+            () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const SettingsScreen(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.6),
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback? onTap, {
+    bool isSelected = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.white),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+        onTap: onTap,
+        hoverColor: Colors.white.withOpacity(0.1),
+        dense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      ),
     );
   }
 
@@ -320,40 +399,47 @@ class DashboardScreen extends ConsumerWidget {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
+                  // VERWALTUNG Section
+                  _buildDrawerSectionHeader('VERWALTUNG'),
                   _buildDrawerItem(
                     context,
                     Icons.dashboard,
                     'Dashboard',
                     () => Navigator.of(context).pop(),
                   ),
-                  const Divider(color: Colors.white24, height: 1),
                   _buildDrawerItem(
                     context,
                     Icons.people,
-                    'Teilnehmer',
+                    'Teilnehmer & Familien',
                     () {
                       Navigator.of(context).pop();
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const ParticipantsListScreen(),
+                          builder: (context) => const ParticipantsFamiliesScreen(),
                         ),
                       );
                     },
                   ),
                   _buildDrawerItem(
                     context,
-                    Icons.family_restroom,
-                    'Familien',
+                    Icons.task_alt,
+                    'Aufgaben',
                     () {
                       Navigator.of(context).pop();
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const FamiliesListScreen(),
+                          builder: (context) => const TasksScreen(),
                         ),
                       );
                     },
                   ),
+
+                  const SizedBox(height: AppConstants.spacingM),
                   const Divider(color: Colors.white24, height: 1),
+                  const SizedBox(height: AppConstants.spacingM),
+
+                  // FINANZEN Section
+                  _buildDrawerSectionHeader('FINANZEN'),
                   _buildDrawerItem(
                     context,
                     Icons.payment,
@@ -393,7 +479,6 @@ class DashboardScreen extends ConsumerWidget {
                       );
                     },
                   ),
-                  const Divider(color: Colors.white24, height: 1),
                   _buildDrawerItem(
                     context,
                     Icons.receipt_long,
@@ -407,46 +492,13 @@ class DashboardScreen extends ConsumerWidget {
                       );
                     },
                   ),
-                  _buildDrawerItem(
-                    context,
-                    Icons.rule,
-                    'Regelwerke',
-                    () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const RulesetsListScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    Icons.badge,
-                    'Rollen',
-                    () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const RolesListScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    Icons.task_alt,
-                    'Aufgaben',
-                    () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const TasksScreen(),
-                        ),
-                      );
-                    },
-                  ),
+
+                  const SizedBox(height: AppConstants.spacingM),
                   const Divider(color: Colors.white24, height: 1),
+                  const SizedBox(height: AppConstants.spacingM),
+
+                  // EINSTELLUNGEN Section
+                  _buildDrawerSectionHeader('EINSTELLUNGEN'),
                   _buildDrawerItem(
                     context,
                     Icons.settings,
@@ -460,9 +512,12 @@ class DashboardScreen extends ConsumerWidget {
                       );
                     },
                   ),
-                  const SizedBox(height: AppConstants.spacingL),
+
+                  const SizedBox(height: AppConstants.spacingXL),
                   const Divider(color: Colors.white24, height: 1),
                   const SizedBox(height: AppConstants.spacingM),
+
+                  // Freizeit wechseln (special item)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Container(
@@ -488,6 +543,21 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.6),
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }
