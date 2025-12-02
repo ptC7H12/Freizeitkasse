@@ -45,12 +45,13 @@ class MGBFreizeitplanerApp extends StatelessWidget {
         ),
         useMaterial3: true,
 
-        // AppBar with gradient-ready styling
-        appBarTheme: const AppBarTheme(
+        // AppBar with neutral background (same as scaffold)
+        appBarTheme: AppBarTheme(
           centerTitle: false,
-          elevation: AppConstants.elevationLow,
-          backgroundColor: AppConstants.primaryColor,
-          foregroundColor: Colors.white,
+          elevation: 0,
+          backgroundColor: Colors.grey.shade50,
+          foregroundColor: Colors.black87,
+          iconTheme: const IconThemeData(color: Colors.black87),
         ),
 
         // Cards with subtle elevation and color

@@ -245,12 +245,12 @@ class DashboardScreen extends ConsumerWidget {
     return Drawer(
       child: Column(
         children: [
-          // Weißer Header-Bereich
+          // Blauer Header-Bereich mit Logo und Event
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
             decoration: const BoxDecoration(
-              color: Colors.white,
+              color: Color(0xFF2196F3),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,20 +260,20 @@ class DashboardScreen extends ConsumerWidget {
                     Container(
                       padding: AppConstants.paddingAll8,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2196F3),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
-                        Icons.event,
+                        Icons.account_balance_wallet,
                         size: 28,
-                        color: Colors.white,
+                        color: Color(0xFF2196F3),
                       ),
                     ),
                     const SizedBox(width: AppConstants.spacingM),
                     const Text(
                       'Freizeitkasse',
                       style: TextStyle(
-                        color: Color(0xFF2196F3),
+                        color: Colors.white,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -281,27 +281,28 @@ class DashboardScreen extends ConsumerWidget {
                   ],
                 ),
                 if (currentEvent != null) ...[
-                  const SizedBox(height: AppConstants.spacingM),
+                  const SizedBox(height: AppConstants.spacing),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE3F2FD),
+                      color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
                           Icons.calendar_today,
-                          size: 14,
-                          color: Color(0xFF2196F3),
+                          size: 16,
+                          color: Colors.white,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           currentEvent.name,
                           style: const TextStyle(
-                            color: Color(0xFF2196F3),
-                            fontSize: 14,
+                            color: Colors.white,
+                            fontSize: 15,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -460,15 +461,28 @@ class DashboardScreen extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(height: AppConstants.spacingL),
-                  _buildDrawerItem(
-                    context,
-                    Icons.event_note,
-                    'Freizeit wechseln',
-                    () {
-                      ref.read(currentEventProvider.notifier).clearEvent();
-                      Navigator.of(context).pushReplacementNamed('/');
-                    },
+                  const Divider(color: Colors.white24, height: 1),
+                  const SizedBox(height: AppConstants.spacingM),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                      ),
+                      child: _buildDrawerItem(
+                        context,
+                        Icons.swap_horiz,
+                        'Freizeit wechseln',
+                        () {
+                          ref.read(currentEventProvider.notifier).clearEvent();
+                          Navigator.of(context).pushReplacementNamed('/');
+                        },
+                      ),
+                    ),
                   ),
+                  const SizedBox(height: AppConstants.spacing),
                 ],
               ),
             ),
