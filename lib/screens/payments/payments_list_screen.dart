@@ -157,11 +157,11 @@ class PaymentsListScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              Icon(Icons.payments, color: const Color(0xFF2196F3), size: 24),
-              const SizedBox(width: AppConstants.spacingS),
-              const Text(
+              Icon(Icons.payments, color: Color(0xFF2196F3), size: 24),
+              SizedBox(width: AppConstants.spacingS),
+              Text(
                 'Übersicht',
                 style: TextStyle(
                   fontSize: 18,
@@ -227,11 +227,11 @@ class PaymentsListScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              Icon(Icons.payments, color: const Color(0xFF2196F3), size: 24),
-              const SizedBox(width: AppConstants.spacingS),
-              const Text(
+              Icon(Icons.payments, color: Color(0xFF2196F3), size: 24),
+              SizedBox(width: AppConstants.spacingS),
+              Text(
                 'Übersicht',
                 style: TextStyle(
                   fontSize: 18,

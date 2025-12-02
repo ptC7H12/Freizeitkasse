@@ -131,7 +131,7 @@ class PdfInvoiceService {
                 children: [
                   pw.Column(
                     children: [
-                      pw.Text('SEPA-QR-Code:', style: pw.TextStyle(fontSize: 10)),
+                      pw.Text('SEPA-QR-Code:', style: const pw.TextStyle(fontSize: 10)),
                       pw.SizedBox(height: 5),
                       pw.BarcodeWidget(
                         data: sepaQrCode,
@@ -139,7 +139,7 @@ class PdfInvoiceService {
                         width: 100,
                         height: 100,
                       ),
-                      pw.Text('Mit Banking-App scannen', style: pw.TextStyle(fontSize: 8)),
+                      pw.Text('Mit Banking-App scannen', style: const pw.TextStyle(fontSize: 8)),
                     ],
                   ),
                 ],
@@ -275,7 +275,7 @@ class PdfInvoiceService {
                 children: [
                   pw.Column(
                     children: [
-                      pw.Text('SEPA-QR-Code:', style: pw.TextStyle(fontSize: 10)),
+                      pw.Text('SEPA-QR-Code:', style: const pw.TextStyle(fontSize: 10)),
                       pw.SizedBox(height: 5),
                       pw.BarcodeWidget(
                         data: sepaQrCode,
@@ -283,7 +283,7 @@ class PdfInvoiceService {
                         width: 100,
                         height: 100,
                       ),
-                      pw.Text('Mit Banking-App scannen', style: pw.TextStyle(fontSize: 8)),
+                      pw.Text('Mit Banking-App scannen', style: const pw.TextStyle(fontSize: 8)),
                     ],
                   ),
                 ],

@@ -111,11 +111,11 @@ class IncomesListScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       children: [
-                        Icon(Icons.account_balance_wallet, color: const Color(0xFF4CAF50), size: 24),
-                        const SizedBox(width: AppConstants.spacingS),
-                        const Text(
+                        Icon(Icons.account_balance_wallet, color: Color(0xFF4CAF50), size: 24),
+                        SizedBox(width: AppConstants.spacingS),
+                        Text(
                           'Übersicht',
                           style: TextStyle(
                             fontSize: 18,
@@ -139,11 +139,11 @@ class IncomesListScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
+                                const Row(
                                   children: [
-                                    Icon(Icons.euro, color: const Color(0xFF4CAF50), size: 20),
-                                    const SizedBox(width: AppConstants.spacingS),
-                                    const Text(
+                                    Icon(Icons.euro, color: Color(0xFF4CAF50), size: 20),
+                                    SizedBox(width: AppConstants.spacingS),
+                                    Text(
                                       'Gesamteinnahmen',
                                       style: TextStyle(
                                         fontSize: 12,
@@ -178,11 +178,11 @@ class IncomesListScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
+                                const Row(
                                   children: [
-                                    Icon(Icons.receipt_long, color: const Color(0xFF2196F3), size: 20),
-                                    const SizedBox(width: AppConstants.spacingS),
-                                    const Text(
+                                    Icon(Icons.receipt_long, color: Color(0xFF2196F3), size: 20),
+                                    SizedBox(width: AppConstants.spacingS),
+                                    Text(
                                       'Anzahl Einnahmen',
                                       style: TextStyle(
                                         fontSize: 12,

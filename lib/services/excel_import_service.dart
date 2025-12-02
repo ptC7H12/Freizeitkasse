@@ -1,14 +1,56 @@
 import 'dart:io';
 import 'package:excel/excel.dart';
 import '../data/repositories/participant_repository.dart';
+import 'package:flutter/foundation.dart';
 
 class ExcelImportService {
   final ParticipantRepository _participantRepository;
 
   ExcelImportService(this._participantRepository);
-
-  /// Import participants from Excel file
   Future<ExcelImportResult> importParticipantsFromExcel({
+    required String filePath,
+    required int eventId,
+  }) async {
+    final result = ExcelImportResult();
+
+    try {
+      final bytes = File(filePath).readAsBytesSync();
+      final excel = Excel.decodeBytes(bytes);
+      final sheet = excel.tables[excel.tables.keys.first];
+
+      if (sheet == null) {
+        result.errors.add('Excel-Datei enthält keine Tabellen');
+        return result;
+      }
+
+      // TEMPORÄR: Debug-Ausgabe aller Header und ersten Datenzeile
+      final headerRow = sheet.rows[0];
+      final dataRow = sheet.rows[1];
+
+      StringBuffer debug = StringBuffer();
+      debug.writeln('=== HEADER ROW ===');
+      for (var i = 0; i < headerRow.length; i++) {
+        debug.writeln('[$i]: "${headerRow[i]?.value}"');
+      }
+      debug.writeln('=== DATA ROW 1 ===');
+      for (var i = 0; i < dataRow.length; i++) {
+        debug.writeln('[$i]: "${dataRow[i]?.value}"');
+      }
+
+      result.errors.add(debug.toString());
+      return result;  // Sofort abbrechen
+    }catch (e, stackTrace) {
+      debugPrint('DEBUG: Fatal error: $e');
+      debugPrint('DEBUG: StackTrace: $stackTrace');
+      result.errors.add('Fehler beim Lesen der Excel-Datei: $e');
+    }
+    return result;
+  }
+
+
+
+      /// Import participants from Excel file
+  Future<ExcelImportResult> _BACKUP_importParticipantsFromExcel({
     required String filePath,
     required int eventId,
   }) async {
@@ -30,7 +72,7 @@ class ExcelImportService {
       final headerRow = sheet.rows[0];
       final columnMapping = _buildColumnMapping(headerRow);
 
-      print('DEBUG: Column Mapping: $columnMapping');
+      debugPrint('DEBUG: Column Mapping: $columnMapping');
 
       // Skip header row (row 0)
       for (var rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
@@ -40,7 +82,7 @@ class ExcelImportService {
           // Parse row data with dynamic column mapping
           final participantData = _parseRowWithMapping(row, columnMapping, rowIndex);
 
-          print('DEBUG: Row ${rowIndex + 1} parsed: ${participantData.keys.toList()}');
+          debugPrint('DEBUG: Row ${rowIndex + 1} parsed: ${participantData.keys.toList()}');
 
           // Validate required fields
           if (participantData['first_name'] == null ||
@@ -74,18 +116,18 @@ class ExcelImportService {
           );
 
           result.successCount++;
-          print('DEBUG: Participant created successfully: ${participantData['first_name']} ${participantData['last_name']}');
+          debugPrint('DEBUG: Participant created successfully: ${participantData['first_name']} ${participantData['last_name']}');
         } catch (e, stackTrace) {
-          print('DEBUG: Error in row ${rowIndex + 1}: $e');
-          print('DEBUG: StackTrace: $stackTrace');
+          debugPrint('DEBUG: Error in row ${rowIndex + 1}: $e');
+          debugPrint('DEBUG: StackTrace: $stackTrace');
           result.errors.add('Zeile ${rowIndex + 1}: $e');
         }
       }
 
       result.totalRows = sheet.maxRows - 1; // Exclude header
     } catch (e, stackTrace) {
-      print('DEBUG: Fatal error: $e');
-      print('DEBUG: StackTrace: $stackTrace');
+      debugPrint('DEBUG: Fatal error: $e');
+      debugPrint('DEBUG: StackTrace: $stackTrace');
       result.errors.add('Fehler beim Lesen der Excel-Datei: $e');
     }
 
@@ -98,10 +140,12 @@ class ExcelImportService {
 
     for (var i = 0; i < headerRow.length; i++) {
       final cell = headerRow[i];
-      if (cell == null || cell.value == null) continue;
+      if (cell == null || cell.value == null) {
+        continue;
+      }
 
       final headerName = cell.value.toString().trim().toLowerCase();
-      print('DEBUG: Header[$i]: "$headerName"');
+      debugPrint('DEBUG: Header[$i]: "$headerName"');
 
       // Map known header names (case-insensitive, with variations)
       if (headerName.contains('vorname')) {
@@ -245,67 +289,115 @@ class ExcelImportService {
   /// Parse date from Excel cell (handles both DateCellValue and string formats)
   DateTime _parseDateFromCell(Data cell) {
     final value = cell.value;
+    debugPrint('DEBUG _parseDateFromCell: Cell value: $value');
+    debugPrint('DEBUG _parseDateFromCell: Cell value type: ${value.runtimeType}');
 
     // Handle DateCellValue (native Excel date)
     if (value is DateCellValue) {
+      debugPrint('DEBUG _parseDateFromCell: Detected DateCellValue');
       return DateTime(value.year, value.month, value.day);
     }
 
     // Handle DateTimeCellValue
     if (value is DateTimeCellValue) {
+      debugPrint('DEBUG _parseDateFromCell: Detected DateTimeCellValue');
       return DateTime(value.year, value.month, value.day);
     }
 
     // Handle numeric value (Excel serial date number)
     if (value is IntCellValue || value is DoubleCellValue) {
+      debugPrint('DEBUG _parseDateFromCell: Detected numeric value (Excel serial date)');
       final numValue = value is IntCellValue ? value.value.toDouble() : (value as DoubleCellValue).value;
-      // Excel date starts from 1900-01-01 (with a quirk for leap year 1900)
-      // Excel serial date 1 = 1900-01-01
-      final excelEpoch = DateTime(1899, 12, 30); // 30.12.1899 (Excel starts counting from 1)
-      return excelEpoch.add(Duration(days: numValue.toInt()));
+      debugPrint('DEBUG _parseDateFromCell: Numeric value: $numValue');
+      final excelEpoch = DateTime(1899, 12, 30);
+      final result = excelEpoch.add(Duration(days: numValue.toInt()));
+      debugPrint('DEBUG _parseDateFromCell: Converted to DateTime: $result');
+      return result;
     }
 
     // Handle string formats
     if (value is TextCellValue) {
+      debugPrint('DEBUG _parseDateFromCell: Detected TextCellValue');
       return _parseDate(value.value.toString());
     }
 
     // Fallback: try to parse as string
+    debugPrint('DEBUG _parseDateFromCell: Fallback - treating as string');
     final dateStr = value.toString();
     return _parseDate(dateStr);
   }
 
+
   /// Parse date string (supports DD.MM.YYYY, YYYY-MM-DD, etc.)
   DateTime _parseDate(String dateStr) {
+    debugPrint('DEBUG _parseDate: Input string: "$dateStr"');
+    debugPrint('DEBUG _parseDate: String length: ${dateStr.length}');
+    debugPrint('DEBUG _parseDate: Codeunits: ${dateStr.codeUnits}');
+
+    // Trim and clean the string
+    final cleanedDateStr = dateStr.trim();
+    debugPrint('DEBUG _parseDate: Cleaned string: "$cleanedDateStr"');
+
     // Try DD.MM.YYYY format (German)
-    if (dateStr.contains('.')) {
-      final parts = dateStr.split('.');
+    if (cleanedDateStr.contains('.')) {
+      debugPrint('DEBUG _parseDate: Detected DOT format (German)');
+      final parts = cleanedDateStr.split('.');
+      debugPrint('DEBUG _parseDate: Split parts: $parts (count: ${parts.length})');
+
       if (parts.length == 3) {
-        final day = int.parse(parts[0]);
-        final month = int.parse(parts[1]);
-        final year = int.parse(parts[2]);
-        return DateTime(year, month, day);
+        try {
+          final day = int.parse(parts[0].trim());
+          final month = int.parse(parts[1].trim());
+          final year = int.parse(parts[2].trim());
+          debugPrint('DEBUG _parseDate: Parsed values - Day: $day, Month: $month, Year: $year');
+
+          final result = DateTime(year, month, day);
+          debugPrint('DEBUG _parseDate: Successfully created DateTime: $result');
+          return result;
+        } catch (e) {
+          debugPrint('DEBUG _parseDate: Error parsing German format: $e');
+        }
       }
     }
 
     // Try YYYY-MM-DD format (ISO)
-    if (dateStr.contains('-')) {
-      return DateTime.parse(dateStr);
-    }
-
-    // Try DD/MM/YYYY format
-    if (dateStr.contains('/')) {
-      final parts = dateStr.split('/');
-      if (parts.length == 3) {
-        final day = int.parse(parts[0]);
-        final month = int.parse(parts[1]);
-        final year = int.parse(parts[2]);
-        return DateTime(year, month, day);
+    if (cleanedDateStr.contains('-')) {
+      debugPrint('DEBUG _parseDate: Detected DASH format (ISO)');
+      try {
+        final result = DateTime.parse(cleanedDateStr);
+        debugPrint('DEBUG _parseDate: Successfully parsed ISO format: $result');
+        return result;
+      } catch (e) {
+        debugPrint('DEBUG _parseDate: Error parsing ISO format: $e');
       }
     }
 
+    // Try DD/MM/YYYY format
+    if (cleanedDateStr.contains('/')) {
+      debugPrint('DEBUG _parseDate: Detected SLASH format');
+      final parts = cleanedDateStr.split('/');
+      debugPrint('DEBUG _parseDate: Split parts: $parts (count: ${parts.length})');
+
+      if (parts.length == 3) {
+        try {
+          final day = int.parse(parts[0].trim());
+          final month = int.parse(parts[1].trim());
+          final year = int.parse(parts[2].trim());
+          debugPrint('DEBUG _parseDate: Parsed values - Day: $day, Month: $month, Year: $year');
+
+          final result = DateTime(year, month, day);
+          debugPrint('DEBUG _parseDate: Successfully created DateTime: $result');
+          return result;
+        } catch (e) {
+          debugPrint('DEBUG _parseDate: Error parsing slash format: $e');
+        }
+      }
+    }
+
+    debugPrint('DEBUG _parseDate: FAILED - No format matched for: "$cleanedDateStr"');
     throw FormatException('Ungültiges Datumsformat: $dateStr');
   }
+
 
   /// Generate Excel template for participant import
   Future<String> generateImportTemplate(String outputPath) async {

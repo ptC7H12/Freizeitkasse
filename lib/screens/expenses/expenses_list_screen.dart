@@ -119,11 +119,11 @@ class ExpensesListScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       children: [
-                        Icon(Icons.shopping_cart, color: const Color(0xFFE91E63), size: 24),
-                        const SizedBox(width: AppConstants.spacingS),
-                        const Text(
+                        Icon(Icons.shopping_cart, color: Color(0xFFE91E63), size: 24),
+                        SizedBox(width: AppConstants.spacingS),
+                        Text(
                           'Übersicht',
                           style: TextStyle(
                             fontSize: 18,

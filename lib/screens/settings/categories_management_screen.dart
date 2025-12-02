@@ -5,7 +5,7 @@ import '../../providers/current_event_provider.dart';
 import '../../data/database/app_database.dart';
 import '../../utils/ui_helpers.dart';
 import '../../utils/constants.dart';
-import '../../extensions/context_extensions.dart';
+/// import '../../extensions/context_extensions.dart';
 
 /// Kategorien-Verwaltung für Ausgaben und Einnahmen
 class CategoriesManagementScreen extends StatelessWidget {

@@ -172,9 +172,9 @@ class ParticipantExcelService {
             continue;
           }
 
-          final firstName = _getCellValue(row, 1); // Spalte B
-          final lastName = _getCellValue(row, 2); // Spalte C
-          final birthDateStr = _getCellValue(row, 3); // Spalte D
+          final firstName = _getCellValue(row, 0);
+          final lastName = _getCellValue(row, 1);
+          final birthDateStr = _getCellValue(row, 2);
 
           if (firstName.isEmpty || lastName.isEmpty) {
             errors.add('Zeile ${i + 1}: Vorname oder Nachname fehlt');
@@ -198,20 +198,20 @@ class ParticipantExcelService {
             firstName: firstName,
             lastName: lastName,
             birthDate: birthDate,
-            gender: _getCellValue(row, 4).isNotEmpty ? _getCellValue(row, 4) : null,
-            street: _getCellValue(row, 5).isNotEmpty ? _getCellValue(row, 5) : null,
-            postalCode: _getCellValue(row, 6).isNotEmpty ? _getCellValue(row, 6) : null,
+            gender: _getCellValue(row, 3).isNotEmpty ? _getCellValue(row, 4) : null,
+            street: _getCellValue(row, 6).isNotEmpty ? _getCellValue(row, 5) : null,
+            //postalCode: _getCellValue(row, 6).isNotEmpty ? _getCellValue(row, 6) : null,
             city: _getCellValue(row, 7).isNotEmpty ? _getCellValue(row, 7) : null,
-            phone: _getCellValue(row, 8).isNotEmpty ? _getCellValue(row, 8) : null,
-            email: _getCellValue(row, 9).isNotEmpty ? _getCellValue(row, 9) : null,
-            emergencyContactName: _getCellValue(row, 10).isNotEmpty ? _getCellValue(row, 10) : null,
-            emergencyContactPhone: _getCellValue(row, 11).isNotEmpty ? _getCellValue(row, 11) : null,
-            medications: _getCellValue(row, 12).isNotEmpty ? _getCellValue(row, 12) : null,
-            allergies: _getCellValue(row, 13).isNotEmpty ? _getCellValue(row, 13) : null,
-            dietaryRestrictions: _getCellValue(row, 14).isNotEmpty ? _getCellValue(row, 14) : null,
-            swimAbility: _getCellValue(row, 15).isNotEmpty ? _getCellValue(row, 15) : null,
-            notes: _getCellValue(row, 16).isNotEmpty ? _getCellValue(row, 16) : null,
-            bildungUndTeilhabe: _getCellValue(row, 17).toLowerCase() == 'ja',
+            phone: _getCellValue(row, 5).isNotEmpty ? _getCellValue(row, 8) : null,
+            email: _getCellValue(row, 4).isNotEmpty ? _getCellValue(row, 9) : null,
+            //emergencyContactName: _getCellValue(row, 10).isNotEmpty ? _getCellValue(row, 10) : null,
+            //emergencyContactPhone: _getCellValue(row, 11).isNotEmpty ? _getCellValue(row, 11) : null,
+            //medications: _getCellValue(row, 12).isNotEmpty ? _getCellValue(row, 12) : null,
+            //allergies: _getCellValue(row, 13).isNotEmpty ? _getCellValue(row, 13) : null,
+            //dietaryRestrictions: _getCellValue(row, 14).isNotEmpty ? _getCellValue(row, 14) : null,
+            //swimAbility: _getCellValue(row, 15).isNotEmpty ? _getCellValue(row, 15) : null,
+            //notes: _getCellValue(row, 16).isNotEmpty ? _getCellValue(row, 16) : null,
+            //bildungUndTeilhabe: _getCellValue(row, 17).toLowerCase() == 'ja',
           );
 
           imported++;
@@ -310,7 +310,7 @@ class ParticipantExcelService {
 
     // Datei speichern
     final dir = await getApplicationDocumentsDirectory();
-    final fileName = 'Teilnehmer_Import_Vorlage.xlsx';
+    const fileName = 'Teilnehmer_Import_Vorlage.xlsx';
     final file = File(path.join(dir.path, fileName));
 
     final bytes = excel.encode();
@@ -336,7 +336,25 @@ class ParticipantExcelService {
 
   DateTime? _parseDate(String dateStr) {
     try {
-      // Format: DD.MM.YYYY oder DD/MM/YYYY
+      // ISO-Format mit Zeit (z.B. 1991-07-01T00:00:00.000Z)
+      if (dateStr.contains('T')) {
+        return DateTime.parse(dateStr);
+      }
+
+      // ISO-Format ohne Zeit (z.B. 1991-07-01)
+      if (dateStr.contains('-') && !dateStr.contains('.')) {
+        final parts = dateStr.split('-');
+        if (parts.length == 3) {
+          final year = int.tryParse(parts[0]);
+          final month = int.tryParse(parts[1]);
+          final day = int.tryParse(parts[2]);
+          if (year != null && month != null && day != null) {
+            return DateTime(year, month, day);
+          }
+        }
+      }
+
+      // Deutsches Format: DD.MM.YYYY oder DD/MM/YYYY
       final parts = dateStr.split(RegExp(r'[./]'));
       if (parts.length != 3) return null;
 
@@ -351,6 +369,7 @@ class ParticipantExcelService {
       return null;
     }
   }
+
 }
 
 /// Import-Ergebnis

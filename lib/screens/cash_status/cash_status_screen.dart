@@ -6,8 +6,8 @@ import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/income_provider.dart';
-import '../../providers/payment_provider.dart';
-import '../../providers/participant_provider.dart';
+/// import '../../providers/payment_provider.dart';
+/// import '../../providers/participant_provider.dart';
 import '../../providers/pdf_export_provider.dart';
 import '../../data/database/app_database.dart' as db;
 import '../../utils/constants.dart';
@@ -855,7 +855,9 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
     // Helper: Finde Teilnehmer-Name
     String? getParticipantName(int? participantId) {
-      if (participantId == null) return null;
+      if (participantId == null) {
+        return null;
+      }
       try {
         final participant = participants.firstWhere((p) => p.id == participantId);
         return '${participant.firstName} ${participant.lastName}';
@@ -866,7 +868,9 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
     // Helper: Finde Familien-Name
     String? getFamilyName(int? familyId) {
-      if (familyId == null) return null;
+      if (familyId == null) {
+        return null;
+      }
       try {
         final family = families.firstWhere((f) => f.id == familyId);
         return family.familyName;
@@ -1274,7 +1278,9 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   Widget _buildSubsidiesContent(BuildContext context, List<db.Participant> participants, List<db.Role> roles) {
     // Helper: Berechne Zuschuss-Betrag
     double calculateSubsidy(db.Participant p) {
-      if (p.discountPercent <= 0) return 0;
+      if (p.discountPercent <= 0) {
+        return 0;
+      }
       // Subsidy = calculatedPrice * (discountPercent / (100 - discountPercent))
       return p.calculatedPrice * (p.discountPercent / (100 - p.discountPercent));
     }
@@ -1859,11 +1865,11 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               children: [
-                Icon(Icons.category, color: const Color(0xFFE91E63), size: 24),
-                const SizedBox(width: AppConstants.spacingS),
-                const Text(
+                Icon(Icons.category, color: Color(0xFFE91E63), size: 24),
+                SizedBox(width: AppConstants.spacingS),
+                Text(
                   'Ausgaben nach Kategorie',
                   style: TextStyle(
                     fontSize: 18,
@@ -1905,7 +1911,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                           Text(entry.key),
                         ],
                       )),
-                      DataCell(Text('-')), // Anzahl könnte aus einer anderen Query kommen
+                      const DataCell(Text('-')), // Anzahl könnte aus einer anderen Query kommen
                       DataCell(Text(
                         NumberFormat.currency(locale: 'de_DE', symbol: '€').format(entry.value),
                         style: const TextStyle(fontWeight: FontWeight.w600),

@@ -636,11 +636,11 @@ class DashboardScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // === EINNAHMEN ===
-                  Row(
+                  const Row(
                     children: [
-                      Icon(Icons.trending_up, color: const Color(0xFF4CAF50), size: 24),
-                      const SizedBox(width: AppConstants.spacingS),
-                      const Text(
+                      Icon(Icons.trending_up, color: Color(0xFF4CAF50), size: 24),
+                      SizedBox(width: AppConstants.spacingS),
+                      Text(
                         'Einnahmen',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
@@ -778,11 +778,11 @@ class DashboardScreen extends ConsumerWidget {
                   const Divider(height: 32),
 
                   // === AUSGABEN ===
-                  Row(
+                  const Row(
                     children: [
-                      Icon(Icons.trending_down, color: const Color(0xFFE91E63), size: 24),
-                      const SizedBox(width: AppConstants.spacingS),
-                      const Text(
+                      Icon(Icons.trending_down, color: Color(0xFFE91E63), size: 24),
+                      SizedBox(width: AppConstants.spacingS),
+                      Text(
                         'Ausgaben',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
@@ -855,11 +855,11 @@ class DashboardScreen extends ConsumerWidget {
                   const Divider(height: 32),
 
                   // === SALDO ===
-                  Row(
+                  const Row(
                     children: [
-                      Icon(Icons.account_balance, color: const Color(0xFFFF9800), size: 24),
-                      const SizedBox(width: AppConstants.spacingS),
-                      const Text(
+                      Icon(Icons.account_balance, color: Color(0xFFFF9800), size: 24),
+                      SizedBox(width: AppConstants.spacingS),
+                      Text(
                         'Saldo',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
