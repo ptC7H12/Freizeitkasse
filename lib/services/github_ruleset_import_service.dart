@@ -119,10 +119,13 @@ class GithubRulesetImportService {
 
   /// Import all YAML rulesets from a GitHub directory
   ///
+  /// If eventType and year are provided, only imports files matching the pattern {eventType}_{year}.yaml
   /// Returns a map with success count, errors, and imported rulesets
   static Future<Map<String, dynamic>> importRulesetsFromGithub({
     required String githubUrl,
     required Future<int> Function(String yamlContent, String filename) onImport,
+    String? eventType,
+    int? year,
   }) async {
     try {
       final files = await listYamlFiles(githubUrl);
@@ -136,11 +139,34 @@ class GithubRulesetImportService {
         };
       }
 
+      // Filter files by eventType and year if provided
+      List<Map<String, dynamic>> filesToImport = files;
+      if (eventType != null && year != null) {
+        final expectedFilename = '${eventType}_$year.yaml';
+        final expectedFilenameYml = '${eventType}_$year.yml';
+
+        filesToImport = files.where((file) {
+          final name = file['name'] as String;
+          return name == expectedFilename || name == expectedFilenameYml;
+        }).toList();
+
+        if (filesToImport.isEmpty) {
+          return {
+            'success': false,
+            'message': 'Keine passende Regelwerk-Datei gefunden für: $expectedFilename',
+            'imported': 0,
+            'errors': ['Erwartet: $expectedFilename oder $expectedFilenameYml'],
+          };
+        }
+
+        AppLogger.info('Filtering for specific ruleset: $expectedFilename');
+      }
+
       int successCount = 0;
       final errors = <String>[];
       final imported = <String>[];
 
-      for (final file in files) {
+      for (final file in filesToImport) {
         try {
           final content = await downloadFile(file['download_url'] as String);
           await onImport(content, file['name'] as String);
@@ -157,10 +183,10 @@ class GithubRulesetImportService {
       return {
         'success': successCount > 0,
         'message': successCount > 0
-            ? 'Erfolgreich $successCount von ${files.length} Regelwerken importiert'
+            ? 'Erfolgreich $successCount von ${filesToImport.length} Regelwerken importiert'
             : 'Keine Regelwerke konnten importiert werden',
         'imported': successCount,
-        'total': files.length,
+        'total': filesToImport.length,
         'errors': errors,
         'importedFiles': imported,
       };

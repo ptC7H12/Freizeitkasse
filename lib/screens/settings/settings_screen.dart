@@ -395,8 +395,14 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
       final database = ref.read(databaseProvider);
       final rulesetRepository = RulesetRepository(database);
 
+      // Extract year from event start date
+      final eventYear = currentEvent.startDate.year;
+      final eventType = currentEvent.eventType;
+
       final result = await GithubRulesetImportService.importRulesetsFromGithub(
         githubUrl: githubPath,
+        eventType: eventType,
+        year: eventYear,
         onImport: (yamlContent, filename) async {
           // Extract name from filename (remove .yaml or .yml extension)
           final name = filename.replaceAll(RegExp(r'\.(yaml|yml)$'), '');
@@ -614,12 +620,51 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                   ],
                 ),
                 const SizedBox(height: AppConstants.spacingS),
-                Text(
-                  'Importieren Sie Regelwerk-Dateien (YAML) direkt von GitHub oder verwalten Sie vorhandene Regelwerke.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final currentEvent = ref.watch(currentEventProvider);
+                    final eventType = currentEvent?.eventType ?? 'Unbekannt';
+                    final eventYear = currentEvent?.startDate.year ?? DateTime.now().year;
+                    final expectedFilename = '${eventType}_$eventYear.yaml';
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Importieren Sie Regelwerk-Dateien (YAML) direkt von GitHub oder verwalten Sie vorhandene Regelwerke.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.blue.shade200, width: 1),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Sucht nach: $expectedFilename',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue.shade700,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
