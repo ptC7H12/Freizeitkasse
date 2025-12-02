@@ -4,9 +4,13 @@ import 'package:intl/intl.dart';
 import '../../data/database/app_database.dart';
 import '../../providers/income_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../providers/database_provider.dart';
+import '../../data/repositories/income_repository.dart';
 import 'income_form_screen.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../widgets/adaptive_list_item.dart';
+import '../../extensions/context_extensions.dart';
 
 class IncomesListScreen extends ConsumerWidget {
   const IncomesListScreen({super.key});
@@ -224,7 +228,7 @@ class IncomesListScreen extends ConsumerWidget {
                   itemCount: incomes.length,
                   itemBuilder: (context, index) {
                     final income = incomes[index];
-                    return _IncomeListItem(income: income);
+                    return _IncomeListItem(income: income, ref: ref);
                   },
                 ),
               ),
@@ -252,10 +256,11 @@ class IncomesListScreen extends ConsumerWidget {
   }
 }
 
-class _IncomeListItem extends StatelessWidget {
+class _IncomeListItem extends ConsumerWidget {
   final Income income;
+  final WidgetRef ref;
 
-  const _IncomeListItem({required this.income});
+  const _IncomeListItem({required this.income, required this.ref});
 
   IconData _getSourceIcon(String source) {
     switch (source.toLowerCase()) {
@@ -296,121 +301,88 @@ class _IncomeListItem extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final sourceColor = _getSourceColor(income.source ?? 'Sonstige');
     final sourceIcon = _getSourceIcon(income.source ?? 'Sonstige');
     final dateFormat = DateFormat('dd.MM.yyyy', 'de_DE');
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => IncomeFormScreen(incomeId: income.id),
+    return AdaptiveListItem(
+      leading: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: sourceColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          sourceIcon,
+          color: sourceColor,
+        ),
+      ),
+      title: Row(
+        children: [
+          Text(
+            income.source ?? 'Sonstige',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const Spacer(),
+          Text(
+            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(income.amount),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.green[700],
+              fontSize: 16,
             ),
-          );
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: AppConstants.paddingAll16,
-          child: Row(
+          ),
+        ],
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (income.description != null)
+            Text(
+              income.description!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          const SizedBox(height: 4),
+          Row(
             children: [
-              // Source icon
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: sourceColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  sourceIcon,
-                  color: sourceColor,
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacing),
-
-              // Income details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      income.source ?? 'Sonstige',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 4),
-                    if (income.description != null)
-                      Text(
-                        income.description!,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          size: 14,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          dateFormat.format(income.incomeDate),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[600],
-                              ),
-                        ),
-                        if (income.paymentMethod != null) ...[
-                          const SizedBox(width: AppConstants.spacingM),
-                          Icon(
-                            Icons.payment,
-                            size: 14,
-                            color: Colors.grey[600],
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            income.paymentMethod!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              // Amount
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    NumberFormat.currency(locale: 'de_DE', symbol: '€').format(income.amount),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green[700],
-                        ),
-                  ),
-                  if (income.referenceNumber != null)
-                    Text(
-                      'Ref: ${income.referenceNumber}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                    ),
-                ],
+              Icon(Icons.calendar_today, size: 12, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Text(
+                dateFormat.format(income.incomeDate),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ],
           ),
-        ),
+        ],
       ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => IncomeFormScreen(incomeId: income.id),
+          ),
+        );
+      },
+      onEdit: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => IncomeFormScreen(incomeId: income.id),
+          ),
+        );
+      },
+      onDelete: () async {
+        final database = ref.read(databaseProvider);
+        final repository = IncomeRepository(database);
+        await repository.deleteIncome(income.id);
+        if (context.mounted) {
+          context.showSuccess('Einnahme gelöscht');
+        }
+      },
+      deleteConfirmMessage: 'Einnahme "${income.source ?? 'Sonstige'}" (${NumberFormat.currency(locale: 'de_DE', symbol: '€').format(income.amount)}) wirklich löschen?',
     );
   }
 }
