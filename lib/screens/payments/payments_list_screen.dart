@@ -6,6 +6,7 @@ import '../../providers/participant_provider.dart';
 import '../../utils/date_utils.dart';
 import 'payment_form_screen.dart';
 import '../../utils/constants.dart';
+import '../../widgets/responsive_scaffold.dart';
 
 /// Payments List Screen
 class PaymentsListScreen extends ConsumerWidget {
@@ -16,9 +17,19 @@ class PaymentsListScreen extends ConsumerWidget {
     final paymentsAsync = ref.watch(paymentsProvider);
     final participantsAsync = ref.watch(participantsProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Zahlungseingänge'),
+    return ResponsiveScaffold(
+      title: 'Zahlungseingänge',
+      selectedIndex: 3,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const PaymentFormScreen(),
+            ),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Zahlung'),
       ),
       body: paymentsAsync.when(
         data: (payments) {
@@ -121,17 +132,6 @@ class PaymentsListScreen extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('Fehler: $error')),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const PaymentFormScreen(),
-            ),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Zahlung'),
       ),
     );
   }

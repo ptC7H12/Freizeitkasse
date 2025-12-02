@@ -12,6 +12,7 @@ import '../../providers/pdf_export_provider.dart';
 import '../../data/database/app_database.dart' as db;
 import '../../utils/constants.dart';
 import '../../extensions/context_extensions.dart';
+import '../../widgets/responsive_scaffold.dart';
 
 // Unified Transaction class für Transaktionshistorie
 class Transaction {
@@ -76,75 +77,88 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
     final database = ref.watch(databaseProvider);
 
     if (currentEvent == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Kassenstand'),
-        ),
+      return ResponsiveScaffold(
+        title: 'Kassenstand',
+        selectedIndex: 6,
         body: const Center(
           child: Text('Bitte wählen Sie zuerst eine Veranstaltung aus.'),
         ),
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kassenstand'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.download),
-            onPressed: () async {
-              final pdfService = ref.read(pdfExportServiceProvider);
-              final payments = await (database.select(database.payments)
-                    ..where((t) => t.eventId.equals(currentEvent.id))
-                    ..where((t) => t.isActive.equals(true)))
-                  .get();
-              final totalPayments = payments.fold<double>(0, (sum, p) => sum + p.amount);
-
-              final totalIncomes = await ref.read(totalIncomesProvider.future);
-              final totalExpenses = await ref.read(totalExpensesProvider.future);
-              final expensesByCategory = await ref.read(expensesByCategoryProvider.future);
-              final incomesBySource = await ref.read(incomesBySourceProvider.future);
-
-              try {
-                final filePath = await pdfService.exportFinancialReport(
-                  eventName: currentEvent.name,
-                  totalIncomes: totalIncomes,
-                  totalExpenses: totalExpenses,
-                  totalPayments: totalPayments,
-                  expensesByCategory: expensesByCategory,
-                  incomesBySource: incomesBySource,
-                );
-
-                if (context.mounted) {
-                  context.showError('PDF gespeichert: $filePath');
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  context.showError('Fehler beim Export: $e');
-                }
-              }
-            },
-            tooltip: 'PDF Export',
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.analytics), text: 'Übersicht'),
-            Tab(icon: Icon(Icons.history), text: 'Transaktionen'),
-            Tab(icon: Icon(Icons.card_giftcard), text: 'Zuschüsse'),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
+    return ResponsiveScaffold(
+      title: 'Kassenstand',
+      selectedIndex: 6,
+      body: Column(
         children: [
-          // Tab 1: Übersicht
-          _buildOverviewTab(context, ref, database, currentEvent.id),
-          // Tab 2: Transaktionshistorie
-          _buildTransactionsTab(context, ref, database, currentEvent.id),
-          // Tab 3: Zuschüsse
-          _buildSubsidiesTab(context, ref, database, currentEvent.id),
+          // PDF Export Button
+          Container(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.download),
+                  label: const Text('PDF Export'),
+                  onPressed: () async {
+                    final pdfService = ref.read(pdfExportServiceProvider);
+                    final payments = await (database.select(database.payments)
+                          ..where((t) => t.eventId.equals(currentEvent.id))
+                          ..where((t) => t.isActive.equals(true)))
+                        .get();
+                    final totalPayments = payments.fold<double>(0, (sum, p) => sum + p.amount);
+
+                    final totalIncomes = await ref.read(totalIncomesProvider.future);
+                    final totalExpenses = await ref.read(totalExpensesProvider.future);
+                    final expensesByCategory = await ref.read(expensesByCategoryProvider.future);
+                    final incomesBySource = await ref.read(incomesBySourceProvider.future);
+
+                    try {
+                      final filePath = await pdfService.exportFinancialReport(
+                        eventName: currentEvent.name,
+                        totalIncomes: totalIncomes,
+                        totalExpenses: totalExpenses,
+                        totalPayments: totalPayments,
+                        expensesByCategory: expensesByCategory,
+                        incomesBySource: incomesBySource,
+                      );
+
+                      if (context.mounted) {
+                        context.showError('PDF gespeichert: $filePath');
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        context.showError('Fehler beim Export: $e');
+                      }
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          // TabBar
+          TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(icon: Icon(Icons.analytics), text: 'Übersicht'),
+              Tab(icon: Icon(Icons.history), text: 'Transaktionen'),
+              Tab(icon: Icon(Icons.card_giftcard), text: 'Zuschüsse'),
+            ],
+          ),
+          // TabBarView
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Tab 1: Übersicht
+                _buildOverviewTab(context, ref, database, currentEvent.id),
+                // Tab 2: Transaktionshistorie
+                _buildTransactionsTab(context, ref, database, currentEvent.id),
+                // Tab 3: Zuschüsse
+                _buildSubsidiesTab(context, ref, database, currentEvent.id),
+              ],
+            ),
+          ),
         ],
       ),
     );

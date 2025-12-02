@@ -4,6 +4,7 @@ import '../../providers/role_provider.dart';
 import '../../providers/current_event_provider.dart';
 import 'role_form_screen.dart';
 import '../../utils/constants.dart';
+import '../../widgets/responsive_scaffold.dart';
 
 class RolesListScreen extends ConsumerWidget {
   const RolesListScreen({super.key});
@@ -14,34 +15,18 @@ class RolesListScreen extends ConsumerWidget {
     final rolesWithCountsAsync = ref.watch(rolesWithCountsProvider);
 
     if (currentEvent == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Rollen'),
-        ),
+      return ResponsiveScaffold(
+        title: 'Rollen',
+        selectedIndex: 8,
         body: const Center(
           child: Text('Bitte wählen Sie zuerst eine Veranstaltung aus.'),
         ),
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Rollen'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const RoleFormScreen(),
-                ),
-              );
-            },
-            tooltip: 'Neue Rolle',
-          ),
-        ],
-      ),
+    return ResponsiveScaffold(
+      title: 'Rollen',
+      selectedIndex: 8,
       body: rolesWithCountsAsync.when(
         data: (rolesWithCounts) {
           if (rolesWithCounts.isEmpty) {

@@ -8,6 +8,7 @@ import '../../providers/database_provider.dart';
 import '../../data/repositories/expense_repository.dart';
 import 'expense_form_screen.dart';
 import '../../utils/constants.dart';
+import '../../widgets/responsive_scaffold.dart';
 
 class ExpensesListScreen extends ConsumerWidget {
   const ExpensesListScreen({super.key});
@@ -28,23 +29,19 @@ class ExpensesListScreen extends ConsumerWidget {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ausgaben'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ExpenseFormScreen(),
-                ),
-              );
-            },
-            tooltip: 'Neue Ausgabe',
-          ),
-        ],
+    return ResponsiveScaffold(
+      title: 'Ausgaben',
+      selectedIndex: 4,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ExpenseFormScreen(),
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
       body: expensesAsync.when(
         data: (expenses) {
@@ -226,17 +223,6 @@ class ExpensesListScreen extends ConsumerWidget {
         error: (error, stack) => Center(
           child: Text('Fehler beim Laden der Ausgaben: $error'),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ExpenseFormScreen(),
-            ),
-          );
-        },
-        child: const Icon(Icons.add),
       ),
     );
   }

@@ -6,6 +6,7 @@ import '../../providers/ruleset_provider.dart';
 import '../../providers/current_event_provider.dart';
 import 'ruleset_form_screen.dart';
 import '../../utils/constants.dart';
+import '../../widgets/responsive_scaffold.dart';
 
 class RulesetsListScreen extends ConsumerWidget {
   const RulesetsListScreen({super.key});
@@ -17,34 +18,18 @@ class RulesetsListScreen extends ConsumerWidget {
     final currentRulesetAsync = ref.watch(currentRulesetProvider);
 
     if (currentEvent == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Regelwerke'),
-        ),
+      return ResponsiveScaffold(
+        title: 'Regelwerke',
+        selectedIndex: 7,
         body: const Center(
           child: Text('Bitte wählen Sie zuerst eine Veranstaltung aus.'),
         ),
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Regelwerke'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const RulesetFormScreen(),
-                ),
-              );
-            },
-            tooltip: 'Neues Regelwerk',
-          ),
-        ],
-      ),
+    return ResponsiveScaffold(
+      title: 'Regelwerke',
+      selectedIndex: 7,
       body: rulesetsAsync.when(
         data: (rulesets) {
           if (rulesets.isEmpty) {

@@ -10,6 +10,7 @@ import '../../data/repositories/ruleset_repository.dart';
 import '../../providers/database_provider.dart';
 import 'categories_management_screen.dart';
 import 'rulesets_management_screen.dart';
+import '../../widgets/responsive_scaffold.dart';
 
 /// Einstellungen-Screen mit Tabs
 ///
@@ -42,46 +43,53 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Einstellungen'),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.business),
-              text: 'Allgemein',
-            ),
-            Tab(
-              icon: Icon(Icons.rule),
-              text: 'Regelwerk',
-            ),
-            Tab(
-              icon: Icon(Icons.category),
-              text: 'Kategorien',
-            ),
-            Tab(
-              icon: Icon(Icons.info),
-              text: 'App-Info',
-            ),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
+    return ResponsiveScaffold(
+      title: 'Einstellungen',
+      selectedIndex: 10,
+      body: Column(
         children: [
-          // Tab 1: Allgemein
-          _GeneralSettingsTab(),
+          // TabBar
+          TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            tabs: const [
+              Tab(
+                icon: Icon(Icons.business),
+                text: 'Allgemein',
+              ),
+              Tab(
+                icon: Icon(Icons.rule),
+                text: 'Regelwerk',
+              ),
+              Tab(
+                icon: Icon(Icons.category),
+                text: 'Kategorien',
+              ),
+              Tab(
+                icon: Icon(Icons.info),
+                text: 'App-Info',
+              ),
+            ],
+          ),
+          // TabBarView
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Tab 1: Allgemein
+                _GeneralSettingsTab(),
 
-          // Tab 2: Regelwerk
-          _RulesetSettingsTab(),
+                // Tab 2: Regelwerk
+                _RulesetSettingsTab(),
 
-          // Tab 3: Kategorien
-          const _CategoriesTab(),
+                // Tab 3: Kategorien
+                const _CategoriesTab(),
 
-          // Tab 4: App-Info
-          const _AppInfoTab(),
+                // Tab 4: App-Info
+                const _AppInfoTab(),
+              ],
+            ),
+          ),
         ],
       ),
     );

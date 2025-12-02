@@ -68,30 +68,25 @@ class ResponsiveScaffold extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            Container(
-              padding: AppConstants.paddingAll8,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.event, size: 24),
-            ),
-            const SizedBox(width: AppConstants.spacingM),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title),
-                if (currentEvent != null)
+        title: currentEvent != null
+            ? Row(
+                children: [
+                  Container(
+                    padding: AppConstants.paddingAll8,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.event, size: 24),
+                  ),
+                  const SizedBox(width: AppConstants.spacingM),
                   Text(
                     currentEvent.name,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
-              ],
-            ),
-          ],
-        ),
+                ],
+              )
+            : null,
         actions: actions,
       ),
       body: Row(
@@ -213,12 +208,14 @@ class ResponsiveScaffold extends ConsumerWidget {
       child: Column(
         children: [
           // Header with logo and event name
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
-            decoration: const BoxDecoration(
-              color: Color(0xFF2196F3),
-            ),
+          SafeArea(
+            bottom: false,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: Color(0xFF2196F3),
+              ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -281,6 +278,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                   ),
                 ],
               ],
+            ),
             ),
           ),
           // Menu items
