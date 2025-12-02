@@ -57,9 +57,15 @@ class RulesetOverviewScreen extends ConsumerWidget {
           Map<String, dynamic> familyDiscount = {};
 
           try {
-            ageGroups = jsonDecode(ruleset.ageGroups) as Map<String, dynamic>;
-            roleDiscounts = jsonDecode(ruleset.roleDiscounts) as Map<String, dynamic>;
-            familyDiscount = jsonDecode(ruleset.familyDiscount) as Map<String, dynamic>;
+            if (ruleset.ageGroups != null && ruleset.ageGroups!.isNotEmpty) {
+              ageGroups = jsonDecode(ruleset.ageGroups!) as Map<String, dynamic>;
+            }
+            if (ruleset.roleDiscounts != null && ruleset.roleDiscounts!.isNotEmpty) {
+              roleDiscounts = jsonDecode(ruleset.roleDiscounts!) as Map<String, dynamic>;
+            }
+            if (ruleset.familyDiscount != null && ruleset.familyDiscount!.isNotEmpty) {
+              familyDiscount = jsonDecode(ruleset.familyDiscount!) as Map<String, dynamic>;
+            }
           } catch (e) {
             return Center(
               child: Text('Fehler beim Parsen des Regelwerks: $e'),
@@ -152,7 +158,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
                     Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
                     const SizedBox(width: 4),
                     Text(
-                      'Gültig von ${_formatDate(ruleset.validFrom)} bis ${_formatDate(ruleset.validUntil)}',
+                      'Gültig ab ${_formatDate(ruleset.validFrom)}${ruleset.validUntil != null ? ' bis ${_formatDate(ruleset.validUntil!)}' : ''}',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],

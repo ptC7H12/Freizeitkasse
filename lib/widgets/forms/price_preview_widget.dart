@@ -168,7 +168,10 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
   }
 
   // Vereinfachtes JSON-Parsing (TODO: Proper JSON parsing)
-  List<dynamic> _parseAgeGroups(String jsonString) {
+  List<dynamic> _parseAgeGroups(String? jsonString) {
+    if (jsonString == null || jsonString.isEmpty) {
+      return [];
+    }
     // Dummy-Daten für Demo
     return [
       {'min_age': 0, 'max_age': 5, 'base_price': 50.0},
@@ -178,7 +181,10 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
     ];
   }
 
-  Map<String, dynamic> _parseRoleDiscounts(String jsonString) {
+  Map<String, dynamic> _parseRoleDiscounts(String? jsonString) {
+    if (jsonString == null || jsonString.isEmpty) {
+      return {};
+    }
     // Dummy-Daten für Demo
     return {
       'betreuer': {'discount_percent': 100.0},
@@ -186,7 +192,10 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
     };
   }
 
-  Map<String, dynamic> _parseFamilyDiscount(String jsonString) {
+  Map<String, dynamic> _parseFamilyDiscount(String? jsonString) {
+    if (jsonString == null || jsonString.isEmpty) {
+      return {};
+    }
     // Dummy-Daten für Demo
     return {
       'enabled': true,
