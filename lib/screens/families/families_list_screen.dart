@@ -198,6 +198,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Familien'),
         actions: [
           IconButton(

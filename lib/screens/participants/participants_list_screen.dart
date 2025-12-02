@@ -395,6 +395,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Teilnehmer'),
         actions: [
           IconButton(
