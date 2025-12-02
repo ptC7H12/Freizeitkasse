@@ -160,7 +160,7 @@ class ExcelImportService {
 
     // Handle string formats
     if (value is TextCellValue) {
-      return _parseDate(value.value);
+      return _parseDate(value.value.toString());
     }
 
     // Fallback: try to parse as string
