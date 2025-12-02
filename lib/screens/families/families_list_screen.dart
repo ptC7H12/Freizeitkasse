@@ -82,7 +82,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
     });
   }
 
-  List<Family> _filterFamilies(List<Family> families) {
+  List<db.Family> _filterFamilies(List<db.Family> families) {
     var filtered = families;
 
     // Search filter
@@ -90,9 +90,9 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
       final query = _searchQuery.toLowerCase();
       filtered = filtered.where((f) {
         final familyName = f.familyName.toLowerCase();
-        final contactPerson = f.contactPerson?.toLowerCase() ?? '';
-        final email = f.email?.toLowerCase() ?? '';
-        final city = f.city?.toLowerCase() ?? '';
+        final contactPerson = (f.contactPerson ?? '').toLowerCase();
+        final email = (f.email ?? '').toLowerCase();
+        final city = (f.city ?? '').toLowerCase();
         return familyName.contains(query) ||
             contactPerson.contains(query) ||
             email.contains(query) ||
