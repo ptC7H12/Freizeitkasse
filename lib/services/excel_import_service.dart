@@ -26,13 +26,21 @@ class ExcelImportService {
         return result;
       }
 
+      // Read header row to map columns dynamically
+      final headerRow = sheet.rows[0];
+      final columnMapping = _buildColumnMapping(headerRow);
+
+      print('DEBUG: Column Mapping: $columnMapping');
+
       // Skip header row (row 0)
       for (var rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
         final row = sheet.rows[rowIndex];
 
         try {
-          // Parse row data
-          final participantData = _parseRow(row, rowIndex);
+          // Parse row data with dynamic column mapping
+          final participantData = _parseRowWithMapping(row, columnMapping, rowIndex);
+
+          print('DEBUG: Row ${rowIndex + 1} parsed: ${participantData.keys.toList()}');
 
           // Validate required fields
           if (participantData['first_name'] == null ||
@@ -66,57 +74,156 @@ class ExcelImportService {
           );
 
           result.successCount++;
-        } catch (e) {
+          print('DEBUG: Participant created successfully: ${participantData['first_name']} ${participantData['last_name']}');
+        } catch (e, stackTrace) {
+          print('DEBUG: Error in row ${rowIndex + 1}: $e');
+          print('DEBUG: StackTrace: $stackTrace');
           result.errors.add('Zeile ${rowIndex + 1}: $e');
         }
       }
 
       result.totalRows = sheet.maxRows - 1; // Exclude header
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('DEBUG: Fatal error: $e');
+      print('DEBUG: StackTrace: $stackTrace');
       result.errors.add('Fehler beim Lesen der Excel-Datei: $e');
     }
 
     return result;
   }
 
-  /// Parse a single row from Excel
-  Map<String, dynamic> _parseRow(List<Data?> row, int rowIndex) {
-    final data = <String, dynamic>{};
+  /// Build column mapping from header row
+  Map<String, int> _buildColumnMapping(List<Data?> headerRow) {
+    final mapping = <String, int>{};
 
-    // Column mapping (0-based index)
-    // 0: Vorname, 1: Nachname, 2: Geburtsdatum, 3: Geschlecht
-    // 4: Straße und Hausnummer, 5: PLZ, 6: Stadt
-    // 7: E-Mail, 8: Telefon
-    // 9: Notfallkontakt Name, 10: Notfallkontakt Telefon
-    // 11: Allergien, 12: Medikamente
-    // 13: Ernährungseinschränkungen, 14: Schwimmfähigkeit, 15: Notizen
+    for (var i = 0; i < headerRow.length; i++) {
+      final cell = headerRow[i];
+      if (cell == null || cell.value == null) continue;
 
-    data['first_name'] = _getCellValue(row, 0);
-    data['last_name'] = _getCellValue(row, 1);
+      final headerName = cell.value.toString().trim().toLowerCase();
+      print('DEBUG: Header[$i]: "$headerName"');
 
-    // Parse birth date (handles both Excel date format and string)
-    final birthDateCell = row.length > 2 ? row[2] : null;
-    if (birthDateCell != null && birthDateCell.value != null) {
-      try {
-        data['birth_date'] = _parseDateFromCell(birthDateCell);
-      } catch (e) {
-        throw Exception('Ungültiges Geburtsdatum: ${birthDateCell.value}');
+      // Map known header names (case-insensitive, with variations)
+      if (headerName.contains('vorname')) {
+        mapping['first_name'] = i;
+      } else if (headerName.contains('nachname')) {
+        mapping['last_name'] = i;
+      } else if (headerName.contains('geburtsdatum') || headerName.contains('geburtstag')) {
+        mapping['birth_date'] = i;
+      } else if (headerName.contains('geschlecht')) {
+        mapping['gender'] = i;
+      } else if (headerName.contains('e-mail') || headerName.contains('email')) {
+        mapping['email'] = i;
+      } else if (headerName.contains('telefon') || headerName.contains('phone')) {
+        mapping['phone'] = i;
+      } else if (headerName.contains('straße') || headerName.contains('strasse') || headerName.contains('adresse')) {
+        mapping['street'] = i;
+      } else if (headerName.contains('plz') || headerName.contains('postleitzahl')) {
+        mapping['postal_code'] = i;
+      } else if (headerName.contains('stadt') || headerName.contains('ort')) {
+        mapping['city'] = i;
+      } else if (headerName.contains('notfall') && headerName.contains('name')) {
+        mapping['emergency_contact_name'] = i;
+      } else if (headerName.contains('notfall') && (headerName.contains('telefon') || headerName.contains('phone'))) {
+        mapping['emergency_contact_phone'] = i;
+      } else if (headerName.contains('allergi')) {
+        mapping['allergies'] = i;
+      } else if (headerName.contains('medikament')) {
+        mapping['medications'] = i;
+      } else if (headerName.contains('ernährung') || headerName.contains('diät')) {
+        mapping['dietary_restrictions'] = i;
+      } else if (headerName.contains('schwimm')) {
+        mapping['swim_ability'] = i;
+      } else if (headerName.contains('notiz') || headerName.contains('bemerkung')) {
+        mapping['notes'] = i;
+      } else if (headerName.contains('familie')) {
+        // Ignore family column for now
       }
     }
 
-    data['gender'] = _getCellValue(row, 3);
-    data['street'] = _getCellValue(row, 4);
-    data['postal_code'] = _getCellValue(row, 5);
-    data['city'] = _getCellValue(row, 6);
-    data['email'] = _getCellValue(row, 7);
-    data['phone'] = _getCellValue(row, 8);
-    data['emergency_contact_name'] = _getCellValue(row, 9);
-    data['emergency_contact_phone'] = _getCellValue(row, 10);
-    data['allergies'] = _getCellValue(row, 11);
-    data['medications'] = _getCellValue(row, 12);
-    data['dietary_restrictions'] = _getCellValue(row, 13);
-    data['swim_ability'] = _getCellValue(row, 14);
-    data['notes'] = _getCellValue(row, 15);
+    return mapping;
+  }
+
+  /// Parse a single row with dynamic column mapping
+  Map<String, dynamic> _parseRowWithMapping(
+    List<Data?> row,
+    Map<String, int> columnMapping,
+    int rowIndex,
+  ) {
+    final data = <String, dynamic>{};
+
+    // Parse each field using the column mapping
+    if (columnMapping.containsKey('first_name')) {
+      data['first_name'] = _getCellValue(row, columnMapping['first_name']!);
+    }
+
+    if (columnMapping.containsKey('last_name')) {
+      data['last_name'] = _getCellValue(row, columnMapping['last_name']!);
+    }
+
+    // Parse birth date
+    if (columnMapping.containsKey('birth_date')) {
+      final birthDateCell = row[columnMapping['birth_date']!];
+      if (birthDateCell != null && birthDateCell.value != null) {
+        try {
+          data['birth_date'] = _parseDateFromCell(birthDateCell);
+        } catch (e) {
+          throw Exception('Ungültiges Geburtsdatum: ${birthDateCell.value}');
+        }
+      }
+    }
+
+    if (columnMapping.containsKey('gender')) {
+      data['gender'] = _getCellValue(row, columnMapping['gender']!);
+    }
+
+    if (columnMapping.containsKey('street')) {
+      data['street'] = _getCellValue(row, columnMapping['street']!);
+    }
+
+    if (columnMapping.containsKey('postal_code')) {
+      data['postal_code'] = _getCellValue(row, columnMapping['postal_code']!);
+    }
+
+    if (columnMapping.containsKey('city')) {
+      data['city'] = _getCellValue(row, columnMapping['city']!);
+    }
+
+    if (columnMapping.containsKey('email')) {
+      data['email'] = _getCellValue(row, columnMapping['email']!);
+    }
+
+    if (columnMapping.containsKey('phone')) {
+      data['phone'] = _getCellValue(row, columnMapping['phone']!);
+    }
+
+    if (columnMapping.containsKey('emergency_contact_name')) {
+      data['emergency_contact_name'] = _getCellValue(row, columnMapping['emergency_contact_name']!);
+    }
+
+    if (columnMapping.containsKey('emergency_contact_phone')) {
+      data['emergency_contact_phone'] = _getCellValue(row, columnMapping['emergency_contact_phone']!);
+    }
+
+    if (columnMapping.containsKey('allergies')) {
+      data['allergies'] = _getCellValue(row, columnMapping['allergies']!);
+    }
+
+    if (columnMapping.containsKey('medications')) {
+      data['medications'] = _getCellValue(row, columnMapping['medications']!);
+    }
+
+    if (columnMapping.containsKey('dietary_restrictions')) {
+      data['dietary_restrictions'] = _getCellValue(row, columnMapping['dietary_restrictions']!);
+    }
+
+    if (columnMapping.containsKey('swim_ability')) {
+      data['swim_ability'] = _getCellValue(row, columnMapping['swim_ability']!);
+    }
+
+    if (columnMapping.containsKey('notes')) {
+      data['notes'] = _getCellValue(row, columnMapping['notes']!);
+    }
 
     return data;
   }
