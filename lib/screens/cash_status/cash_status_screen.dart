@@ -202,7 +202,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
             const SizedBox(height: AppConstants.spacing),
             const Divider(),
             const SizedBox(height: AppConstants.spacing),
-            StreamBuilder<List<Payment>>(
+            StreamBuilder<List<db.Payment>>(
               stream: (database.select(database.payments)
                     ..where((tbl) => tbl.eventId.equals(eventId))
                     ..where((tbl) => tbl.isActive.equals(true)))
@@ -652,7 +652,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   Widget _buildDetailedBreakdown(
     BuildContext context,
     WidgetRef ref,
-    AppDatabase database,
+    db.AppDatabase database,
     int eventId,
   ) {
     return Card(
