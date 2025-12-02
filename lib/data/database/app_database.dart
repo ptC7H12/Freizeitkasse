@@ -146,13 +146,13 @@ class Rulesets extends Table {
   TextColumn get name => text().withLength(min: 1, max: 200)();
   TextColumn get description => text().nullable()();
   DateTimeColumn get validFrom => dateTime()();
-  DateTimeColumn get validUntil => dateTime()();
+  DateTimeColumn get validUntil => dateTime().nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(false))();
   TextColumn get yamlContent => text()();
-  // JSON-Felder werden als TEXT gespeichert und in Dart als Map geparst
-  TextColumn get ageGroups => text()();
-  TextColumn get roleDiscounts => text()();
-  TextColumn get familyDiscount => text()();
+  // JSON-Felder werden als TEXT gespeichert und in Dart als Map geparst (nullable, da aus YAML geparst)
+  TextColumn get ageGroups => text().nullable()();
+  TextColumn get roleDiscounts => text().nullable()();
+  TextColumn get familyDiscount => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
