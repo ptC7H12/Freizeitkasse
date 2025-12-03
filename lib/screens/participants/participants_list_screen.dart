@@ -411,17 +411,43 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
           onPressed: _importFromExcel,
           tooltip: 'Excel importieren',
         ),
-        IconButton(
+        PopupMenuButton<String>(
           icon: const Icon(Icons.download),
-          onPressed: () {
-            final participantsValue = ref.read(participantsProvider).value;
-            if (participantsValue != null && participantsValue.isNotEmpty) {
-              _exportToExcel(participantsValue);
-            } else {
-              context.showError('Keine Teilnehmer zum Exportieren');
+          tooltip: 'Export-Optionen',
+          onSelected: (value) {
+            if (value == 'export') {
+              final participantsValue = ref.read(participantsProvider).value;
+              if (participantsValue != null && participantsValue.isNotEmpty) {
+                _exportToExcel(participantsValue);
+              } else {
+                context.showError('Keine Teilnehmer zum Exportieren');
+              }
+            } else if (value == 'template') {
+              _downloadTemplate();
             }
           },
-          tooltip: 'Excel exportieren',
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'export',
+              child: Row(
+                children: [
+                  Icon(Icons.table_chart),
+                  SizedBox(width: 8),
+                  Text('Teilnehmer exportieren'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'template',
+              child: Row(
+                children: [
+                  Icon(Icons.description),
+                  SizedBox(width: 8),
+                  Text('Import-Vorlage herunterladen'),
+                ],
+              ),
+            ),
+          ],
         ),
         IconButton(
           icon: const Icon(Icons.picture_as_pdf),
