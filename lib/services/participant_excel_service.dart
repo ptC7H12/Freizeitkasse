@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../data/database/app_database.dart';
 import '../data/repositories/participant_repository.dart';
+import '../utils/logger.dart';
 
 /// Service für Excel-Import/Export von Teilnehmern
 class ParticipantExcelService {
@@ -118,25 +119,61 @@ class ParticipantExcelService {
   Future<ImportResult> importParticipants({
     required int eventId,
   }) async {
+    AppLogger.info('[ParticipantExcelService] ==================== IMPORT START ====================');
+    AppLogger.info('[ParticipantExcelService] importParticipants() called');
+    AppLogger.info('[ParticipantExcelService] eventId: $eventId');
+
     try {
       // File Picker
+      AppLogger.info('[ParticipantExcelService] Opening file picker...');
       final result = await FilePicker.platform.pickFiles(
         type: FileType.any,
         allowedExtensions: ['xlsx', 'xls'],
       );
 
+      AppLogger.debug('[ParticipantExcelService] File picker result: ${result != null ? "File selected" : "Cancelled"}');
+
       if (result == null || result.files.isEmpty) {
+        AppLogger.warning('[ParticipantExcelService] No file selected or result is empty');
         return ImportResult(
           success: false,
           message: 'Keine Datei ausgewählt',
         );
       }
 
-      final file = File(result.files.single.path!);
+      AppLogger.info('[ParticipantExcelService] File selected: ${result.files.single.name}');
+      AppLogger.info('[ParticipantExcelService] File size: ${result.files.single.size} bytes');
+
+      final filePath = result.files.single.path;
+      if (filePath == null) {
+        AppLogger.error('[ParticipantExcelService] File path is null!');
+        return ImportResult(
+          success: false,
+          message: 'Dateipfad konnte nicht gelesen werden',
+        );
+      }
+
+      AppLogger.info('[ParticipantExcelService] File path: $filePath');
+
+      final file = File(filePath);
+      if (!file.existsSync()) {
+        AppLogger.error('[ParticipantExcelService] File does not exist at path: $filePath');
+        return ImportResult(
+          success: false,
+          message: 'Datei nicht gefunden',
+        );
+      }
+
+      AppLogger.info('[ParticipantExcelService] Reading file bytes...');
       final bytes = await file.readAsBytes();
+      AppLogger.debug('[ParticipantExcelService] File size: ${bytes.length} bytes');
+
+      AppLogger.info('[ParticipantExcelService] Decoding Excel...');
       final excel = Excel.decodeBytes(bytes);
+      AppLogger.info('[ParticipantExcelService] Excel decoded. Found ${excel.tables.length} sheets');
 
       if (excel.tables.isEmpty) {
+        AppLogger.error('[ParticipantExcelService] Excel file contains no tables');
         return ImportResult(
           success: false,
           message: 'Excel-Datei enthält keine Tabellen',
@@ -145,9 +182,12 @@ class ParticipantExcelService {
 
       // Erste Tabelle verwenden
       final sheetName = excel.tables.keys.first;
+      AppLogger.info('[ParticipantExcelService] Using sheet: $sheetName');
+
       final sheet = excel.tables[sheetName];
 
       if (sheet == null || sheet.rows.isEmpty) {
+        AppLogger.error('[ParticipantExcelService] Sheet is null or empty');
         return ImportResult(
           success: false,
           message: 'Tabelle ist leer',
@@ -155,18 +195,25 @@ class ParticipantExcelService {
       }
 
       final rows = sheet.rows;
+      AppLogger.info('[ParticipantExcelService] Sheet has ${rows.length} rows');
 
       // Header-Zeile überspringen (Index 0)
       var imported = 0;
       var errors = <String>[];
 
+      AppLogger.info('[ParticipantExcelService] Starting import of ${rows.length - 1} rows (excluding header)...');
+
       for (var i = 1; i < rows.length; i++) {
         try {
           final row = rows[i];
 
+          AppLogger.debug('[ParticipantExcelService] Processing row ${i + 1}: ${row.length} columns');
+
           // Mindestens Vorname und Nachname müssen vorhanden sein
           if (row.length < 3) {
-            errors.add('Zeile ${i + 1}: Zu wenige Spalten');
+            final error = 'Zeile ${i + 1}: Zu wenige Spalten (${row.length} statt mind. 3)';
+            AppLogger.warning('[ParticipantExcelService] $error');
+            errors.add(error);
             continue;
           }
 
@@ -174,21 +221,31 @@ class ParticipantExcelService {
           final lastName = _getCellValue(row, 1);
           final birthDateStr = _getCellValue(row, 2);
 
+          AppLogger.debug('[ParticipantExcelService] Row ${i + 1}: firstName="$firstName", lastName="$lastName", birthDate="$birthDateStr"');
+
           if (firstName.isEmpty || lastName.isEmpty) {
-            errors.add('Zeile ${i + 1}: Vorname oder Nachname fehlt');
+            final error = 'Zeile ${i + 1}: Vorname oder Nachname fehlt';
+            AppLogger.warning('[ParticipantExcelService] $error');
+            errors.add(error);
             continue;
           }
 
           if (birthDateStr.isEmpty) {
-            errors.add('Zeile ${i + 1}: Geburtsdatum fehlt');
+            final error = 'Zeile ${i + 1}: Geburtsdatum fehlt';
+            AppLogger.warning('[ParticipantExcelService] $error');
+            errors.add(error);
             continue;
           }
 
           final birthDate = _parseDate(birthDateStr);
           if (birthDate == null) {
-            errors.add('Zeile ${i + 1}: Ungültiges Geburtsdatum: $birthDateStr');
+            final error = 'Zeile ${i + 1}: Ungültiges Geburtsdatum: $birthDateStr';
+            AppLogger.warning('[ParticipantExcelService] $error');
+            errors.add(error);
             continue;
           }
+
+          AppLogger.debug('[ParticipantExcelService] Creating participant: $firstName $lastName, born: $birthDate');
 
           // Teilnehmer erstellen
           await _repository.createParticipant(
@@ -213,10 +270,16 @@ class ParticipantExcelService {
           );
 
           imported++;
-        } catch (e) {
-          errors.add('Zeile ${i + 1}: Fehler beim Importieren - $e');
+          AppLogger.info('[ParticipantExcelService] ✓ Row ${i + 1}: Created participant $firstName $lastName');
+        } catch (e, stackTrace) {
+          final error = 'Zeile ${i + 1}: Fehler beim Importieren - $e';
+          AppLogger.error('[ParticipantExcelService] $error', error: e, stackTrace: stackTrace);
+          errors.add(error);
         }
       }
+
+      AppLogger.info('[ParticipantExcelService] Import complete: $imported imported, ${errors.length} errors');
+      AppLogger.info('[ParticipantExcelService] ==================== IMPORT END ====================');
 
       return ImportResult(
         success: true,
@@ -224,7 +287,12 @@ class ParticipantExcelService {
         importedCount: imported,
         errors: errors,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger.error('[ParticipantExcelService] FATAL ERROR during import', error: e, stackTrace: stackTrace);
+      AppLogger.error('[ParticipantExcelService] Error type: ${e.runtimeType}');
+      AppLogger.error('[ParticipantExcelService] Error message: $e');
+      AppLogger.info('[ParticipantExcelService] ==================== IMPORT END (WITH ERROR) ====================');
+
       return ImportResult(
         success: false,
         message: 'Fehler beim Lesen der Datei: $e',
