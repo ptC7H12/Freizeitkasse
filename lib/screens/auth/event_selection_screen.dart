@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
-import 'dart:developer' as developer;
 import '../../data/database/app_database.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/ruleset_provider.dart';
 import '../../services/github_ruleset_service.dart';
+import '../../utils/logger.dart';
 //import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -663,7 +663,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
   ) async {
     // GitHub-Pfad aus Settings laden (vorerst hardcoded)
     const githubPath =
-        'https://raw.githubusercontent.com/YOUR_ORG/YOUR_REPO/main/rulesets';
+        'https://raw.githubusercontent.com/ptC7H12/Freizeitkasse/master/rulesets/valid';
 
     try {
       final yamlContent = await GitHubRulesetService.loadRulesetFromGitHub(
@@ -693,11 +693,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
         }
       }
     } catch (e) {
-      developer.log(
-        'Fehler beim GitHub-Import: $e',
-        name: 'EventSelectionScreen',
-        level: 900,
-      );
+      AppLogger.warning('[EventSelectionScreen] Fehler beim GitHub-Import', e);
     }
   }
 
