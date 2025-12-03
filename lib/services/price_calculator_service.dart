@@ -56,6 +56,19 @@ class PriceCalculatorService {
     // Endpreis = Basispreis - Summe aller Rabatte
     final finalPrice = basePrice - roleDiscountAmount - familyDiscountAmount;
 
+    AppLogger.debug(
+        '[PriceCalculation] calculateParticipantPrice:\n'
+            '  age: $age\n'
+            '  roleName: $roleName\n'
+            '  familyChildrenCount: $familyChildrenCount\n'
+            '  basePrice: $basePrice\n'
+            '  roleDiscountPercent: $roleDiscountPercent\n'
+            '  roleDiscountAmount: $roleDiscountAmount\n'
+            '  familyDiscountPercent: $familyDiscountPercent\n'
+            '  familyDiscountAmount: $familyDiscountAmount\n'
+            '  finalPrice: ${finalPrice.toStringAsFixed(2)}\n'
+    );
+
     return double.parse(finalPrice.toStringAsFixed(2));
   }
 
@@ -295,6 +308,23 @@ class PriceCalculatorService {
     final finalPrice = breakdown['price_after_family_discount'] -
         breakdown['manual_discount_amount'];
     breakdown['final_price'] = double.parse((finalPrice as num).toStringAsFixed(2));
+
+    AppLogger.debug(
+        '[PriceCalculation] Breakdown:\n'
+            '  base_price: ${breakdown['base_price']}\n'
+            '  role_discount_percent: ${breakdown['role_discount_percent']}\n'
+            '  role_discount_amount: ${breakdown['role_discount_amount']}\n'
+            '  price_after_role_discount: ${breakdown['price_after_role_discount']}\n'
+            '  family_discount_percent: ${breakdown['family_discount_percent']}\n'
+            '  family_discount_amount: ${breakdown['family_discount_amount']}\n'
+            '  price_after_family_discount: ${breakdown['price_after_family_discount']}\n'
+            '  manual_discount_percent: ${breakdown['manual_discount_percent']}\n'
+            '  manual_discount_amount: ${breakdown['manual_discount_amount']}\n'
+            '  manual_price_override: ${breakdown['manual_price_override']}\n'
+            '  final_price: ${breakdown['final_price']}\n'
+            '  has_discounts: ${breakdown['has_discounts']}\n'
+            '  discount_reasons: ${breakdown['discount_reasons']}\n'
+    );
 
     return breakdown;
   }

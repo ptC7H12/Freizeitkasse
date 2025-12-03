@@ -1932,18 +1932,6 @@ class $ParticipantsTable extends Participants
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
-  static const VerificationMeta _swimAbilityMeta = const VerificationMeta(
-    'swimAbility',
-  );
-  @override
-  late final GeneratedColumn<String> swimAbility = GeneratedColumn<String>(
-    'swim_ability',
-    aliasedName,
-    true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 50),
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -2107,7 +2095,6 @@ class $ParticipantsTable extends Participants
     medications,
     allergies,
     dietaryRestrictions,
-    swimAbility,
     notes,
     bildungUndTeilhabe,
     calculatedPrice,
@@ -2243,15 +2230,6 @@ class $ParticipantsTable extends Participants
         dietaryRestrictions.isAcceptableOrUnknown(
           data['dietary_restrictions']!,
           _dietaryRestrictionsMeta,
-        ),
-      );
-    }
-    if (data.containsKey('swim_ability')) {
-      context.handle(
-        _swimAbilityMeta,
-        swimAbility.isAcceptableOrUnknown(
-          data['swim_ability']!,
-          _swimAbilityMeta,
         ),
       );
     }
@@ -2415,10 +2393,6 @@ class $ParticipantsTable extends Participants
         DriftSqlType.string,
         data['${effectivePrefix}dietary_restrictions'],
       ),
-      swimAbility: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}swim_ability'],
-      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -2493,7 +2467,6 @@ class Participant extends DataClass implements Insertable<Participant> {
   final String? medications;
   final String? allergies;
   final String? dietaryRestrictions;
-  final String? swimAbility;
   final String? notes;
   final bool bildungUndTeilhabe;
   final double calculatedPrice;
@@ -2523,7 +2496,6 @@ class Participant extends DataClass implements Insertable<Participant> {
     this.medications,
     this.allergies,
     this.dietaryRestrictions,
-    this.swimAbility,
     this.notes,
     required this.bildungUndTeilhabe,
     required this.calculatedPrice,
@@ -2577,9 +2549,6 @@ class Participant extends DataClass implements Insertable<Participant> {
     }
     if (!nullToAbsent || dietaryRestrictions != null) {
       map['dietary_restrictions'] = Variable<String>(dietaryRestrictions);
-    }
-    if (!nullToAbsent || swimAbility != null) {
-      map['swim_ability'] = Variable<String>(swimAbility);
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -2646,9 +2615,6 @@ class Participant extends DataClass implements Insertable<Participant> {
       dietaryRestrictions: dietaryRestrictions == null && nullToAbsent
           ? const Value.absent()
           : Value(dietaryRestrictions),
-      swimAbility: swimAbility == null && nullToAbsent
-          ? const Value.absent()
-          : Value(swimAbility),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -2704,7 +2670,6 @@ class Participant extends DataClass implements Insertable<Participant> {
       dietaryRestrictions: serializer.fromJson<String?>(
         json['dietaryRestrictions'],
       ),
-      swimAbility: serializer.fromJson<String?>(json['swimAbility']),
       notes: serializer.fromJson<String?>(json['notes']),
       bildungUndTeilhabe: serializer.fromJson<bool>(json['bildungUndTeilhabe']),
       calculatedPrice: serializer.fromJson<double>(json['calculatedPrice']),
@@ -2743,7 +2708,6 @@ class Participant extends DataClass implements Insertable<Participant> {
       'medications': serializer.toJson<String?>(medications),
       'allergies': serializer.toJson<String?>(allergies),
       'dietaryRestrictions': serializer.toJson<String?>(dietaryRestrictions),
-      'swimAbility': serializer.toJson<String?>(swimAbility),
       'notes': serializer.toJson<String?>(notes),
       'bildungUndTeilhabe': serializer.toJson<bool>(bildungUndTeilhabe),
       'calculatedPrice': serializer.toJson<double>(calculatedPrice),
@@ -2776,7 +2740,6 @@ class Participant extends DataClass implements Insertable<Participant> {
     Value<String?> medications = const Value.absent(),
     Value<String?> allergies = const Value.absent(),
     Value<String?> dietaryRestrictions = const Value.absent(),
-    Value<String?> swimAbility = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     bool? bildungUndTeilhabe,
     double? calculatedPrice,
@@ -2812,7 +2775,6 @@ class Participant extends DataClass implements Insertable<Participant> {
     dietaryRestrictions: dietaryRestrictions.present
         ? dietaryRestrictions.value
         : this.dietaryRestrictions,
-    swimAbility: swimAbility.present ? swimAbility.value : this.swimAbility,
     notes: notes.present ? notes.value : this.notes,
     bildungUndTeilhabe: bildungUndTeilhabe ?? this.bildungUndTeilhabe,
     calculatedPrice: calculatedPrice ?? this.calculatedPrice,
@@ -2858,9 +2820,6 @@ class Participant extends DataClass implements Insertable<Participant> {
       dietaryRestrictions: data.dietaryRestrictions.present
           ? data.dietaryRestrictions.value
           : this.dietaryRestrictions,
-      swimAbility: data.swimAbility.present
-          ? data.swimAbility.value
-          : this.swimAbility,
       notes: data.notes.present ? data.notes.value : this.notes,
       bildungUndTeilhabe: data.bildungUndTeilhabe.present
           ? data.bildungUndTeilhabe.value
@@ -2905,7 +2864,6 @@ class Participant extends DataClass implements Insertable<Participant> {
           ..write('medications: $medications, ')
           ..write('allergies: $allergies, ')
           ..write('dietaryRestrictions: $dietaryRestrictions, ')
-          ..write('swimAbility: $swimAbility, ')
           ..write('notes: $notes, ')
           ..write('bildungUndTeilhabe: $bildungUndTeilhabe, ')
           ..write('calculatedPrice: $calculatedPrice, ')
@@ -2940,7 +2898,6 @@ class Participant extends DataClass implements Insertable<Participant> {
     medications,
     allergies,
     dietaryRestrictions,
-    swimAbility,
     notes,
     bildungUndTeilhabe,
     calculatedPrice,
@@ -2974,7 +2931,6 @@ class Participant extends DataClass implements Insertable<Participant> {
           other.medications == this.medications &&
           other.allergies == this.allergies &&
           other.dietaryRestrictions == this.dietaryRestrictions &&
-          other.swimAbility == this.swimAbility &&
           other.notes == this.notes &&
           other.bildungUndTeilhabe == this.bildungUndTeilhabe &&
           other.calculatedPrice == this.calculatedPrice &&
@@ -3006,7 +2962,6 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
   final Value<String?> medications;
   final Value<String?> allergies;
   final Value<String?> dietaryRestrictions;
-  final Value<String?> swimAbility;
   final Value<String?> notes;
   final Value<bool> bildungUndTeilhabe;
   final Value<double> calculatedPrice;
@@ -3036,7 +2991,6 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     this.medications = const Value.absent(),
     this.allergies = const Value.absent(),
     this.dietaryRestrictions = const Value.absent(),
-    this.swimAbility = const Value.absent(),
     this.notes = const Value.absent(),
     this.bildungUndTeilhabe = const Value.absent(),
     this.calculatedPrice = const Value.absent(),
@@ -3067,7 +3021,6 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     this.medications = const Value.absent(),
     this.allergies = const Value.absent(),
     this.dietaryRestrictions = const Value.absent(),
-    this.swimAbility = const Value.absent(),
     this.notes = const Value.absent(),
     this.bildungUndTeilhabe = const Value.absent(),
     this.calculatedPrice = const Value.absent(),
@@ -3101,7 +3054,6 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     Expression<String>? medications,
     Expression<String>? allergies,
     Expression<String>? dietaryRestrictions,
-    Expression<String>? swimAbility,
     Expression<String>? notes,
     Expression<bool>? bildungUndTeilhabe,
     Expression<double>? calculatedPrice,
@@ -3135,7 +3087,6 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
       if (allergies != null) 'allergies': allergies,
       if (dietaryRestrictions != null)
         'dietary_restrictions': dietaryRestrictions,
-      if (swimAbility != null) 'swim_ability': swimAbility,
       if (notes != null) 'notes': notes,
       if (bildungUndTeilhabe != null)
         'bildung_und_teilhabe': bildungUndTeilhabe,
@@ -3170,7 +3121,6 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     Value<String?>? medications,
     Value<String?>? allergies,
     Value<String?>? dietaryRestrictions,
-    Value<String?>? swimAbility,
     Value<String?>? notes,
     Value<bool>? bildungUndTeilhabe,
     Value<double>? calculatedPrice,
@@ -3202,7 +3152,6 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
       medications: medications ?? this.medications,
       allergies: allergies ?? this.allergies,
       dietaryRestrictions: dietaryRestrictions ?? this.dietaryRestrictions,
-      swimAbility: swimAbility ?? this.swimAbility,
       notes: notes ?? this.notes,
       bildungUndTeilhabe: bildungUndTeilhabe ?? this.bildungUndTeilhabe,
       calculatedPrice: calculatedPrice ?? this.calculatedPrice,
@@ -3273,9 +3222,6 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     if (dietaryRestrictions.present) {
       map['dietary_restrictions'] = Variable<String>(dietaryRestrictions.value);
     }
-    if (swimAbility.present) {
-      map['swim_ability'] = Variable<String>(swimAbility.value);
-    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -3336,7 +3282,6 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
           ..write('medications: $medications, ')
           ..write('allergies: $allergies, ')
           ..write('dietaryRestrictions: $dietaryRestrictions, ')
-          ..write('swimAbility: $swimAbility, ')
           ..write('notes: $notes, ')
           ..write('bildungUndTeilhabe: $bildungUndTeilhabe, ')
           ..write('calculatedPrice: $calculatedPrice, ')
@@ -11553,7 +11498,6 @@ typedef $$ParticipantsTableCreateCompanionBuilder =
       Value<String?> medications,
       Value<String?> allergies,
       Value<String?> dietaryRestrictions,
-      Value<String?> swimAbility,
       Value<String?> notes,
       Value<bool> bildungUndTeilhabe,
       Value<double> calculatedPrice,
@@ -11585,7 +11529,6 @@ typedef $$ParticipantsTableUpdateCompanionBuilder =
       Value<String?> medications,
       Value<String?> allergies,
       Value<String?> dietaryRestrictions,
-      Value<String?> swimAbility,
       Value<String?> notes,
       Value<bool> bildungUndTeilhabe,
       Value<double> calculatedPrice,
@@ -11782,11 +11725,6 @@ class $$ParticipantsTableFilterComposer
 
   ColumnFilters<String> get dietaryRestrictions => $composableBuilder(
     column: $table.dietaryRestrictions,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get swimAbility => $composableBuilder(
-    column: $table.swimAbility,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12044,11 +11982,6 @@ class $$ParticipantsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get swimAbility => $composableBuilder(
-    column: $table.swimAbility,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get notes => $composableBuilder(
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
@@ -12230,11 +12163,6 @@ class $$ParticipantsTableAnnotationComposer
 
   GeneratedColumn<String> get dietaryRestrictions => $composableBuilder(
     column: $table.dietaryRestrictions,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get swimAbility => $composableBuilder(
-    column: $table.swimAbility,
     builder: (column) => column,
   );
 
@@ -12448,7 +12376,6 @@ class $$ParticipantsTableTableManager
                 Value<String?> medications = const Value.absent(),
                 Value<String?> allergies = const Value.absent(),
                 Value<String?> dietaryRestrictions = const Value.absent(),
-                Value<String?> swimAbility = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<bool> bildungUndTeilhabe = const Value.absent(),
                 Value<double> calculatedPrice = const Value.absent(),
@@ -12478,7 +12405,6 @@ class $$ParticipantsTableTableManager
                 medications: medications,
                 allergies: allergies,
                 dietaryRestrictions: dietaryRestrictions,
-                swimAbility: swimAbility,
                 notes: notes,
                 bildungUndTeilhabe: bildungUndTeilhabe,
                 calculatedPrice: calculatedPrice,
@@ -12510,7 +12436,6 @@ class $$ParticipantsTableTableManager
                 Value<String?> medications = const Value.absent(),
                 Value<String?> allergies = const Value.absent(),
                 Value<String?> dietaryRestrictions = const Value.absent(),
-                Value<String?> swimAbility = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<bool> bildungUndTeilhabe = const Value.absent(),
                 Value<double> calculatedPrice = const Value.absent(),
@@ -12540,7 +12465,6 @@ class $$ParticipantsTableTableManager
                 medications: medications,
                 allergies: allergies,
                 dietaryRestrictions: dietaryRestrictions,
-                swimAbility: swimAbility,
                 notes: notes,
                 bildungUndTeilhabe: bildungUndTeilhabe,
                 calculatedPrice: calculatedPrice,

@@ -5,6 +5,7 @@ import '../../services/price_calculator_service.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../utils/date_utils.dart';
+import '../../utils/logger.dart';
 
 /// Live-Preisberechnung Widget
 ///
@@ -104,6 +105,8 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
         return;
       }
 
+      AppLogger.debug('[PriceCalculation] _calculatePrice(): rulsetId: ${ruleset.id}');
+
       // Alter zum Event-Start berechnen
       final age = AppDateUtils.calculateAgeAtEventStart(
         widget.birthDate!,
@@ -153,6 +156,35 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
         discountPercent: widget.discountPercent,
         discountReason: widget.discountReason,
         manualPriceOverride: widget.manualPriceOverride,
+      );
+
+      AppLogger.debug(
+          '[PriceCalculation] _calculatePrice():\n'
+              '  eventId: $eventId\n'
+              '  age: $age\n'
+              '  roleName: $roleName\n'
+              '  roleDisplayName: $roleDisplayName\n'
+              '  familyChildrenCount: $familyChildrenCount\n'
+              '  discountPercent: ${widget.discountPercent}\n'
+              '  discountReason: ${widget.discountReason}\n'
+              '  manualPriceOverride: ${widget.manualPriceOverride}\n'
+              '  rulesetData.age_groups: ${rulesetData['age_groups']}\n'
+              '  rulesetData.role_discounts: ${rulesetData['role_discounts']}\n'
+              '  rulesetData.family_discount: ${rulesetData['family_discount']}\n'
+              '  breakdown:\n'
+              '    base_price: ${breakdown['base_price']}\n'
+              '    role_discount_percent: ${breakdown['role_discount_percent']}\n'
+              '    role_discount_amount: ${breakdown['role_discount_amount']}\n'
+              '    price_after_role_discount: ${breakdown['price_after_role_discount']}\n'
+              '    family_discount_percent: ${breakdown['family_discount_percent']}\n'
+              '    family_discount_amount: ${breakdown['family_discount_amount']}\n'
+              '    price_after_family_discount: ${breakdown['price_after_family_discount']}\n'
+              '    manual_discount_percent: ${breakdown['manual_discount_percent']}\n'
+              '    manual_discount_amount: ${breakdown['manual_discount_amount']}\n'
+              '    manual_price_override: ${breakdown['manual_price_override']}\n'
+              '    final_price: ${breakdown['final_price']}\n'
+              '    has_discounts: ${breakdown['has_discounts']}\n'
+              '    discount_reasons: ${breakdown['discount_reasons']}\n'
       );
 
       setState(() {
