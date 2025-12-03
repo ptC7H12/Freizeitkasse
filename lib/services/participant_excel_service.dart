@@ -212,11 +212,46 @@ class ParticipantExcelService {
       final rows = sheet.rows;
       AppLogger.info('[ParticipantExcelService] Sheet has ${rows.length} rows');
 
-      // Header-Zeile überspringen (Index 0)
+      // Parse header row to build column mapping
+      if (rows.isEmpty) {
+        AppLogger.error('[ParticipantExcelService] Sheet has no rows');
+        return ImportResult(
+          success: false,
+          message: 'Tabelle enthält keine Zeilen',
+        );
+      }
+
+      final headerRow = rows[0];
+      final columnMapping = _buildColumnMapping(headerRow);
+      AppLogger.info('[ParticipantExcelService] Column mapping: $columnMapping');
+
+      // Validate required columns
+      if (!columnMapping.containsKey('first_name') ||
+          !columnMapping.containsKey('last_name') ||
+          !columnMapping.containsKey('birth_date')) {
+        final error = 'Erforderliche Spalten fehlen: Vorname, Nachname, Geburtsdatum';
+        AppLogger.error('[ParticipantExcelService] $error');
+        return ImportResult(
+          success: false,
+          message: error,
+        );
+      }
+
+      // PHASE 1: Create families based on Familien-Nr
+      final familyMap = <String, int>{};
+      if (columnMapping.containsKey('family_number')) {
+        AppLogger.info('[ParticipantExcelService] PHASE 1: Creating families...');
+        familyMap.addAll(await _createFamilies(rows, columnMapping, eventId));
+        AppLogger.info('[ParticipantExcelService] Created ${familyMap.length} families');
+      } else {
+        AppLogger.info('[ParticipantExcelService] No Familien-Nr column - skipping family creation');
+      }
+
+      // PHASE 2: Import participants
       var imported = 0;
       var errors = <String>[];
 
-      AppLogger.info('[ParticipantExcelService] Starting import of ${rows.length - 1} rows (excluding header)...');
+      AppLogger.info('[ParticipantExcelService] PHASE 2: Starting import of ${rows.length - 1} rows (excluding header)...');
 
       for (var i = 1; i < rows.length; i++) {
         try {
@@ -224,17 +259,9 @@ class ParticipantExcelService {
 
           AppLogger.debug('[ParticipantExcelService] Processing row ${i + 1}: ${row.length} columns');
 
-          // Mindestens Vorname und Nachname müssen vorhanden sein
-          if (row.length < 3) {
-            final error = 'Zeile ${i + 1}: Zu wenige Spalten (${row.length} statt mind. 3)';
-            AppLogger.warning('[ParticipantExcelService] $error');
-            errors.add(error);
-            continue;
-          }
-
-          final firstName = _getCellValue(row, 0);
-          final lastName = _getCellValue(row, 1);
-          final birthDateStr = _getCellValue(row, 2);
+          final firstName = _getCellValue(row, columnMapping['first_name']!);
+          final lastName = _getCellValue(row, columnMapping['last_name']!);
+          final birthDateStr = _getCellValue(row, columnMapping['birth_date']!);
 
           AppLogger.debug('[ParticipantExcelService] Row ${i + 1}: firstName="$firstName", lastName="$lastName", birthDate="$birthDateStr"');
 
@@ -260,7 +287,66 @@ class ParticipantExcelService {
             continue;
           }
 
+          // Get family ID if Familien-Nr exists
+          int? familyId;
+          String? familyNumber;
+          if (columnMapping.containsKey('family_number')) {
+            familyNumber = _getCellValue(row, columnMapping['family_number']!);
+            if (familyNumber != null && familyNumber.isNotEmpty) {
+              familyId = familyMap[familyNumber];
+              if (familyId != null) {
+                AppLogger.debug('[ParticipantExcelService] Row ${i + 1}: Assigning to family $familyNumber (ID: $familyId)');
+              } else {
+                AppLogger.warning('[ParticipantExcelService] Row ${i + 1}: Family number "$familyNumber" not found in familyMap!');
+              }
+            }
+          }
+
           AppLogger.debug('[ParticipantExcelService] Creating participant: $firstName $lastName, born: $birthDate');
+
+          // Parse optional fields with column mapping
+          String? gender;
+          String? email;
+          String? address;
+          String? phone;
+          String? emergencyContactName;
+          String? emergencyContactPhone;
+          String? medications;
+          String? allergies;
+          String? dietaryRestrictions;
+          bool? bildungUndTeilhabe;
+
+          if (columnMapping.containsKey('gender')) {
+            gender = _getCellValue(row, columnMapping['gender']!);
+          }
+          if (columnMapping.containsKey('email')) {
+            email = _getCellValue(row, columnMapping['email']!);
+          }
+          if (columnMapping.containsKey('address')) {
+            address = _getCellValue(row, columnMapping['address']!);
+          }
+          if (columnMapping.containsKey('phone')) {
+            phone = _getCellValue(row, columnMapping['phone']!);
+          }
+          if (columnMapping.containsKey('emergency_contact_name')) {
+            emergencyContactName = _getCellValue(row, columnMapping['emergency_contact_name']!);
+          }
+          if (columnMapping.containsKey('emergency_contact_phone')) {
+            emergencyContactPhone = _getCellValue(row, columnMapping['emergency_contact_phone']!);
+          }
+          if (columnMapping.containsKey('medications')) {
+            medications = _getCellValue(row, columnMapping['medications']!);
+          }
+          if (columnMapping.containsKey('allergies')) {
+            allergies = _getCellValue(row, columnMapping['allergies']!);
+          }
+          if (columnMapping.containsKey('dietary_restrictions')) {
+            dietaryRestrictions = _getCellValue(row, columnMapping['dietary_restrictions']!);
+          }
+          if (columnMapping.containsKey('bildung_und_teilhabe')) {
+            final value = _getCellValue(row, columnMapping['bildung_und_teilhabe']!);
+            bildungUndTeilhabe = value?.toLowerCase() == 'ja';
+          }
 
           // Teilnehmer erstellen
           await _repository.createParticipant(
@@ -268,24 +354,22 @@ class ParticipantExcelService {
             firstName: firstName,
             lastName: lastName,
             birthDate: birthDate,
-            gender: _getCellValue(row, 3).isNotEmpty ? _getCellValue(row, 4) : null,
-            street: _getCellValue(row, 6).isNotEmpty ? _getCellValue(row, 5) : null,
-            //postalCode: _getCellValue(row, 6).isNotEmpty ? _getCellValue(row, 6) : null,
-            city: _getCellValue(row, 7).isNotEmpty ? _getCellValue(row, 7) : null,
-            phone: _getCellValue(row, 5).isNotEmpty ? _getCellValue(row, 8) : null,
-            email: _getCellValue(row, 4).isNotEmpty ? _getCellValue(row, 9) : null,
-            //emergencyContactName: _getCellValue(row, 10).isNotEmpty ? _getCellValue(row, 10) : null,
-            //emergencyContactPhone: _getCellValue(row, 11).isNotEmpty ? _getCellValue(row, 11) : null,
-            //medications: _getCellValue(row, 12).isNotEmpty ? _getCellValue(row, 12) : null,
-            //allergies: _getCellValue(row, 13).isNotEmpty ? _getCellValue(row, 13) : null,
-            //dietaryRestrictions: _getCellValue(row, 14).isNotEmpty ? _getCellValue(row, 14) : null,
-            //swimAbility: _getCellValue(row, 15).isNotEmpty ? _getCellValue(row, 15) : null,
-            //notes: _getCellValue(row, 16).isNotEmpty ? _getCellValue(row, 16) : null,
-            //bildungUndTeilhabe: _getCellValue(row, 17).toLowerCase() == 'ja',
+            gender: gender,
+            street: address,  // Map "Adresse" to "street" DB field
+            email: email,
+            phone: phone,
+            emergencyContactName: emergencyContactName,
+            emergencyContactPhone: emergencyContactPhone,
+            medications: medications,
+            allergies: allergies,
+            dietaryRestrictions: dietaryRestrictions,
+            bildungUndTeilhabe: bildungUndTeilhabe ?? false,
+            familyId: familyId,
           );
 
           imported++;
-          AppLogger.info('[ParticipantExcelService] ✓ Row ${i + 1}: Created participant $firstName $lastName');
+          final familyInfo = familyId != null ? ' → Familie ID: $familyId (Nr: $familyNumber)' : ' → Einzelperson';
+          AppLogger.info('[ParticipantExcelService] ✓ Row ${i + 1}: Created participant $firstName $lastName$familyInfo');
         } catch (e, stackTrace) {
           final error = 'Zeile ${i + 1}: Fehler beim Importieren - $e';
           AppLogger.error('[ParticipantExcelService] $error', error: e, stackTrace: stackTrace);
@@ -320,24 +404,21 @@ class ParticipantExcelService {
     final excel = Excel.createExcel();
     final sheet = excel['Teilnehmer'];
 
-    // Header-Zeile (gleich wie Export, aber ohne ID)
+    // Header-Zeile in der korrekten Reihenfolge
     final headers = [
-      'ID (leer lassen)',
       'Vorname *',
       'Nachname *',
       'Geburtsdatum * (TT.MM.JJJJ)',
+      'Familien-Nr',
       'Geschlecht',
-      'Straße und Hausnummer',
-      'PLZ',
-      'Ort',
-      'Telefon',
       'E-Mail',
+      'Adresse',
+      'Telefon',
       'Notfallkontakt Name',
       'Notfallkontakt Telefon',
       'Medikamente',
       'Allergien',
-      'Ernährungseinschränkungen',
-      'Notizen',
+      'Ernährung',
       'Bildung & Teilhabe (Ja/Nein)',
     ];
 
@@ -352,35 +433,23 @@ class ParticipantExcelService {
       );
     }
 
-    // Beispiel-Zeile
-    final example = [
-      '',
-      'Max',
-      'Mustermann',
-      '01.01.2010',
-      'Männlich',
-      'Musterstraße 123',
-      '12345',
-      'Musterstadt',
-      '0123456789',
-      'max@example.com',
-      'Maria Mustermann',
-      '0123456789',
-      '',
-      'Keine',
-      'Vegetarisch',
-      'Bronze',
-      'Beispiel-Notiz',
-      'Nein',
+    // Beispiel-Zeilen (Familie mit 2 Kindern + 1 Einzelperson)
+    final exampleData = [
+      ['Max', 'Mustermann', '01.07.2010', '1', 'Männlich', 'max@example.com', 'Musterstraße 42, 12345 Musterstadt', '0123456789', 'Maria Mustermann', '0123456789', '', 'Erdnüsse', 'Vegetarisch', 'Nein'],
+      ['Anna', 'Mustermann', '10.03.2012', '1', 'Weiblich', 'anna@example.com', 'Musterstraße 42, 12345 Musterstadt', '0123456789', 'Maria Mustermann', '0123456789', '', '', '', 'Nein'],
+      ['Lisa', 'Schmidt', '22.08.2011', '', 'Weiblich', 'lisa@example.com', 'Beispielweg 7, 54321 Beispielstadt', '9876543210', 'Peter Schmidt', '9876543210', '', '', '', 'Nein'],
     ];
 
-    for (var i = 0; i < example.length; i++) {
-      final cell = sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 1));
-      cell.value = TextCellValue(example[i]);
-      cell.cellStyle = CellStyle(
-        italic: true,
-        fontColorHex: ExcelColor.fromHexString('#808080'),
-      );
+    // Beispiel-Daten schreiben
+    for (var rowIndex = 0; rowIndex < exampleData.length; rowIndex++) {
+      for (var colIndex = 0; colIndex < exampleData[rowIndex].length; colIndex++) {
+        final cell = sheet.cell(CellIndex.indexByColumnRow(columnIndex: colIndex, rowIndex: rowIndex + 1));
+        cell.value = TextCellValue(exampleData[rowIndex][colIndex]);
+        cell.cellStyle = CellStyle(
+          italic: true,
+          fontColorHex: ExcelColor.fromHexString('#808080'),
+        );
+      }
     }
 
     // Auto-fit columns
@@ -448,6 +517,122 @@ class ParticipantExcelService {
     } catch (e) {
       return null;
     }
+  }
+
+  /// Build column mapping from header row
+  /// Maps German column names to internal field names and their column indices
+  Map<String, int> _buildColumnMapping(List<Data?> headerRow) {
+    AppLogger.debug('[ParticipantExcelService] _buildColumnMapping() - parsing ${headerRow.length} header cells');
+
+    final mapping = <String, int>{};
+
+    for (var i = 0; i < headerRow.length; i++) {
+      final header = _getCellValue(headerRow, i).toLowerCase().trim();
+
+      // Remove asterisks and notes from headers (e.g. "Vorname *" → "vorname")
+      final cleanHeader = header.replaceAll('*', '').replaceAll(RegExp(r'\s*\([^)]*\)'), '').trim();
+
+      AppLogger.debug('[ParticipantExcelService] Header[$i]: "$header" → "$cleanHeader"');
+
+      // Map German headers to internal field names
+      if (cleanHeader == 'vorname') {
+        mapping['first_name'] = i;
+      } else if (cleanHeader == 'nachname') {
+        mapping['last_name'] = i;
+      } else if (cleanHeader == 'geburtsdatum') {
+        mapping['birth_date'] = i;
+      } else if (cleanHeader == 'familien-nr') {
+        mapping['family_number'] = i;
+      } else if (cleanHeader == 'geschlecht') {
+        mapping['gender'] = i;
+      } else if (cleanHeader == 'e-mail') {
+        mapping['email'] = i;
+      } else if (cleanHeader == 'adresse') {
+        mapping['address'] = i;
+      } else if (cleanHeader == 'telefon') {
+        mapping['phone'] = i;
+      } else if (cleanHeader == 'notfallkontakt name') {
+        mapping['emergency_contact_name'] = i;
+      } else if (cleanHeader == 'notfallkontakt telefon') {
+        mapping['emergency_contact_phone'] = i;
+      } else if (cleanHeader == 'medikamente') {
+        mapping['medications'] = i;
+      } else if (cleanHeader == 'allergien') {
+        mapping['allergies'] = i;
+      } else if (cleanHeader == 'ernährung') {
+        mapping['dietary_restrictions'] = i;
+      } else if (cleanHeader == 'bildung & teilhabe') {
+        mapping['bildung_und_teilhabe'] = i;
+      }
+    }
+
+    AppLogger.info('[ParticipantExcelService] Column mapping complete: $mapping');
+    return mapping;
+  }
+
+  /// Create families from Excel data based on Familien-Nr
+  /// Returns a map of family_number → family_id
+  Future<Map<String, int>> _createFamilies(
+    List<List<Data?>> rows,
+    Map<String, int> columnMapping,
+    int eventId,
+  ) async {
+    AppLogger.info('[ParticipantExcelService] _createFamilies() - grouping families...');
+
+    final familyNumberCol = columnMapping['family_number']!;
+    final lastNameCol = columnMapping['last_name']!;
+
+    // Group rows by family number
+    final familyGroups = <String, List<int>>{};
+
+    for (var i = 1; i < rows.length; i++) {  // Skip header row (index 0)
+      final row = rows[i];
+      final familyNumber = _getCellValue(row, familyNumberCol);
+
+      // Only process rows with a family number
+      if (familyNumber.isNotEmpty) {
+        if (!familyGroups.containsKey(familyNumber)) {
+          familyGroups[familyNumber] = [];
+        }
+        familyGroups[familyNumber]!.add(i);
+      }
+    }
+
+    AppLogger.info('[ParticipantExcelService] Found ${familyGroups.length} family groups');
+
+    // Create family records
+    final familyMap = <String, int>{};
+
+    for (final entry in familyGroups.entries) {
+      final familyNumber = entry.key;
+      final rowIndices = entry.value;
+
+      if (rowIndices.isEmpty) continue;
+
+      // Use first person's last name for family name
+      final firstRowIndex = rowIndices.first;
+      final firstRow = rows[firstRowIndex];
+      final lastName = _getCellValue(firstRow, lastNameCol);
+
+      final familyName = 'Familie $lastName';
+
+      AppLogger.debug('[ParticipantExcelService] Creating family "$familyName" (Familien-Nr: $familyNumber, ${rowIndices.length} members)');
+
+      try {
+        // Create family in database
+        final familyId = await _repository.createFamily(
+          eventId: eventId,
+          name: familyName,
+        );
+
+        familyMap[familyNumber] = familyId;
+        AppLogger.info('[ParticipantExcelService] ✓ Created family "$familyName" with ID: $familyId (Familien-Nr: $familyNumber)');
+      } catch (e, stackTrace) {
+        AppLogger.error('[ParticipantExcelService] Failed to create family "$familyName"', error: e, stackTrace: stackTrace);
+      }
+    }
+
+    return familyMap;
   }
 
 }
