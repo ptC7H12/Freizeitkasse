@@ -177,7 +177,7 @@ Widget _buildCategoryList(
           child: FilledButton.icon(
             onPressed: () => _showAddDialog(context, ref, isExpense),
             icon: const Icon(Icons.add),
-            label: Text(isExpense ? 'Neue Kategorie' : 'Neue Quelle'),
+            label: Text(isExpense ? 'Neue Kategorie' : 'Neue Einnahme'),
           ),
         ),
       ),
@@ -260,14 +260,14 @@ void _showAddDialog(
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(isExpense ? 'Neue Kategorie' : 'Neue Quelle'),
+      title: Text(isExpense ? 'Neue Kategorie' : 'Neue Einnahme'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: nameController,
             decoration: InputDecoration(
-              labelText: isExpense ? 'Kategorie-Name *' : 'Quellen-Name *',
+              labelText: isExpense ? 'Kategorie-Name *' : 'Einnahmenbeschreibung *',
               hintText: isExpense ? 'z.B. Dekoration' : 'z.B. Verkauf',
             ),
             autofocus: true,
