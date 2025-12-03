@@ -16,28 +16,78 @@ class ExcelImportService {
     final result = ExcelImportResult();
 
     try {
+      AppLogger.info('[ExcelImport] Starting import from file: $filePath');
+      AppLogger.info('[ExcelImport] Target event ID: $eventId');
+
       // Read Excel file
+      AppLogger.debug('[ExcelImport] Reading file bytes...');
       final bytes = File(filePath).readAsBytesSync();
+      AppLogger.debug('[ExcelImport] File size: ${bytes.length} bytes');
+
+      // Decode Excel
+      AppLogger.debug('[ExcelImport] Decoding Excel file...');
       final excel = Excel.decodeBytes(bytes);
+      AppLogger.info('[ExcelImport] Excel decoded. Found ${excel.tables.length} sheets');
 
       // Get first sheet
-      final sheet = excel.tables[excel.tables.keys.first];
+      if (excel.tables.isEmpty) {
+        final error = 'Excel-Datei enthält keine Tabellen';
+        AppLogger.error('[ExcelImport] $error');
+        result.errors.add(error);
+        return result;
+      }
+
+      final firstSheetName = excel.tables.keys.first;
+      AppLogger.info('[ExcelImport] Using sheet: $firstSheetName');
+
+      final sheet = excel.tables[firstSheetName];
       if (sheet == null) {
-        result.errors.add('Excel-Datei enthält keine Tabellen');
+        final error = 'Sheet "$firstSheetName" ist null';
+        AppLogger.error('[ExcelImport] $error');
+        result.errors.add(error);
+        return result;
+      }
+
+      AppLogger.info('[ExcelImport] Sheet has ${sheet.maxRows} rows and ${sheet.maxColumns} columns');
+
+      // Validate sheet has data
+      if (sheet.maxRows < 2) {
+        final error = 'Excel-Datei muss mindestens eine Header-Zeile und eine Datenzeile enthalten';
+        AppLogger.error('[ExcelImport] $error');
+        result.errors.add(error);
         return result;
       }
 
       // Read header row to map columns dynamically
-      final headerRow = sheet.rows[0];
-      final columnMapping = _buildColumnMapping(headerRow);
+      AppLogger.debug('[ExcelImport] Reading header row...');
+      final headerRow = sheet.rows.firstOrNull;
+      if (headerRow == null) {
+        final error = 'Header-Zeile konnte nicht gelesen werden';
+        AppLogger.error('[ExcelImport] $error');
+        result.errors.add(error);
+        return result;
+      }
 
+      final columnMapping = _buildColumnMapping(headerRow);
       AppLogger.info('[ExcelImport] Column Mapping: $columnMapping');
 
+      // Validate required columns
+      if (!columnMapping.containsKey('first_name') ||
+          !columnMapping.containsKey('last_name') ||
+          !columnMapping.containsKey('birth_date')) {
+        final error = 'Erforderliche Spalten fehlen: Vorname, Nachname, Geburtsdatum';
+        AppLogger.error('[ExcelImport] $error');
+        result.errors.add(error);
+        return result;
+      }
+
       // PHASE 1: Create families based on Familien-Nr
+      AppLogger.info('[ExcelImport] PHASE 1: Creating families...');
       final familyMap = await _createFamilies(sheet, columnMapping, eventId, result);
       AppLogger.info('[ExcelImport] Created ${familyMap.length} families');
 
       // PHASE 2: Import participants with family assignments
+      AppLogger.info('[ExcelImport] PHASE 2: Importing participants...');
       // Skip header row (row 0)
       for (var rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
         final row = sheet.rows[rowIndex];
@@ -103,11 +153,15 @@ class ExcelImportService {
       }
 
       result.totalRows = sheet.maxRows - 1; // Exclude header
+      AppLogger.info('[ExcelImport] Import complete: ${result.successCount}/${result.totalRows} successful, ${result.errorCount} errors');
     } catch (e, stackTrace) {
       AppLogger.error('[ExcelImport] Fatal error during import', error: e, stackTrace: stackTrace);
+      final errorMessage = 'Fehler beim Lesen der Excel-Datei: $e\n\nStack Trace:\n$stackTrace';
+      AppLogger.error('[ExcelImport] Full error details: $errorMessage');
       result.errors.add('Fehler beim Lesen der Excel-Datei: $e');
     }
 
+    AppLogger.info('[ExcelImport] Import result: $result');
     return result;
   }
 
@@ -358,16 +412,22 @@ class ExcelImportService {
 
   /// Get cell value as string
   String? _getCellValue(List<Data?> row, int columnIndex) {
-    if (columnIndex >= row.length) {
+    try {
+      if (columnIndex < 0 || columnIndex >= row.length) {
+        return null;
+      }
+
+      final cell = row[columnIndex];
+      if (cell == null || cell.value == null) {
+        return null;
+      }
+
+      final value = cell.value.toString().trim();
+      return value.isEmpty ? null : value;
+    } catch (e) {
+      AppLogger.error('[ExcelImport] Error reading cell at column $columnIndex', error: e);
       return null;
     }
-
-    final cell = row[columnIndex];
-    if (cell == null || cell.value == null) {
-      return null;
-    }
-
-    return cell.value.toString().trim();
   }
 
   /// Parse date from Excel cell (handles both DateCellValue and string formats)
