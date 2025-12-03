@@ -79,6 +79,24 @@ Alle FABs haben jetzt Icon + Label:
 
 ---
 
+### Problem #4: Drawer Header Design ✅
+
+**Symptom:** Drawer hatte oben eine AppBar-Zeile mit Logo und Freizeitkasse-Titel, die den Fokus vom Event ablenkte
+
+**Lösung:**
+- Alte SafeArea-Header-Struktur mit Logo entfernt
+- Eleganter Event-Header hinzugefügt mit:
+  - Event-Icon und Name (groß, bold)
+  - Event-Typ (wenn vorhanden)
+  - Datumsspanne formatiert (dd.MM.yyyy - dd.MM.yyyy)
+- Header positioniert direkt über "VERWALTUNG" Sektion
+- Weiße Border-Linie als Trenner
+- Vereinfachte Drawer-Struktur: `Drawer > Container > SafeArea > ListView`
+
+**Dateien:** `lib/widgets/responsive_scaffold.dart`
+
+---
+
 ## 🎨 Neue Wiederverwendbare Widgets
 
 ### 1. AdaptiveListItem
@@ -144,21 +162,22 @@ Vollständiger Form-Screen für Tasks mit:
 
 | Kategorie | Wert |
 |-----------|------|
-| **Commits** | 3 |
+| **Commits** | 4 |
 | **Dateien geändert** | 15 |
 | **Neue Dateien** | 4 |
 | **Geänderte Screens** | 7 |
 | **Adaptive Listen** | 3 |
 | **Extended FABs** | 7 |
-| **Neue Zeilen** | ~1,400 |
-| **Gelöschte Zeilen** | ~320 |
-| **Netto** | ~1,080 Zeilen |
+| **Neue Zeilen** | ~1,467 |
+| **Gelöschte Zeilen** | ~405 |
+| **Netto** | ~1,062 Zeilen |
 
 ---
 
 ## 🔄 Commits
 
 ```
+eaf038a - feat: Redesign drawer header with elegant event information
 f725e9b - feat: Add AdaptiveListItem to Incomes list
 0ea4d7b - feat: Integrate AdaptiveListItem for responsive list interactions
 b18811d - feat: Improve UI consistency with animations, forms, and buttons
@@ -184,13 +203,19 @@ b18811d - feat: Improve UI consistency with animations, forms, and buttons
    - ✓ Alle haben Icon + Label
 
 ### Mobile Testing (≤800px)
-1. **Swipe-to-Action:**
+1. **Drawer Header:**
+   - Öffne Drawer (Hamburger Menu)
+   - ✓ Event-Name, Typ, und Datumsspanne werden angezeigt
+   - ✓ Keine alte AppBar-Zeile mehr sichtbar
+   - ✓ Header direkt über VERWALTUNG Sektion
+
+2. **Swipe-to-Action:**
    - Swipe auf Eintrag nach rechts (→)
    - ✓ Blaue "Bearbeiten"-Anzeige
    - Swipe auf Eintrag nach links (←)
    - ✓ Rote "Löschen"-Anzeige mit Bestätigung
 
-2. **Forms:**
+3. **Forms:**
    - Erstelle neue Aufgabe
    - ✓ Form-Screen statt Dialog
    - ✓ Konsistente Button-Anordnung
