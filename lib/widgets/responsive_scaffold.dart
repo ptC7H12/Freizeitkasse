@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../providers/current_event_provider.dart';
 import '../utils/constants.dart';
 import '../screens/dashboard/dashboard_screen.dart';
@@ -295,91 +296,17 @@ class ResponsiveScaffold extends ConsumerWidget {
     final currentEvent = ref.watch(currentEventProvider);
 
     return Drawer(
-      child: Column(
-        children: [
-          // Header with logo and event name
-          SafeArea(
-            bottom: false,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Color(0xFF2196F3),
-              ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: AppConstants.paddingAll8,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.account_balance_wallet,
-                        size: 28,
-                        color: Color(0xFF2196F3),
-                      ),
-                    ),
-                    const SizedBox(width: AppConstants.spacingM),
-                    const Text(
-                      'Freizeitkasse',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                if (currentEvent != null) ...[
-                  const SizedBox(height: AppConstants.spacing),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.calendar_today,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            currentEvent.name,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            ),
-          ),
-          // Menu items
-          Expanded(
-            child: Container(
-              color: const Color(0xFF2196F3),
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  // VERWALTUNG Section
-                  _buildDrawerSectionHeader('VERWALTUNG'),
+      child: Container(
+        color: const Color(0xFF2196F3),
+        child: SafeArea(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              // Event Header (nur wenn Event ausgewählt)
+              if (currentEvent != null) _buildEventHeader(currentEvent),
+
+              // VERWALTUNG Section
+              _buildDrawerSectionHeader('VERWALTUNG'),
                   _buildDrawerItem(
                     context,
                     Icons.dashboard,
@@ -518,6 +445,61 @@ class ResponsiveScaffold extends ConsumerWidget {
                   const SizedBox(height: AppConstants.spacing),
                 ],
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEventHeader(Event currentEvent) {
+    final dateFormat = DateFormat('dd.MM.yyyy', 'de_DE');
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Colors.white.withOpacity(0.2), width: 1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Event Icon + Name
+          Row(
+            children: [
+              const Icon(Icons.event, color: Colors.white, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  currentEvent.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Type
+          if (currentEvent.eventType != null)
+            Text(
+              currentEvent.eventType!,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 14,
+              ),
+            ),
+          const SizedBox(height: 4),
+          // Date Range
+          Text(
+            '${dateFormat.format(currentEvent.startDate)} - ${dateFormat.format(currentEvent.endDate)}',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 13,
             ),
           ),
         ],
