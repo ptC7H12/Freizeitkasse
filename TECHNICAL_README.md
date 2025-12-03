@@ -1366,6 +1366,78 @@ Future<void> _saveXxx() async {
 
 ---
 
+## Responsive Design & Platform Consistency
+
+### Critical Rule: Desktop AND Mobile Views
+
+**⚠️ WICHTIG: Bei ALLEN UI-Änderungen IMMER beide Ansichten berücksichtigen!**
+
+Jede UI-Änderung muss für **Desktop (>800px) UND Mobile (≤800px)** durchdacht werden:
+
+### Layout-Breakpoint
+```dart
+final isDesktop = MediaQuery.of(context).size.width >= 800;
+```
+
+### Common Patterns
+
+**Navigation:**
+- Desktop: Sidebar (280px) immer sichtbar
+- Mobile: Drawer (swipe-in)
+- Beide nutzen gleiche `_buildDrawer()` Methode
+
+**Forms:**
+- Desktop: Max. 800px Breite, zentriert
+- Mobile: Volle Breite
+- Lösung: `ResponsiveFormContainer` verwenden
+
+**Buttons:**
+- Desktop & Mobile: Gleiche Button-Konzepte verwenden
+  - Extended FABs mit Icon + Label
+  - NICHT in Mobile IconButton und in Desktop Extended FAB
+
+**Lists:**
+- Desktop: Hover-Effekte mit Trailing Buttons
+- Mobile: Swipe-to-Action (links/rechts)
+- Lösung: `AdaptiveListItem` verwenden
+
+### Checklist für UI-Änderungen
+
+Vor dem Commit prüfen:
+- [ ] Desktop Ansicht getestet (>800px)
+- [ ] Mobile Ansicht getestet (≤800px)
+- [ ] Buttons folgen gleichem Konzept
+- [ ] Navigation in beiden Views konsistent
+- [ ] Forms sind responsive (ResponsiveFormContainer)
+- [ ] Listen nutzen adaptive Patterns (AdaptiveListItem)
+
+### Beispiele für Inkonsistenzen (VERMEIDEN):
+
+❌ **FALSCH:**
+```dart
+// Mobile: IconButton im AppBar
+actions: [
+  if (!isDesktop) IconButton(icon: Icon(Icons.add), ...)
+]
+
+// Desktop: Extended FAB
+floatingActionButton: isDesktop
+    ? FloatingActionButton.extended(...)
+    : null
+```
+
+✅ **RICHTIG:**
+```dart
+// Beide nutzen Extended FAB
+floatingActionButton: FloatingActionButton.extended(
+  icon: Icon(Icons.add),
+  label: Text('Neu'),
+  ...
+)
+```
+
+---
+
 ## AI Assistant Tips
 
 ### Critical Rules (ALWAYS)
