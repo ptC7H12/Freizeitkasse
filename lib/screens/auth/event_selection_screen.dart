@@ -171,7 +171,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
 
               // DROPDOWN für Event-Auswahl
               DropdownButtonFormField<Event>(
-                value: _selectedEvent,
+                initialValue: _selectedEvent,
                 decoration: InputDecoration(
                   labelText: 'Freizeit',
                   prefixIcon: const Icon(Icons.event),
@@ -318,7 +318,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
 
                         // Freizeittyp
                         DropdownButtonFormField<String>(
-                          value: _selectedEventType,
+                          initialValue: _selectedEventType,
                           decoration: const InputDecoration(
                             labelText: 'Freizeittyp *',
                             prefixIcon: Icon(Icons.category),
@@ -428,22 +428,22 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
   // ========== EMPTY STATE ==========
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.event_outlined,
             size: 100,
             color: Colors.grey,
           ),
-          const SizedBox(height: AppConstants.spacingL),
-          const Text(
+          SizedBox(height: AppConstants.spacingL),
+          Text(
             'Noch keine Freizeiten vorhanden',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: AppConstants.spacingS),
-          const Text(
+          SizedBox(height: AppConstants.spacingS),
+          Text(
             'Erstelle deine erste Freizeit rechts →',
             style: TextStyle(color: Colors.grey),
           ),

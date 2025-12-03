@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../data/database/app_database.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/participant_provider.dart';
@@ -235,7 +234,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
 
               // Priorität
               DropdownButtonFormField<String>(
-                value: _priority,
+                initialValue: _priority,
                 decoration: const InputDecoration(
                   labelText: 'Priorität',
                   border: OutlineInputBorder(),
@@ -257,7 +256,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
 
               // Status
               DropdownButtonFormField<String>(
-                value: _status,
+                initialValue: _status,
                 decoration: const InputDecoration(
                   labelText: 'Status',
                   border: OutlineInputBorder(),
@@ -313,7 +312,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
               // Zugewiesen an
               participantsAsync.when(
                 data: (participants) => DropdownButtonFormField<int?>(
-                  value: _assignedTo,
+                  initialValue: _assignedTo,
                   decoration: const InputDecoration(
                     labelText: 'Zugewiesen an',
                     border: OutlineInputBorder(),

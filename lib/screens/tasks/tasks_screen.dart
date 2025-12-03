@@ -27,10 +27,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final statsAsync = ref.watch(taskStatisticsProvider);
 
     if (currentEvent == null) {
-      return ResponsiveScaffold(
+      return const ResponsiveScaffold(
         title: 'Aufgaben',
         selectedIndex: 9,
-        body: const Center(child: Text('Bitte wählen Sie zuerst eine Veranstaltung aus.')),
+        body: Center(child: Text('Bitte wählen Sie zuerst eine Veranstaltung aus.')),
       );
     }
 

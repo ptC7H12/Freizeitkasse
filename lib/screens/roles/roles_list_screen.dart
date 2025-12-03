@@ -15,10 +15,10 @@ class RolesListScreen extends ConsumerWidget {
     final rolesWithCountsAsync = ref.watch(rolesWithCountsProvider);
 
     if (currentEvent == null) {
-      return ResponsiveScaffold(
+      return const ResponsiveScaffold(
         title: 'Rollen',
         selectedIndex: 8,
-        body: const Center(
+        body: Center(
           child: Text('Bitte wählen Sie zuerst eine Veranstaltung aus.'),
         ),
       );

@@ -6,13 +6,10 @@ import '../providers/current_event_provider.dart';
 import '../utils/constants.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/participants/participants_list_screen.dart';
-import '../screens/families/families_list_screen.dart';
 import '../screens/payments/payments_list_screen.dart';
 import '../screens/expenses/expenses_list_screen.dart';
 import '../screens/incomes/incomes_list_screen.dart';
 import '../screens/cash_status/cash_status_screen.dart';
-import '../screens/rulesets/rulesets_list_screen.dart';
-import '../screens/roles/roles_list_screen.dart';
 import '../screens/tasks/tasks_screen.dart';
 import '../screens/settings/settings_screen.dart';
 

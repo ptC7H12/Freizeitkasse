@@ -18,10 +18,10 @@ class RulesetsListScreen extends ConsumerWidget {
     final currentRulesetAsync = ref.watch(currentRulesetProvider);
 
     if (currentEvent == null) {
-      return ResponsiveScaffold(
+      return const ResponsiveScaffold(
         title: 'Regelwerke',
         selectedIndex: 7,
-        body: const Center(
+        body: Center(
           child: Text('Bitte wählen Sie zuerst eine Veranstaltung aus.'),
         ),
       );

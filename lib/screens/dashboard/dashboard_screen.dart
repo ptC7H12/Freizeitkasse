@@ -5,12 +5,6 @@ import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../data/database/app_database.dart';
 import '../participants/participants_families_screen.dart';
-import '../payments/payments_list_screen.dart';
-import '../expenses/expenses_list_screen.dart';
-import '../incomes/incomes_list_screen.dart';
-import '../cash_status/cash_status_screen.dart';
-import '../tasks/tasks_screen.dart';
-import '../settings/settings_screen.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
 

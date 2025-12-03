@@ -77,10 +77,10 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
     final database = ref.watch(databaseProvider);
 
     if (currentEvent == null) {
-      return ResponsiveScaffold(
+      return const ResponsiveScaffold(
         title: 'Kassenstand',
         selectedIndex: 6,
-        body: const Center(
+        body: Center(
           child: Text('Bitte wählen Sie zuerst eine Veranstaltung aus.'),
         ),
       );

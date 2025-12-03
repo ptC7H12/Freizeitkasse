@@ -21,10 +21,10 @@ class IncomesListScreen extends ConsumerWidget {
     final incomesAsync = ref.watch(incomesProvider);
 
     if (currentEvent == null) {
-      return ResponsiveScaffold(
+      return const ResponsiveScaffold(
         title: 'Sonstige Einnahmen',
         selectedIndex: 5,
-        body: const Center(
+        body: Center(
           child: Text('Bitte wählen Sie zuerst eine Veranstaltung aus.'),
         ),
       );
