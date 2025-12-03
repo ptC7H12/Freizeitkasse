@@ -58,10 +58,18 @@ class ExcelImportService {
 
           // Get family ID if Familien-Nr exists
           int? familyId;
+          String? familyNumber;
           if (participantData.containsKey('family_number') &&
               participantData['family_number'] != null) {
-            final familyNumber = participantData['family_number'].toString();
-            familyId = familyMap[familyNumber];
+            familyNumber = participantData['family_number'].toString().trim();
+            if (familyNumber.isNotEmpty) {
+              familyId = familyMap[familyNumber];
+              if (familyId != null) {
+                AppLogger.debug('[ExcelImport] Row ${rowIndex + 1}: Assigning to family $familyNumber (ID: $familyId)');
+              } else {
+                AppLogger.warning('[ExcelImport] Row ${rowIndex + 1}: Family number "$familyNumber" not found in familyMap!');
+              }
+            }
           }
 
           // Create participant
@@ -86,7 +94,8 @@ class ExcelImportService {
           );
 
           result.successCount++;
-          AppLogger.debug('[ExcelImport] Participant created: ${participantData['first_name']} ${participantData['last_name']}${familyId != null ? ' (Familie ID: $familyId)' : ''}');
+          final familyInfo = familyId != null ? ' → Familie ID: $familyId (Nr: $familyNumber)' : ' → Einzelperson';
+          AppLogger.info('[ExcelImport] ✓ Row ${rowIndex + 1}: ${participantData['first_name']} ${participantData['last_name']}$familyInfo');
         } catch (e, stackTrace) {
           AppLogger.error('[ExcelImport] Error in row ${rowIndex + 1}', error: e, stackTrace: stackTrace);
           result.errors.add('Zeile ${rowIndex + 1}: $e');
@@ -114,22 +123,31 @@ class ExcelImportService {
 
     // Return early if no family column
     if (!columnMapping.containsKey('family_number')) {
-      AppLogger.info('[ExcelImport] No Familien-Nr column found');
+      AppLogger.warning('[ExcelImport] No Familien-Nr column found - skipping family creation');
       return familyMap;
     }
 
+    AppLogger.info('[ExcelImport] Starting family creation from Familien-Nr column (index: ${columnMapping['family_number']})');
+
     // Group rows by family number and track first person name
-    final familyGroups = <String, String>{};  // family_number -> first_person_name
+    final familyGroups = <String, List<String>>{};  // family_number -> [lastName, firstName]
+    final familyMemberCounts = <String, int>{};  // family_number -> member count
 
     for (var rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
       final row = sheet.rows[rowIndex];
       final familyNumberCell = _getCellValue(row, columnMapping['family_number']!);
 
+      AppLogger.debug('[ExcelImport] Row $rowIndex: family_number cell = "$familyNumberCell"');
+
       if (familyNumberCell != null && familyNumberCell.isNotEmpty) {
         final familyNumber = familyNumberCell.toString().trim();
 
-        // Skip if already processed
+        // Count members in this family
+        familyMemberCounts[familyNumber] = (familyMemberCounts[familyNumber] ?? 0) + 1;
+
+        // Skip if already processed (we only need the first person)
         if (familyGroups.containsKey(familyNumber)) {
+          AppLogger.debug('[ExcelImport] Family $familyNumber already processed, skipping');
           continue;
         }
 
@@ -145,16 +163,29 @@ class ExcelImportService {
         }
 
         if (firstName != null && lastName != null) {
-          familyGroups[familyNumber] = '$firstName $lastName';
+          // Store as [lastName, firstName] like Python code does
+          familyGroups[familyNumber] = [lastName, firstName];
+          AppLogger.info('[ExcelImport] Found family $familyNumber: First member = "$lastName $firstName" (Row $rowIndex)');
+        } else {
+          AppLogger.warning('[ExcelImport] Row $rowIndex: Family number $familyNumber found but name is incomplete (firstName: $firstName, lastName: $lastName)');
         }
       }
+    }
+
+    AppLogger.info('[ExcelImport] Found ${familyGroups.length} unique families:');
+    for (var entry in familyMemberCounts.entries) {
+      AppLogger.info('[ExcelImport]   Familie ${entry.key}: ${entry.value} Mitglieder');
     }
 
     // Create families
     for (var entry in familyGroups.entries) {
       final familyNumber = entry.key;
-      final firstPersonName = entry.value;
-      final familyName = 'Familie $firstPersonName';
+      final names = entry.value;
+      final lastName = names[0];
+      final firstName = names[1];
+      // Format like Python: "LastName FirstName" (Familie Mustermann Max)
+      final familyName = 'Familie $lastName';
+      final memberCount = familyMemberCounts[familyNumber] ?? 0;
 
       try {
         final familyId = await _familyRepository.createFamily(
@@ -163,13 +194,14 @@ class ExcelImportService {
         );
 
         familyMap[familyNumber] = familyId;
-        AppLogger.info('[ExcelImport] Created family: $familyName (Nr: $familyNumber, ID: $familyId)');
+        AppLogger.info('[ExcelImport] ✓ Created family: "$familyName" (Nr: $familyNumber, ID: $familyId, Members: $memberCount)');
       } catch (e) {
         AppLogger.error('[ExcelImport] Failed to create family for number $familyNumber', error: e);
         result.errors.add('Fehler beim Erstellen der Familie "$familyName": $e');
       }
     }
 
+    AppLogger.info('[ExcelImport] Family creation complete: ${familyMap.length} families created');
     return familyMap;
   }
 
@@ -178,6 +210,8 @@ class ExcelImportService {
   Map<String, int> _buildColumnMapping(List<Data?> headerRow) {
     final mapping = <String, int>{};
 
+    AppLogger.info('[ExcelImport] Building column mapping from ${headerRow.length} headers');
+
     for (var i = 0; i < headerRow.length; i++) {
       final cell = headerRow[i];
       if (cell == null || cell.value == null) {
@@ -185,17 +219,21 @@ class ExcelImportService {
       }
 
       final headerName = cell.value.toString().trim().toLowerCase();
-      AppLogger.debug('DEBUG: Header[$i]: "$headerName"');
+      AppLogger.debug('[ExcelImport] Header[$i]: "$headerName"');
 
       // Map known header names (case-insensitive, with variations)
       if (headerName.contains('vorname')) {
         mapping['first_name'] = i;
+        AppLogger.info('[ExcelImport] ✓ Mapped first_name to column $i');
       } else if (headerName.contains('nachname')) {
         mapping['last_name'] = i;
+        AppLogger.info('[ExcelImport] ✓ Mapped last_name to column $i');
       } else if (headerName.contains('geburtsdatum') || headerName.contains('geburtstag')) {
         mapping['birth_date'] = i;
+        AppLogger.info('[ExcelImport] ✓ Mapped birth_date to column $i');
       } else if (headerName.contains('geschlecht')) {
         mapping['gender'] = i;
+        AppLogger.info('[ExcelImport] ✓ Mapped gender to column $i');
       } else if (headerName.contains('e-mail') || headerName.contains('email')) {
         mapping['email'] = i;
       } else if (headerName.contains('telefon') || headerName.contains('phone')) {
@@ -220,7 +258,15 @@ class ExcelImportService {
         mapping['notes'] = i;
       } else if (headerName.contains('familie') && (headerName.contains('nr') || headerName.contains('nummer'))) {
         mapping['family_number'] = i;
+        AppLogger.info('[ExcelImport] ✓ Mapped family_number to column $i (header: "$headerName")');
       }
+    }
+
+    AppLogger.info('[ExcelImport] Column mapping complete: ${mapping.length} columns mapped');
+    if (mapping.containsKey('family_number')) {
+      AppLogger.info('[ExcelImport] ✓ Family column detected at index ${mapping['family_number']}');
+    } else {
+      AppLogger.warning('[ExcelImport] ⚠ No family column detected - participants will not be grouped into families');
     }
 
     return mapping;
