@@ -441,9 +441,27 @@ class _ParticipantFormScreenState
             ..where((tbl) => tbl.eventId.equals(eventId)))
           .watch(),
       builder: (context, snapshot) {
-        final roles = snapshot.data ?? [];
+        // Warte bis Daten geladen sind
+        if (!snapshot.hasData) {
+          return DropdownButtonFormField<int?>(
+            value: null,
+            decoration: const InputDecoration(
+              labelText: 'Rolle',
+              hintText: 'Laden...',
+            ),
+            items: const [
+              DropdownMenuItem<int?>(
+                value: null,
+                child: Text('Laden...'),
+              ),
+            ],
+            onChanged: null, // Deaktiviert während des Ladens
+          );
+        }
 
-        // Prüfe ob die aktuell ausgewählte Rolle noch existiert
+        final roles = snapshot.data!;
+
+        // Prüfe ob die aktuell ausgewählte Rolle noch existiert (nur wenn Daten geladen)
         final roleExists = _selectedRoleId == null ||
             roles.any((r) => r.id == _selectedRoleId);
 
@@ -503,9 +521,27 @@ class _ParticipantFormScreenState
             ..where((tbl) => tbl.eventId.equals(eventId)))
           .watch(),
       builder: (context, snapshot) {
-        final families = snapshot.data ?? [];
+        // Warte bis Daten geladen sind
+        if (!snapshot.hasData) {
+          return DropdownButtonFormField<int?>(
+            value: null,
+            decoration: const InputDecoration(
+              labelText: 'Familie',
+              hintText: 'Laden...',
+            ),
+            items: const [
+              DropdownMenuItem<int?>(
+                value: null,
+                child: Text('Laden...'),
+              ),
+            ],
+            onChanged: null, // Deaktiviert während des Ladens
+          );
+        }
 
-        // Prüfe ob die aktuell ausgewählte Familie noch existiert
+        final families = snapshot.data!;
+
+        // Prüfe ob die aktuell ausgewählte Familie noch existiert (nur wenn Daten geladen)
         final familyExists = _selectedFamilyId == null ||
             families.any((f) => f.id == _selectedFamilyId);
 
