@@ -183,19 +183,9 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
                 items: events.map((event) {
                   return DropdownMenuItem<Event>(
                     value: event,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          event.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '${_formatDate(event.startDate)} - ${_formatDate(event.endDate)}',
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                        ),
-                      ],
+                    child: Text(
+                      '${event.name} (${_formatDate(event.startDate)} - ${_formatDate(event.endDate)})',
+                      overflow: TextOverflow.ellipsis,
                     ),
                   );
                 }).toList(),
