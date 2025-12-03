@@ -231,7 +231,7 @@ class ResponsiveScaffold extends ConsumerWidget {
           const SizedBox(height: AppConstants.spacing),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildNavigationSectionHeader(String title) {

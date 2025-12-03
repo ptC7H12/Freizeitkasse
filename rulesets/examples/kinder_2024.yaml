@@ -1,0 +1,31 @@
+name: "Kinderfreizeit 2024"
+type: "kinder"
+valid_from: "2024-01-01"
+valid_until: "2024-12-31"
+
+age_groups:
+  - min_age: 6
+    max_age: 9
+    price: 140.00
+  - min_age: 10
+    max_age: 12
+    price: 150.00
+  - min_age: 13
+    max_age: 99
+    price: 200.00
+
+role_discounts:
+  betreuer:
+    discount_percent: 50
+    max_count: 10
+    subsidy_eligible: true  # Zuschussberechtigt (Rabatt wird durch Zuschüsse gedeckt)
+  kueche:
+    discount_percent: 100
+    max_count: 2
+    subsidy_eligible: false  # NICHT zuschussberechtigt (Umlage auf Gruppe)
+
+family_discount:
+  enabled: false
+  first_child_percent: 0      # Optional: Rabatt für das erste Kind (Standard: 0%)
+  second_child_percent: 10    # Rabatt für das zweite Kind
+  third_plus_child_percent: 20  # Rabatt für das dritte und alle weiteren Kinder
