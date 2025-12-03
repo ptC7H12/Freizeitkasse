@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../../services/ruleset_parser_service.dart';
@@ -67,17 +68,26 @@ class RulesetRepository {
     DateTime? validUntil,
     String? description,
   }) async {
-    // Validate YAML content
+    // Validate and parse YAML content
+    Map<String, dynamic> parsedData;
     try {
-      RulesetParserService.parseRuleset(yamlContent);
+      parsedData = RulesetParserService.parseRuleset(yamlContent);
     } catch (e) {
       throw Exception('Ungültiger YAML-Inhalt: $e');
     }
+
+    // Convert parsed data to JSON strings for storage
+    final ageGroupsJson = jsonEncode(parsedData['age_groups']);
+    final roleDiscountsJson = jsonEncode(parsedData['role_discounts']);
+    final familyDiscountJson = jsonEncode(parsedData['family_discount']);
 
     final companion = RulesetsCompanion(
       eventId: Value(eventId),
       name: Value(name),
       yamlContent: Value(yamlContent),
+      ageGroups: Value(ageGroupsJson),
+      roleDiscounts: Value(roleDiscountsJson),
+      familyDiscount: Value(familyDiscountJson),
       validFrom: Value(validFrom),
       validUntil: Value(validUntil),
       description: Value(description),
@@ -86,7 +96,9 @@ class RulesetRepository {
       updatedAt: Value(DateTime.now()),
     );
 
-    return await _database.into(_database.rulesets).insert(companion);
+    final id = await _database.into(_database.rulesets).insert(companion);
+    AppLogger.info('[RulesetRepository] Created ruleset $id with parsed JSON fields');
+    return id;
   }
 
   /// Update an existing ruleset
@@ -102,10 +114,17 @@ class RulesetRepository {
       return false;
     }
 
-    // If YAML content is being updated, validate it
+    // If YAML content is being updated, validate and parse it
+    String? ageGroupsJson;
+    String? roleDiscountsJson;
+    String? familyDiscountJson;
+
     if (yamlContent != null) {
       try {
-        RulesetParserService.parseRuleset(yamlContent);
+        final parsedData = RulesetParserService.parseRuleset(yamlContent);
+        ageGroupsJson = jsonEncode(parsedData['age_groups']);
+        roleDiscountsJson = jsonEncode(parsedData['role_discounts']);
+        familyDiscountJson = jsonEncode(parsedData['family_discount']);
       } catch (e) {
         throw Exception('Ungültiger YAML-Inhalt: $e');
       }
@@ -115,12 +134,19 @@ class RulesetRepository {
       id: Value(id),
       name: name != null ? Value(name) : const Value.absent(),
       yamlContent: yamlContent != null ? Value(yamlContent) : const Value.absent(),
+      ageGroups: ageGroupsJson != null ? Value(ageGroupsJson) : const Value.absent(),
+      roleDiscounts: roleDiscountsJson != null ? Value(roleDiscountsJson) : const Value.absent(),
+      familyDiscount: familyDiscountJson != null ? Value(familyDiscountJson) : const Value.absent(),
       validFrom: validFrom != null ? Value(validFrom) : const Value.absent(),
       description: description != null ? Value(description) : const Value.absent(),
       updatedAt: Value(DateTime.now()),
     );
 
-    return await _database.update(_database.rulesets).replace(companion);
+    final success = await _database.update(_database.rulesets).replace(companion);
+    if (success) {
+      AppLogger.info('[RulesetRepository] Updated ruleset $id with parsed JSON fields');
+    }
+    return success;
   }
 
   /// Soft delete a ruleset

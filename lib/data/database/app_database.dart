@@ -42,7 +42,6 @@ class Participants extends Table {
   TextColumn get medications => text().nullable()();
   TextColumn get allergies => text().nullable()();
   TextColumn get dietaryRestrictions => text().nullable()();
-  TextColumn get swimAbility => text().withLength(max: 50).nullable()();
   TextColumn get notes => text().nullable()();
   BoolColumn get bildungUndTeilhabe => boolean().withDefault(const Constant(false))();
   RealColumn get calculatedPrice => real().withDefault(const Constant(0.0))();
