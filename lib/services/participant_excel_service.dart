@@ -37,7 +37,6 @@ class ParticipantExcelService {
       'Medikamente',
       'Allergien',
       'Ernährungseinschränkungen',
-      'Schwimmfähigkeit',
       'Notizen',
       'Bildung & Teilhabe',
       'Rolle ID',
@@ -79,7 +78,6 @@ class ParticipantExcelService {
         participant.medications ?? '',
         participant.allergies ?? '',
         participant.dietaryRestrictions ?? '',
-        participant.swimAbility ?? '',
         participant.notes ?? '',
         participant.bildungUndTeilhabe ? 'Ja' : 'Nein',
         participant.roleId?.toString() ?? '',
@@ -256,7 +254,6 @@ class ParticipantExcelService {
       'Medikamente',
       'Allergien',
       'Ernährungseinschränkungen',
-      'Schwimmfähigkeit',
       'Notizen',
       'Bildung & Teilhabe (Ja/Nein)',
     ];

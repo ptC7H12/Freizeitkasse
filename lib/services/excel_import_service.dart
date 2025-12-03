@@ -81,7 +81,6 @@ class ExcelImportService {
             allergies: participantData['allergies'] as String?,
             medications: participantData['medications'] as String?,
             dietaryRestrictions: participantData['dietary_restrictions'] as String?,
-            swimAbility: participantData['swim_ability'] as String?,
             notes: participantData['notes'] as String?,
             familyId: familyId,
           );
@@ -217,8 +216,6 @@ class ExcelImportService {
         mapping['medications'] = i;
       } else if (headerName.contains('ernährung') || headerName.contains('diät')) {
         mapping['dietary_restrictions'] = i;
-      } else if (headerName.contains('schwimm')) {
-        mapping['swim_ability'] = i;
       } else if (headerName.contains('notiz') || headerName.contains('bemerkung')) {
         mapping['notes'] = i;
       } else if (headerName.contains('familie') && (headerName.contains('nr') || headerName.contains('nummer'))) {
@@ -300,10 +297,6 @@ class ExcelImportService {
 
     if (columnMapping.containsKey('dietary_restrictions')) {
       data['dietary_restrictions'] = _getCellValue(row, columnMapping['dietary_restrictions']!);
-    }
-
-    if (columnMapping.containsKey('swim_ability')) {
-      data['swim_ability'] = _getCellValue(row, columnMapping['swim_ability']!);
     }
 
     if (columnMapping.containsKey('notes')) {

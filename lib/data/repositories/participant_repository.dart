@@ -96,7 +96,6 @@ class ParticipantRepository {
     String? medications,
     String? allergies,
     String? dietaryRestrictions,
-    String? swimAbility,
     String? notes,
     bool bildungUndTeilhabe = false,
     int? roleId,
@@ -129,7 +128,6 @@ class ParticipantRepository {
       medications: Value(medications),
       allergies: Value(allergies),
       dietaryRestrictions: Value(dietaryRestrictions),
-      swimAbility: Value(swimAbility),
       notes: Value(notes),
       bildungUndTeilhabe: Value(bildungUndTeilhabe),
       calculatedPrice: Value(calculatedPrice),
@@ -173,7 +171,6 @@ class ParticipantRepository {
     String? medications,
     String? allergies,
     String? dietaryRestrictions,
-    String? swimAbility,
     String? notes,
     bool? bildungUndTeilhabe,
     int? roleId,
@@ -227,8 +224,6 @@ class ParticipantRepository {
       dietaryRestrictions: dietaryRestrictions != null
           ? Value(dietaryRestrictions)
           : const Value.absent(),
-      swimAbility:
-          swimAbility != null ? Value(swimAbility) : const Value.absent(),
       notes:
           notes != null ? Value(notes) : const Value.absent(),
       bildungUndTeilhabe: bildungUndTeilhabe != null

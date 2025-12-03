@@ -51,9 +51,6 @@ class _ParticipantFormScreenState
   final _discountReasonController = TextEditingController();
 
   // Form State
-  String? _swimAbility;
-
-  // Form State
   DateTime? _birthDate;
   String? _gender;
   bool _bildungUndTeilhabe = false;
@@ -95,7 +92,6 @@ class _ParticipantFormScreenState
           _allergiesController.text = participant.allergies ?? '';
           _dietaryRestrictionsController.text =
               participant.dietaryRestrictions ?? '';
-          _swimAbility = participant.swimAbility;
           _notesController.text = participant.notes ?? '';
           _bildungUndTeilhabe = participant.bildungUndTeilhabe;
           _selectedRoleId = participant.roleId;
@@ -275,9 +271,6 @@ class _ParticipantFormScreenState
               label: 'Ernährungseinschränkungen',
               maxLines: 2,
             ),
-            const SizedBox(height: AppConstants.spacing),
-            _buildSwimAbilityDropdown(),
-
             const SizedBox(height: AppConstants.spacingL),
 
             // Rolle & Familie
@@ -430,33 +423,6 @@ class _ParticipantFormScreenState
       onChanged: (value) {
         setState(() {
           _gender = value;
-        });
-      },
-    );
-  }
-
-  Widget _buildSwimAbilityDropdown() {
-    return DropdownButtonFormField<String?>(
-      value: _swimAbility?.isEmpty ?? true ? null : _swimAbility,
-      decoration: const InputDecoration(
-        labelText: 'Schwimmfähigkeit',
-        hintText: 'Bitte auswählen',
-      ),
-      items: [
-        const DropdownMenuItem<String?>(
-          value: null,
-          child: Text('Nicht angegeben'),
-        ),
-        ...AppConstants.swimAbilities.map(
-          (ability) => DropdownMenuItem<String?>(
-            value: ability,
-            child: Text(ability),
-          ),
-        ),
-      ],
-      onChanged: (value) {
-        setState(() {
-          _swimAbility = value;
         });
       },
     );
@@ -669,7 +635,6 @@ class _ParticipantFormScreenState
           dietaryRestrictions: _dietaryRestrictionsController.text.isNotEmpty
               ? _dietaryRestrictionsController.text
               : null,
-          swimAbility: _swimAbility,
           notes: _notesController.text.isNotEmpty ? _notesController.text : null,
           bildungUndTeilhabe: _bildungUndTeilhabe,
           roleId: _selectedRoleId,
@@ -713,7 +678,6 @@ class _ParticipantFormScreenState
           dietaryRestrictions: _dietaryRestrictionsController.text.isNotEmpty
               ? _dietaryRestrictionsController.text
               : null,
-          swimAbility: _swimAbility,
           notes: _notesController.text.isNotEmpty ? _notesController.text : null,
           bildungUndTeilhabe: _bildungUndTeilhabe,
           roleId: _selectedRoleId,
