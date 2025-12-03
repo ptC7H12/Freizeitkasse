@@ -443,8 +443,27 @@ class _ParticipantFormScreenState
       builder: (context, snapshot) {
         final roles = snapshot.data ?? [];
 
+        // Prüfe ob die aktuell ausgewählte Rolle noch existiert
+        final roleExists = _selectedRoleId == null ||
+            roles.any((r) => r.id == _selectedRoleId);
+
+        // Wenn die Rolle nicht mehr existiert, setze auf null und zeige Warnung
+        if (!roleExists && _selectedRoleId != null) {
+          // Verwende WidgetsBinding um setState nach dem Build auszuführen
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _selectedRoleId = null;
+              });
+              context.showWarning(
+                'Die zugewiesene Rolle existiert nicht mehr und wurde entfernt.'
+              );
+            }
+          });
+        }
+
         return DropdownButtonFormField<int?>(
-          value: _selectedRoleId,
+          value: roleExists ? _selectedRoleId : null,
           decoration: const InputDecoration(
             labelText: 'Rolle',
             hintText: 'Keine Rolle',
@@ -486,8 +505,27 @@ class _ParticipantFormScreenState
       builder: (context, snapshot) {
         final families = snapshot.data ?? [];
 
+        // Prüfe ob die aktuell ausgewählte Familie noch existiert
+        final familyExists = _selectedFamilyId == null ||
+            families.any((f) => f.id == _selectedFamilyId);
+
+        // Wenn die Familie nicht mehr existiert, setze auf null und zeige Warnung
+        if (!familyExists && _selectedFamilyId != null) {
+          // Verwende WidgetsBinding um setState nach dem Build auszuführen
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _selectedFamilyId = null;
+              });
+              context.showWarning(
+                'Die zugewiesene Familie existiert nicht mehr und wurde entfernt.'
+              );
+            }
+          });
+        }
+
         return DropdownButtonFormField<int?>(
-          value: _selectedFamilyId,
+          value: familyExists ? _selectedFamilyId : null,
           decoration: const InputDecoration(
             labelText: 'Familie',
             hintText: 'Keine Familie',
