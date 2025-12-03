@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:drift/drift.dart';
 import '../../utils/logger.dart';
 import '../database/app_database.dart';
@@ -139,7 +140,14 @@ class ParticipantRepository {
       familyId: Value(familyId),
     );
 
-    return await _db.into(_db.participants).insert(companion);
+    final participantId = await _db.into(_db.participants).insert(companion);
+
+    // Preise aller Familienmitglieder neu berechnen (da sich Anzahl ändert)
+    if (familyId != null) {
+      await recalculateFamilyPrices(familyId);
+    }
+
+    return participantId;
   }
 
   // ============================================================================
@@ -238,7 +246,22 @@ class ParticipantRepository {
       updatedAt: Value(DateTime.now()),
     );
 
-    return await _db.update(_db.participants).replace(companion);
+    final success = await _db.update(_db.participants).replace(companion);
+
+    // Preise aller Familienmitglieder neu berechnen wenn Familie geändert wurde
+    if (success) {
+      // Alte Familie neu berechnen (wenn vorhanden)
+      if (existing.familyId != null && existing.familyId != familyId) {
+        await recalculateFamilyPrices(existing.familyId!);
+      }
+
+      // Neue Familie neu berechnen (wenn vorhanden)
+      if (familyId != null) {
+        await recalculateFamilyPrices(familyId);
+      }
+    }
+
+    return success;
   }
 
   // ============================================================================
@@ -248,6 +271,9 @@ class ParticipantRepository {
   /// Soft-Delete: Setzt isActive=false und deletedAt
   Future<bool> deleteParticipant(int id) async {
     try {
+      // Teilnehmer laden um familyId zu bekommen
+      final participant = await getParticipantById(id);
+
       final rowsAffected = await (_db.update(_db.participants)
             ..where((tbl) => tbl.id.equals(id)))
           .write(
@@ -262,6 +288,12 @@ class ParticipantRepository {
       );
 
       AppLogger.info('Soft-deleted participant', {'id': id, 'rowsAffected': rowsAffected});
+
+      // Preise der verbleibenden Familienmitglieder neu berechnen
+      if (rowsAffected > 0 && participant?.familyId != null) {
+        await recalculateFamilyPrices(participant!.familyId!);
+      }
+
       return rowsAffected > 0;
     } catch (e, stack) {
       AppLogger.error('Failed to delete participant', error: e, stackTrace: stack);
@@ -331,16 +363,25 @@ class ParticipantRepository {
       roleName = role?.name.toLowerCase();
     }
 
-    // Position in Familie ermitteln
+    // Position in Familie ermitteln (basierend auf Geburtsdatum)
     int familyChildrenCount = 1;
     if (familyId != null) {
+      // Alle Geschwister inkl. neuem Teilnehmer laden und nach Geburtsdatum sortieren
       final siblings = await (_db.select(_db.participants)
             ..where((tbl) => tbl.familyId.equals(familyId))
             ..where((tbl) => tbl.isActive.equals(true))
             ..orderBy([(tbl) => OrderingTerm.asc(tbl.birthDate)]))
           .get();
 
-      familyChildrenCount = siblings.length + 1;
+      // Position des Kindes in sortierter Liste finden
+      // Kinder mit gleichem oder früherem Geburtsdatum zählen
+      familyChildrenCount = 1;
+      for (var sibling in siblings) {
+        if (sibling.birthDate.isBefore(birthDate) ||
+            sibling.birthDate.isAtSameMomentAs(birthDate)) {
+          familyChildrenCount++;
+        }
+      }
     }
 
     // Preis berechnen mit PriceCalculatorService
@@ -360,15 +401,15 @@ class ParticipantRepository {
 
   /// Parse JSON-String zu Map/List (Drift speichert JSON als TEXT)
   dynamic _parseJsonField(String? jsonString) {
-    if (jsonString == null || jsonString.isEmpty) {
+    if (jsonString == null || jsonString.isEmpty || jsonString == 'null') {
       return <String, dynamic>{};
     }
 
     try {
-      // TODO: Implement JSON parsing
-      // Für jetzt: Return leere Struktur
-      return <String, dynamic>{};
+      final parsed = jsonDecode(jsonString);
+      return parsed;
     } catch (e) {
+      AppLogger.error('[ParticipantRepository] Failed to parse JSON field', error: e);
       return <String, dynamic>{};
     }
   }
@@ -376,6 +417,60 @@ class ParticipantRepository {
   /// Gibt den finalen Anzeigepreis zurück (manualPriceOverride oder calculatedPrice)
   double getDisplayPrice(Participant participant) {
     return participant.manualPriceOverride ?? participant.calculatedPrice;
+  }
+
+  /// Berechnet Preise aller Familienmitglieder neu
+  ///
+  /// Sollte aufgerufen werden wenn:
+  /// - Ein neues Familienmitglied hinzugefügt wird
+  /// - Ein Familienmitglied entfernt wird
+  /// - Die Familie eines Teilnehmers geändert wird
+  ///
+  /// Ignoriert Teilnehmer mit manual_price_override
+  Future<void> recalculateFamilyPrices(int familyId) async {
+    AppLogger.info('[ParticipantRepository] Recalculating prices for family $familyId');
+
+    // Alle aktiven Familienmitglieder laden
+    final members = await (_db.select(_db.participants)
+          ..where((tbl) => tbl.familyId.equals(familyId))
+          ..where((tbl) => tbl.isActive.equals(true)))
+        .get();
+
+    if (members.isEmpty) {
+      AppLogger.info('[ParticipantRepository] No family members found for family $familyId');
+      return;
+    }
+
+    // Event-ID vom ersten Mitglied nehmen (alle sollten gleich sein)
+    final eventId = members.first.eventId;
+
+    for (var member in members) {
+      // Nur Teilnehmer ohne manuelle Preisanpassung neu berechnen
+      if (member.manualPriceOverride != null) {
+        AppLogger.debug('[ParticipantRepository] Skipping ${member.firstName} ${member.lastName} (manual price override)');
+        continue;
+      }
+
+      // Preis neu berechnen
+      final newPrice = await _calculatePrice(
+        eventId: eventId,
+        birthDate: member.birthDate,
+        roleId: member.roleId,
+        familyId: familyId,
+      );
+
+      // Preis aktualisieren
+      await (_db.update(_db.participants)..where((tbl) => tbl.id.equals(member.id))).write(
+        ParticipantsCompanion(
+          calculatedPrice: Value(newPrice),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+      AppLogger.debug('[ParticipantRepository] Updated price for ${member.firstName} ${member.lastName}: $newPrice€');
+    }
+
+    AppLogger.info('[ParticipantRepository] Recalculated prices for ${members.length} family members');
   }
 
   /// Berechnet Gesamtsumme aller Teilnehmerpreise eines Events
