@@ -61,6 +61,7 @@ class RulesetRepository {
     required String name,
     required String yamlContent,
     required DateTime validFrom,
+    DateTime? validUntil,
     String? description,
   }) async {
     // Validate YAML content
@@ -75,6 +76,7 @@ class RulesetRepository {
       name: Value(name),
       yamlContent: Value(yamlContent),
       validFrom: Value(validFrom),
+      validUntil: Value(validUntil),
       description: Value(description),
       isActive: const Value(true),
       createdAt: Value(DateTime.now()),

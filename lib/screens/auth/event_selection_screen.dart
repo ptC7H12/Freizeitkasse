@@ -622,6 +622,8 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
         eventId,
         _selectedEventType,
         _startDate.year,
+        _startDate,
+        _endDate,
       );
 
       if (mounted) {
@@ -660,6 +662,8 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
     int eventId,
     String eventType,
     int year,
+    DateTime eventStartDate,
+    DateTime eventEndDate,
   ) async {
     // GitHub-Pfad aus Settings laden (vorerst hardcoded)
     const githubPath =
@@ -679,9 +683,12 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
           eventId: eventId,
           name: '$eventType $year (GitHub)',
           yamlContent: yamlContent,
-          validFrom: DateTime(year, 1, 1),
+          validFrom: eventStartDate,
+          validUntil: eventEndDate,
           description: 'Automatisch importiert von GitHub',
         );
+
+        AppLogger.info('[EventSelectionScreen] Ruleset erstellt für Event $eventId (validFrom: $eventStartDate, validUntil: $eventEndDate)');
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
