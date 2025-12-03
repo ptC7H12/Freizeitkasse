@@ -614,10 +614,11 @@ Widget build(BuildContext context) {
 **Purpose:** Calculate participant price based on age, role, and family status.
 
 **Algorithm:**
-1. Get base price from age group in ruleset
-2. Apply role discount (if participant has role)
-3. Apply family discount (based on number of children in family)
-4. Discounts are NON-STACKING (both calculated from base price, not cumulative)
+1. Check file cash_status.py for calculation logic in the Folder "OLD"
+2. Get base price from age group in ruleset
+3. Apply role discount (if participant has role)
+4. Apply family discount (based on number of children in family)
+5. Discounts are NON-STACKING (both calculated from base price, not cumulative)
 
 **Key Method:**
 ```dart
@@ -1342,29 +1343,6 @@ Future<void> _saveXxx() async {
 
 ---
 
-## Migration Notes (Python → Flutter)
-
-### Equivalent Concepts
-
-| Python/FastAPI | Flutter/Dart |
-|----------------|--------------|
-| SQLAlchemy models | Drift tables |
-| Jinja2 templates | Flutter widgets |
-| HTMX live updates | StreamBuilder + Riverpod |
-| Flask sessions | StateNotifier (current event) |
-| Pydantic validation | Form validators |
-| FastAPI routes | Screen navigation |
-| Background tasks | Isolates (not yet used) |
-
-### Key Differences
-
-- **No server:** All logic runs locally
-- **No authentication:** Event selection replaces login
-- **Real-time UI:** Streams auto-update, no manual refresh
-- **Type safety:** Drift provides compile-time SQL safety
-- **Cross-platform:** Single codebase for iOS/macOS/Windows
-
----
 
 ## Responsive Design & Platform Consistency
 
@@ -1499,20 +1477,3 @@ floatingActionButton: FloatingActionButton.extended(
 ❌ **DON'T** throw `Exception('error')` → ✅ Use specific exception types (ValidationException, etc.)
 ❌ **DON'T** forget ResponsiveFormContainer → ✅ Wrap all form ListViews
 
----
-
-**Last Updated:** Sprint 5 Complete (Code Quality Refactoring + UI Improvements)
-**Total Lines of Code:** ~12,400+ Dart (net -59 lines after refactoring)
-**Total Files:** 70+ files
-**Database Tables:** 12 tables (added ExpenseCategories, IncomeSources)
-**Screens:** 33+ screens and forms
-**Utilities:** 4 core utils + 3 extensions
-**Custom Exceptions:** 15+ exception types
-**Code Quality Metrics:**
-- Magic Numbers (EdgeInsets.all): 59 → 0 ✅
-- AppConstants Usages: 0 → 277 ✅
-- Hardcoded Colors: 10 → 3 ✅
-- Logging: 100% AppLogger (no print/developer.log) ✅
-- SnackBars: Centralized via UIHelpers/Extensions ✅
-- Navigation: Centralized via RouteHelpers/Extensions ✅
-- Responsive Forms: 100% with ResponsiveFormContainer ✅
