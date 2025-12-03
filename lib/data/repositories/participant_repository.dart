@@ -241,7 +241,10 @@ class ParticipantRepository {
       updatedAt: Value(DateTime.now()),
     );
 
-    final success = await _db.update(_db.participants).replace(companion);
+    final rowsAffected = await (_db.update(_db.participants)
+          ..where((tbl) => tbl.id.equals(id)))
+        .write(companion);
+    final success = rowsAffected > 0;
 
     // Preise aller Familienmitglieder neu berechnen wenn Familie geändert wurde
     if (success) {
@@ -305,13 +308,15 @@ class ParticipantRepository {
   /// Reaktiviere gelöschten Teilnehmer
   Future<bool> restoreParticipant(int id) async {
     final companion = ParticipantsCompanion(
-      id: Value(id),
       isActive: const Value(true),
       deletedAt: const Value(null),
       updatedAt: Value(DateTime.now()),
     );
 
-    return await _db.update(_db.participants).replace(companion);
+    final rowsAffected = await (_db.update(_db.participants)
+          ..where((tbl) => tbl.id.equals(id)))
+        .write(companion);
+    return rowsAffected > 0;
   }
 
   // ============================================================================
