@@ -131,7 +131,6 @@ class RulesetRepository {
     }
 
     final companion = RulesetsCompanion(
-      id: Value(id),
       name: name != null ? Value(name) : const Value.absent(),
       yamlContent: yamlContent != null ? Value(yamlContent) : const Value.absent(),
       ageGroups: ageGroupsJson != null ? Value(ageGroupsJson) : const Value.absent(),
@@ -142,11 +141,14 @@ class RulesetRepository {
       updatedAt: Value(DateTime.now()),
     );
 
-    final success = await _database.update(_database.rulesets).replace(companion);
-    if (success) {
+    final rowsAffected = await (_database.update(_database.rulesets)
+          ..where((t) => t.id.equals(id)))
+        .write(companion);
+
+    if (rowsAffected > 0) {
       AppLogger.info('[RulesetRepository] Updated ruleset $id with parsed JSON fields');
     }
-    return success;
+    return rowsAffected > 0;
   }
 
   /// Soft delete a ruleset
