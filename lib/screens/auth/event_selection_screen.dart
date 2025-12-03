@@ -62,19 +62,19 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
       appBar: AppBar(
         title: const Text('MGB Freizeitplaner'),
         centerTitle: true,
-        actions: [
-          if (!isDesktop && !_showingCreateForm)
-            IconButton(
-              icon: const Icon(Icons.add),
+      ),
+      floatingActionButton: !isDesktop && !_showingCreateForm
+          ? FloatingActionButton.extended(
               onPressed: () {
                 setState(() {
                   _showingCreateForm = true;
                 });
               },
+              icon: const Icon(Icons.add),
+              label: const Text('Freizeit'),
               tooltip: 'Neue Freizeit erstellen',
-            ),
-        ],
-      ),
+            )
+          : null,
       body: StreamBuilder<List<Event>>(
         stream: database.select(database.events).watch(),
         builder: (context, snapshot) {
