@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
@@ -105,7 +106,15 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
         return;
       }
 
-      AppLogger.debug('[PriceCalculation] _calculatePrice(): rulsetId: ${ruleset.id}');
+      AppLogger.debug(
+          '[PriceCalculation] Loaded ruleset:\n'
+              '  id: ${ruleset.id}\n'
+              '  name: ${ruleset.name}\n'
+              '  validFrom: ${ruleset.validFrom}\n'
+              '  ageGroups (raw): ${ruleset.ageGroups}\n'
+              '  roleDiscounts (raw): ${ruleset.roleDiscounts}\n'
+              '  familyDiscount (raw): ${ruleset.familyDiscount}\n'
+      );
 
       // Alter zum Event-Start berechnen
       final age = AppDateUtils.calculateAgeAtEventStart(
@@ -199,42 +208,55 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
     }
   }
 
-  // Vereinfachtes JSON-Parsing (TODO: Proper JSON parsing)
+  /// Parse age groups from JSON string stored in database
   List<dynamic> _parseAgeGroups(String? jsonString) {
     if (jsonString == null || jsonString.isEmpty) {
+      AppLogger.warning('[PriceCalculation] ageGroups JSON is null or empty');
       return [];
     }
-    // Dummy-Daten für Demo
-    return [
-      {'min_age': 0, 'max_age': 5, 'base_price': 50.0},
-      {'min_age': 6, 'max_age': 12, 'base_price': 100.0},
-      {'min_age': 13, 'max_age': 17, 'base_price': 150.0},
-      {'min_age': 18, 'max_age': 999, 'base_price': 200.0},
-    ];
+
+    try {
+      final parsed = jsonDecode(jsonString);
+      AppLogger.debug('[PriceCalculation] Parsed ageGroups: $parsed');
+      return parsed as List<dynamic>;
+    } catch (e) {
+      AppLogger.error('[PriceCalculation] Failed to parse ageGroups JSON', error: e);
+      return [];
+    }
   }
 
+  /// Parse role discounts from JSON string stored in database
   Map<String, dynamic> _parseRoleDiscounts(String? jsonString) {
     if (jsonString == null || jsonString.isEmpty) {
+      AppLogger.warning('[PriceCalculation] roleDiscounts JSON is null or empty');
       return {};
     }
-    // Dummy-Daten für Demo
-    return {
-      'betreuer': {'discount_percent': 100.0},
-      'küchenteam': {'discount_percent': 50.0},
-    };
+
+    try {
+      final parsed = jsonDecode(jsonString);
+      AppLogger.debug('[PriceCalculation] Parsed roleDiscounts: $parsed');
+      return parsed as Map<String, dynamic>;
+    } catch (e) {
+      AppLogger.error('[PriceCalculation] Failed to parse roleDiscounts JSON', error: e);
+      return {};
+    }
   }
 
+  /// Parse family discount from JSON string stored in database
   Map<String, dynamic> _parseFamilyDiscount(String? jsonString) {
     if (jsonString == null || jsonString.isEmpty) {
+      AppLogger.warning('[PriceCalculation] familyDiscount JSON is null or empty');
       return {};
     }
-    // Dummy-Daten für Demo
-    return {
-      'enabled': true,
-      'first_child_percent': 0.0,
-      'second_child_percent': 25.0,
-      'third_plus_child_percent': 50.0,
-    };
+
+    try {
+      final parsed = jsonDecode(jsonString);
+      AppLogger.debug('[PriceCalculation] Parsed familyDiscount: $parsed');
+      return parsed as Map<String, dynamic>;
+    } catch (e) {
+      AppLogger.error('[PriceCalculation] Failed to parse familyDiscount JSON', error: e);
+      return {};
+    }
   }
 
   @override

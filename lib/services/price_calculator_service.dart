@@ -82,38 +82,59 @@ class PriceCalculatorService {
   ///   Basispreis für die Altersgruppe
   static double _getBasePriceByAge(int age, List<dynamic> ageGroups) {
     AppLogger.debug(
-      '[PriceCalculatorService] Suche Basispreis für Alter $age in ${ageGroups.length} Altersgruppen',
+      '[PriceCalculatorService] _getBasePriceByAge():\n'
+      '  age: $age\n'
+      '  ageGroups count: ${ageGroups.length}\n'
+      '  ageGroups: $ageGroups',
     );
 
-    for (var group in ageGroups) {
+    if (ageGroups.isEmpty) {
+      AppLogger.warning('[PriceCalculatorService] ageGroups ist leer! Keine Altersgruppen definiert.');
+      return 0.0;
+    }
+
+    for (var i = 0; i < ageGroups.length; i++) {
+      final group = ageGroups[i];
       final minAge = group['min_age'] as int? ?? 0;
       final maxAge = group['max_age'] as int? ?? 999;
 
       AppLogger.debug(
-        '[PriceCalculatorService] Prüfe Gruppe: min=$minAge, max=$maxAge, group=$group',
+        '[PriceCalculatorService] Prüfe Gruppe $i:\n'
+        '  min_age: $minAge\n'
+        '  max_age: $maxAge\n'
+        '  age in range: ${minAge <= age && age <= maxAge}\n'
+        '  group: $group',
       );
 
       if (minAge <= age && age <= maxAge) {
         // Neues Format: base_price direkt aus age_group
         if (group.containsKey('base_price') == true) {
           final price = (group['base_price'] as num).toDouble();
-          AppLogger.debug(
-            '[PriceCalculatorService] Basispreis für Alter $age: $price€ (Gruppe $minAge-$maxAge)',
+          AppLogger.info(
+            '[PriceCalculatorService] ✓ Basispreis gefunden:\n'
+            '  Alter: $age\n'
+            '  Preis: $price€\n'
+            '  Gruppe: $minAge-$maxAge',
           );
           return price;
         }
 
         // Legacy Format: price als Fallback
         final price = (group['price'] as num?)?.toDouble() ?? 0.0;
-        AppLogger.debug(
-          '[PriceCalculatorService] Basispreis für Alter $age: $price€ (Gruppe $minAge-$maxAge, legacy format)',
+        AppLogger.info(
+          '[PriceCalculatorService] ✓ Basispreis gefunden (legacy format):\n'
+          '  Alter: $age\n'
+          '  Preis: $price€\n'
+          '  Gruppe: $minAge-$maxAge',
         );
         return price;
       }
     }
 
     AppLogger.warning(
-      '[PriceCalculatorService] Keine passende Altersgruppe für Alter $age gefunden! Rückgabe: 0.0',
+      '[PriceCalculatorService] ! Keine passende Altersgruppe für Alter $age gefunden!\n'
+      '  Geprüfte Gruppen: ${ageGroups.length}\n'
+      '  Rückgabe: 0.0',
     );
     return 0.0;
   }
@@ -130,7 +151,19 @@ class PriceCalculatorService {
     String? roleName,
     Map<String, dynamic> roleDiscounts,
   ) {
+    AppLogger.debug(
+      '[PriceCalculatorService] _getRoleDiscount():\n'
+      '  roleName: $roleName\n'
+      '  roleDiscounts: $roleDiscounts',
+    );
+
     if (roleName == null || roleName.isEmpty) {
+      AppLogger.debug('[PriceCalculatorService] Keine Rolle angegeben → Rabatt: 0%');
+      return 0.0;
+    }
+
+    if (roleDiscounts.isEmpty) {
+      AppLogger.debug('[PriceCalculatorService] roleDiscounts ist leer → Rabatt: 0%');
       return 0.0;
     }
 
@@ -139,10 +172,19 @@ class PriceCalculatorService {
     for (var entry in roleDiscounts.entries) {
       if (entry.key.toLowerCase() == roleNameLower) {
         final discount = entry.value as Map<String, dynamic>?;
-        return (discount?['discount_percent'] as num?)?.toDouble() ?? 0.0;
+        final discountPercent = (discount?['discount_percent'] as num?)?.toDouble() ?? 0.0;
+        AppLogger.info(
+          '[PriceCalculatorService] ✓ Rollenrabatt gefunden:\n'
+          '  Rolle: $roleName\n'
+          '  Rabatt: $discountPercent%',
+        );
+        return discountPercent;
       }
     }
 
+    AppLogger.debug(
+      '[PriceCalculatorService] Keine Rolle "$roleName" in roleDiscounts gefunden → Rabatt: 0%',
+    );
     return 0.0;
   }
 
@@ -166,31 +208,43 @@ class PriceCalculatorService {
     int childPosition,
     Map<String, dynamic> familyDiscountConfig,
   ) {
+    AppLogger.debug(
+      '[PriceCalculatorService] _getFamilyDiscount():\n'
+      '  age: $age\n'
+      '  childPosition: $childPosition\n'
+      '  familyDiscountConfig: $familyDiscountConfig',
+    );
+
     // Familienrabatte gelten NUR für Kinder (unter 18)
     if (age >= 18) {
+      AppLogger.debug('[PriceCalculatorService] Alter >= 18 → Kein Familienrabatt');
       return 0.0;
     }
 
     final enabled = familyDiscountConfig['enabled'] as bool? ?? false;
     if (!enabled) {
+      AppLogger.debug('[PriceCalculatorService] Familienrabatt nicht aktiviert → Rabatt: 0%');
       return 0.0;
     }
 
+    double discount = 0.0;
     if (childPosition == 1) {
       // Erstes Kind (ältestes): Rabatt optional (Standard: 0%)
-      return (familyDiscountConfig['first_child_percent'] as num?)?.toDouble() ??
-          0.0;
+      discount = (familyDiscountConfig['first_child_percent'] as num?)?.toDouble() ?? 0.0;
     } else if (childPosition == 2) {
       // Zweites Kind
-      return (familyDiscountConfig['second_child_percent'] as num?)
-              ?.toDouble() ??
-          0.0;
+      discount = (familyDiscountConfig['second_child_percent'] as num?)?.toDouble() ?? 0.0;
     } else {
       // 3. Kind und weitere (jüngste Kinder)
-      return (familyDiscountConfig['third_plus_child_percent'] as num?)
-              ?.toDouble() ??
-          0.0;
+      discount = (familyDiscountConfig['third_plus_child_percent'] as num?)?.toDouble() ?? 0.0;
     }
+
+    AppLogger.info(
+      '[PriceCalculatorService] ✓ Familienrabatt:\n'
+      '  Position: $childPosition. Kind\n'
+      '  Rabatt: $discount%',
+    );
+    return discount;
   }
 
   /// Berechnet den Preis mit detaillierter Aufschlüsselung
