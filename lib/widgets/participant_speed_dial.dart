@@ -163,7 +163,6 @@ class _ParticipantSpeedDialState extends State<ParticipantSpeedDial>
         FloatingActionButton.extended(
           heroTag: 'main_participants_fab',
           onPressed: _isOpen ? _toggle : widget.onAdd,
-          onLongPress: _toggle,
           icon: AnimatedRotation(
             turns: _animation.value * 0.125,
             duration: const Duration(milliseconds: 250),
