@@ -110,7 +110,7 @@ class RolesListScreen extends ConsumerWidget {
           child: Text('Fehler beim Laden der Rollen: $error'),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
             context,
@@ -119,7 +119,8 @@ class RolesListScreen extends ConsumerWidget {
             ),
           );
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Rolle'),
       ),
     );
   }

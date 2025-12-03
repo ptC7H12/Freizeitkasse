@@ -453,7 +453,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
         ),
       ],
       body: _buildContent(participantsAsync),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -461,8 +461,9 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
             ),
           );
         },
+        icon: const Icon(Icons.person_add),
+        label: const Text('Teilnehmer'),
         tooltip: 'Teilnehmer hinzufügen',
-        child: const Icon(Icons.add),
       ),
     );
   }

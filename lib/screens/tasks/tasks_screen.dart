@@ -4,9 +4,11 @@ import 'package:intl/intl.dart';
 import '../../data/database/app_database.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/current_event_provider.dart';
-import '../../providers/participant_provider.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../widgets/adaptive_list_item.dart';
+import '../../extensions/context_extensions.dart';
+import 'task_form_screen.dart';
 
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
@@ -95,8 +97,55 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 return ListView.builder(
                   padding: AppConstants.paddingAll16,
                   itemCount: filteredTasks.length,
-                  itemBuilder: (context, index) =>
-                      _TaskListItem(task: filteredTasks[index], onTap: () => _showTaskDialog(context, filteredTasks[index])),
+                  itemBuilder: (context, index) {
+                    final task = filteredTasks[index];
+                    final isOverdue = task.status == 'pending' && (task.dueDate?.isBefore(DateTime.now()) ?? false);
+
+                    return AdaptiveListItem(
+                      leading: Icon(
+                        task.status == 'completed' ? Icons.check_circle : Icons.radio_button_unchecked,
+                        color: task.status == 'completed' ? Colors.green : (isOverdue ? Colors.red : Colors.grey),
+                      ),
+                      title: Text(
+                        task.title,
+                        style: TextStyle(
+                          decoration: task.status == 'completed' ? TextDecoration.lineThrough : null,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (task.description != null)
+                            Text(task.description!, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          if (task.dueDate != null)
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today, size: 12, color: isOverdue ? Colors.red : Colors.grey),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Fällig: ${DateFormat('dd.MM.yyyy', 'de_DE').format(task.dueDate!)}',
+                                  style: TextStyle(
+                                    color: isOverdue ? Colors.red : null,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                      onTap: () => _navigateToTaskForm(context, task),
+                      onEdit: () => _navigateToTaskForm(context, task),
+                      onDelete: () async {
+                        final repo = ref.read(taskRepositoryProvider);
+                        await repo.deleteTask(task.id);
+                        if (context.mounted) {
+                          context.showSuccess('Aufgabe gelöscht');
+                        }
+                      },
+                      deleteConfirmMessage: 'Aufgabe "${task.title}" wirklich löschen?',
+                    );
+                  },
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -105,9 +154,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showTaskDialog(context),
-        child: const Icon(Icons.add),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _navigateToTaskForm(context),
+        icon: const Icon(Icons.add),
+        label: const Text('Aufgabe'),
       ),
     );
   }
@@ -148,207 +198,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     }
   }
 
-  void _showTaskDialog(BuildContext context, [Task? task]) {
-    showDialog(
-      context: context,
-      builder: (context) => _TaskFormDialog(task: task),
-    );
-  }
-}
-
-class _TaskListItem extends StatelessWidget {
-  final Task task;
-  final VoidCallback onTap;
-
-  const _TaskListItem({required this.task, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final isOverdue = task.status == 'pending' && (task.dueDate?.isBefore(DateTime.now()) ?? false);
-    return Card(
-      child: ListTile(
-        leading: Icon(
-          task.status == 'completed' ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: task.status == 'completed' ? Colors.green : (isOverdue ? Colors.red : Colors.grey),
-        ),
-        title: Text(task.title, style: TextStyle(decoration: task.status == 'completed' ? TextDecoration.lineThrough : null)),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (task.description != null) Text(task.description!, maxLines: 1, overflow: TextOverflow.ellipsis),
-            if (task.dueDate != null) Text('Fällig: ${DateFormat('dd.MM.yyyy', 'de_DE').format(task.dueDate!)}', style: TextStyle(color: isOverdue ? Colors.red : null)),
-          ],
-        ),
-        trailing: _PriorityBadge(priority: task.priority),
-        onTap: onTap,
+  void _navigateToTaskForm(BuildContext context, [Task? task]) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => TaskFormScreen(taskId: task?.id),
       ),
-    );
-  }
-}
-
-class _PriorityBadge extends StatelessWidget {
-  final String priority;
-  const _PriorityBadge({required this.priority});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = priority == 'high' ? Colors.red : (priority == 'medium' ? Colors.orange : Colors.grey);
-    final label = priority == 'high' ? 'Hoch' : (priority == 'medium' ? 'Mittel' : 'Niedrig');
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-      child: Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
-    );
-  }
-}
-
-class _TaskFormDialog extends ConsumerStatefulWidget {
-  final Task? task;
-  const _TaskFormDialog({this.task});
-
-  @override
-  ConsumerState<_TaskFormDialog> createState() => _TaskFormDialogState();
-}
-
-class _TaskFormDialogState extends ConsumerState<_TaskFormDialog> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _titleController;
-  late TextEditingController _descriptionController;
-  late DateTime _dueDate;
-  late String _priority;
-  late String _status;
-  int? _assignedTo;
-
-  @override
-  void initState() {
-    super.initState();
-    _titleController = TextEditingController(text: widget.task?.title);
-    _descriptionController = TextEditingController(text: widget.task?.description);
-    _dueDate = widget.task?.dueDate ?? DateTime.now().add(const Duration(days: 7));
-    _priority = widget.task?.priority ?? 'medium';
-    _status = widget.task?.status ?? 'pending';
-    _assignedTo = widget.task?.assignedTo;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final participantsAsync = ref.watch(participantsProvider);
-
-    return AlertDialog(
-      title: Text(widget.task == null ? 'Neue Aufgabe' : 'Aufgabe bearbeiten'),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Titel *', border: OutlineInputBorder()),
-                validator: (v) => v?.isEmpty == true ? 'Titel erforderlich' : null,
-              ),
-              const SizedBox(height: AppConstants.spacingM),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Beschreibung', border: OutlineInputBorder()),
-                maxLines: 3,
-              ),
-              const SizedBox(height: AppConstants.spacingM),
-              DropdownButtonFormField<String>(
-                initialValue: _priority,
-                decoration: const InputDecoration(labelText: 'Priorität', border: OutlineInputBorder()),
-                items: const [
-                  DropdownMenuItem(value: 'low', child: Text('Niedrig')),
-                  DropdownMenuItem(value: 'medium', child: Text('Mittel')),
-                  DropdownMenuItem(value: 'high', child: Text('Hoch')),
-                ],
-                onChanged: (v) => setState(() => _priority = v!),
-              ),
-              const SizedBox(height: AppConstants.spacingM),
-              InkWell(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _dueDate,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) {
-                    setState(() => _dueDate = picked);
-                  }
-                },
-                child: InputDecorator(
-                  decoration: const InputDecoration(labelText: 'Fälligkeitsdatum', border: OutlineInputBorder()),
-                  child: Text(DateFormat('dd.MM.yyyy').format(_dueDate)),
-                ),
-              ),
-              const SizedBox(height: AppConstants.spacingM),
-              participantsAsync.when(
-                data: (participants) => DropdownButtonFormField<int?>(
-                  initialValue: _assignedTo,
-                  decoration: const InputDecoration(labelText: 'Zugewiesen an', border: OutlineInputBorder()),
-                  items: [
-                    const DropdownMenuItem(value: null, child: Text('Nicht zugewiesen')),
-                    ...participants.map((p) => DropdownMenuItem(value: p.id, child: Text('${p.firstName} ${p.lastName}'))),
-                  ],
-                  onChanged: (v) => setState(() => _assignedTo = v),
-                ),
-                loading: () => const CircularProgressIndicator(),
-                error: (_, __) => const Text('Fehler beim Laden'),
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        if (widget.task != null)
-          TextButton(
-            onPressed: () async {
-              final repo = ref.read(taskRepositoryProvider);
-              await repo.deleteTask(widget.task!.id);
-              if (mounted) {
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Löschen', style: TextStyle(color: Colors.red)),
-          ),
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Abbrechen')),
-        FilledButton(
-          onPressed: () async {
-            if (!_formKey.currentState!.validate()) {
-              return;
-            }
-            final repo = ref.read(taskRepositoryProvider);
-            final event = ref.read(currentEventProvider)!;
-
-            if (widget.task == null) {
-              await repo.createTask(
-                eventId: event.id,
-                title: _titleController.text,
-                description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
-                dueDate: _dueDate,
-                priority: _priority,
-                status: _status,
-                assignedTo: _assignedTo,
-              );
-            } else {
-              await repo.updateTask(
-                id: widget.task!.id,
-                title: _titleController.text,
-                description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
-                dueDate: _dueDate,
-                priority: _priority,
-                status: _status,
-                assignedTo: _assignedTo,
-              );
-            }
-            if (mounted) {
-              Navigator.pop(context);
-            }
-          },
-          child: const Text('Speichern'),
-        ),
-      ],
     );
   }
 }
