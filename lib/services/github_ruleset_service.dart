@@ -1,5 +1,5 @@
 import 'package:http/http.dart' as http;
-import 'dart:developer' as developer;
+import '../utils/logger.dart';
 
 /// GitHub Ruleset Import Service
 ///
@@ -34,10 +34,7 @@ class GitHubRulesetService {
       final fileName = '${normalizedEventType}_$year.yaml';
       final url = '$cleanBasePath/$fileName';
 
-      developer.log(
-        'Lade Ruleset von GitHub: $url',
-        name: 'GitHubRulesetService',
-      );
+      AppLogger.info('[GitHubRulesetService] Lade Ruleset von GitHub: $url');
 
       // HTTP-Request
       final response = await http.get(Uri.parse(url)).timeout(
@@ -48,34 +45,19 @@ class GitHubRulesetService {
       );
 
       if (response.statusCode == 200) {
-        developer.log(
-          'Ruleset erfolgreich geladen: ${response.body.length} Zeichen',
-          name: 'GitHubRulesetService',
-        );
+        AppLogger.info('[GitHubRulesetService] Ruleset erfolgreich geladen: ${response.body.length} Zeichen');
         return response.body;
       } else if (response.statusCode == 404) {
-        developer.log(
-          'Ruleset nicht gefunden auf GitHub: $url (404)',
-          name: 'GitHubRulesetService',
-          level: 900, // Warning
-        );
+        AppLogger.warning('[GitHubRulesetService] Ruleset nicht gefunden auf GitHub: $url (404)');
 
         // Versuche Fallback auf generisches Ruleset ohne Jahr
         return await _loadFallbackRuleset(cleanBasePath, normalizedEventType);
       } else {
-        developer.log(
-          'Fehler beim Laden von GitHub: ${response.statusCode}',
-          name: 'GitHubRulesetService',
-          level: 1000, // Error
-        );
+        AppLogger.error('[GitHubRulesetService] Fehler beim Laden von GitHub: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      developer.log(
-        'Exception beim Laden von GitHub: $e',
-        name: 'GitHubRulesetService',
-        level: 1000, // Error
-      );
+      AppLogger.error('[GitHubRulesetService] Exception beim Laden von GitHub', error: e);
       return null;
     }
   }
@@ -91,35 +73,21 @@ class GitHubRulesetService {
       final fileName = '$normalizedEventType.yaml';
       final url = '$basePath/$fileName';
 
-      developer.log(
-        'Versuche Fallback-Ruleset: $url',
-        name: 'GitHubRulesetService',
-      );
+      AppLogger.info('[GitHubRulesetService] Versuche Fallback-Ruleset: $url');
 
       final response = await http.get(Uri.parse(url)).timeout(
         const Duration(seconds: 10),
       );
 
       if (response.statusCode == 200) {
-        developer.log(
-          'Fallback-Ruleset geladen: ${response.body.length} Zeichen',
-          name: 'GitHubRulesetService',
-        );
+        AppLogger.info('[GitHubRulesetService] Fallback-Ruleset geladen: ${response.body.length} Zeichen');
         return response.body;
       } else {
-        developer.log(
-          'Fallback-Ruleset nicht gefunden: ${response.statusCode}',
-          name: 'GitHubRulesetService',
-          level: 900, // Warning
-        );
+        AppLogger.warning('[GitHubRulesetService] Fallback-Ruleset nicht gefunden: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      developer.log(
-        'Fehler beim Laden des Fallback-Rulesets: $e',
-        name: 'GitHubRulesetService',
-        level: 1000, // Error
-      );
+      AppLogger.error('[GitHubRulesetService] Fehler beim Laden des Fallback-Rulesets', error: e);
       return null;
     }
   }
