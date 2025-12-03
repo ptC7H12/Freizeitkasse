@@ -7,6 +7,7 @@ import '../../providers/excel_import_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../services/excel_import_service.dart';
 import '../../utils/constants.dart';
+import '../../utils/logger.dart';
 import '../../extensions/context_extensions.dart';
 
 class ParticipantImportScreen extends ConsumerStatefulWidget {
@@ -22,16 +23,52 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
   ExcelImportResult? _importResult;
 
   Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['xlsx', 'xls'],
-    );
+    AppLogger.info('[ImportScreen] Opening file picker...');
 
-    if (result != null && result.files.single.path != null) {
-      setState(() {
-        _selectedFilePath = result.files.single.path;
-        _importResult = null; // Reset previous result
-      });
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['xlsx', 'xls'],
+      );
+
+      AppLogger.debug('[ImportScreen] File picker result: ${result != null ? "File selected" : "Cancelled"}');
+
+      if (result != null && result.files.single.path != null) {
+        final filePath = result.files.single.path!;
+        final fileName = result.files.single.name;
+        final fileSize = result.files.single.size;
+
+        AppLogger.info('[ImportScreen] File selected:');
+        AppLogger.info('[ImportScreen]   Name: $fileName');
+        AppLogger.info('[ImportScreen]   Path: $filePath');
+        AppLogger.info('[ImportScreen]   Size: $fileSize bytes');
+
+        // Check if file exists
+        final file = File(filePath);
+        if (!file.existsSync()) {
+          AppLogger.error('[ImportScreen] File does not exist at path: $filePath');
+          if (mounted) {
+            context.showError('Datei nicht gefunden');
+          }
+          return;
+        }
+
+        AppLogger.info('[ImportScreen] File exists and is readable');
+
+        setState(() {
+          _selectedFilePath = filePath;
+          _importResult = null; // Reset previous result
+        });
+
+        AppLogger.info('[ImportScreen] File path stored in state');
+      } else {
+        AppLogger.info('[ImportScreen] No file selected or path is null');
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error('[ImportScreen] Error in file picker', error: e, stackTrace: stackTrace);
+      if (mounted) {
+        context.showError('Fehler beim Auswählen der Datei: $e');
+      }
     }
   }
 
@@ -69,34 +106,56 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
   }
 
   Future<void> _importFile() async {
+    AppLogger.info('[ImportScreen] ==================== IMPORT START ====================');
+    AppLogger.info('[ImportScreen] _importFile() called');
+
     if (_selectedFilePath == null) {
-      context.showSuccess('Bitte wählen Sie zuerst eine Datei aus');
+      AppLogger.warning('[ImportScreen] No file selected');
+      context.showError('Bitte wählen Sie zuerst eine Datei aus');
       return;
     }
 
+    AppLogger.info('[ImportScreen] File path: $_selectedFilePath');
+
     final currentEvent = ref.read(currentEventProvider);
     if (currentEvent == null) {
-      context.showSuccess('Keine Veranstaltung ausgewählt');
+      AppLogger.warning('[ImportScreen] No event selected');
+      context.showError('Keine Veranstaltung ausgewählt');
       return;
     }
+
+    AppLogger.info('[ImportScreen] Current event: ${currentEvent.name} (ID: ${currentEvent.id})');
 
     setState(() {
       _isImporting = true;
       _importResult = null;
     });
 
+    AppLogger.info('[ImportScreen] State updated - import started');
+
     try {
+      AppLogger.info('[ImportScreen] Getting excel import service from provider...');
       final service = ref.read(excelImportServiceProvider);
+      AppLogger.info('[ImportScreen] Service obtained: ${service.runtimeType}');
+
+      AppLogger.info('[ImportScreen] Calling importParticipantsFromExcel()...');
+      AppLogger.info('[ImportScreen]   filePath: $_selectedFilePath');
+      AppLogger.info('[ImportScreen]   eventId: ${currentEvent.id}');
+
       final result = await service.importParticipantsFromExcel(
         filePath: _selectedFilePath!,
         eventId: currentEvent.id,
       );
+
+      AppLogger.info('[ImportScreen] Import completed!');
+      AppLogger.info('[ImportScreen] Result: $result');
 
       setState(() {
         _importResult = result;
       });
 
       if (result.successCount > 0) {
+        AppLogger.info('[ImportScreen] Showing success message: ${result.successCount} participants imported');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${result.successCount} Teilnehmer erfolgreich importiert'),
@@ -106,6 +165,8 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
       }
 
       if (result.hasErrors) {
+        AppLogger.warning('[ImportScreen] Import had ${result.errorCount} errors');
+        AppLogger.warning('[ImportScreen] Errors: ${result.errors}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Import abgeschlossen mit ${result.errorCount} Fehlern'),
@@ -113,21 +174,29 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
           ),
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      AppLogger.error('[ImportScreen] FATAL ERROR during import', error: e, stackTrace: stackTrace);
+      AppLogger.error('[ImportScreen] Error type: ${e.runtimeType}');
+      AppLogger.error('[ImportScreen] Error message: $e');
+      AppLogger.error('[ImportScreen] Stack trace:\n$stackTrace');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Fehler beim Import: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 10),
           ),
         );
       }
     } finally {
+      AppLogger.info('[ImportScreen] Cleaning up - setting _isImporting to false');
       if (mounted) {
         setState(() {
           _isImporting = false;
         });
       }
+      AppLogger.info('[ImportScreen] ==================== IMPORT END ====================');
     }
   }
 
