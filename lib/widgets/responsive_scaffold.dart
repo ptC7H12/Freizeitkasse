@@ -308,145 +308,143 @@ class ResponsiveScaffold extends ConsumerWidget {
 
               // VERWALTUNG Section
               _buildDrawerSectionHeader('VERWALTUNG'),
-                  _buildDrawerItem(
-                    context,
-                    Icons.dashboard,
-                    'Dashboard',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 0) {
-                        _navigateWithoutAnimation(context, const DashboardScreen());
-                      }
-                    },
-                    isSelected: selectedIndex == 0,
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    Icons.people,
-                    'Teilnehmer & Familien',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 1) {
-                        _navigateWithoutAnimation(context, const ParticipantsListScreen());
-                      }
-                    },
-                    isSelected: selectedIndex == 1,
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    Icons.task_alt,
-                    'Aufgaben',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 9) {
-                        _navigateWithoutAnimation(context, const TasksScreen());
-                      }
-                    },
-                    isSelected: selectedIndex == 9,
-                  ),
-
-                  const SizedBox(height: AppConstants.spacingM),
-                  const Divider(color: Colors.white24, height: 1),
-                  const SizedBox(height: AppConstants.spacingM),
-
-                  // FINANZEN Section
-                  _buildDrawerSectionHeader('FINANZEN'),
-                  _buildDrawerItem(
-                    context,
-                    Icons.payment,
-                    'Zahlungseingänge',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 3) {
-                        _navigateWithoutAnimation(context, const PaymentsListScreen());
-                      }
-                    },
-                    isSelected: selectedIndex == 3,
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    Icons.attach_money,
-                    'Sonstige Einnahmen',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 5) {
-                        _navigateWithoutAnimation(context, const IncomesListScreen());
-                      }
-                    },
-                    isSelected: selectedIndex == 5,
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    Icons.shopping_cart,
-                    'Ausgaben',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 4) {
-                        _navigateWithoutAnimation(context, const ExpensesListScreen());
-                      }
-                    },
-                    isSelected: selectedIndex == 4,
-                  ),
-                  _buildDrawerItem(
-                    context,
-                    Icons.receipt_long,
-                    'Kassenstand',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 6) {
-                        _navigateWithoutAnimation(context, const CashStatusScreen());
-                      }
-                    },
-                    isSelected: selectedIndex == 6,
-                  ),
-
-                  const SizedBox(height: AppConstants.spacingM),
-                  const Divider(color: Colors.white24, height: 1),
-                  const SizedBox(height: AppConstants.spacingM),
-
-                  // EINSTELLUNGEN Section
-                  _buildDrawerSectionHeader('EINSTELLUNGEN'),
-                  _buildDrawerItem(
-                    context,
-                    Icons.settings,
-                    'Einstellungen',
-                    () {
-                      Navigator.of(context).pop();
-                      if (selectedIndex != 10) {
-                        _navigateWithoutAnimation(context, const SettingsScreen());
-                      }
-                    },
-                    isSelected: selectedIndex == 10,
-                  ),
-
-                  const SizedBox(height: AppConstants.spacingXL),
-                  const Divider(color: Colors.white24, height: 1),
-                  const SizedBox(height: AppConstants.spacingM),
-
-                  // Freizeit wechseln (special item)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
-                      ),
-                      child: _buildDrawerItem(
-                        context,
-                        Icons.swap_horiz,
-                        'Freizeit wechseln',
-                        () {
-                          ref.read(currentEventProvider.notifier).clearEvent();
-                          Navigator.of(context).pushReplacementNamed('/');
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.spacing),
-                ],
+              _buildDrawerItem(
+                context,
+                Icons.dashboard,
+                'Dashboard',
+                () {
+                  Navigator.of(context).pop();
+                  if (selectedIndex != 0) {
+                    _navigateWithoutAnimation(context, const DashboardScreen());
+                  }
+                },
+                isSelected: selectedIndex == 0,
               ),
-            ),
+              _buildDrawerItem(
+                context,
+                Icons.people,
+                'Teilnehmer & Familien',
+                () {
+                  Navigator.of(context).pop();
+                  if (selectedIndex != 1) {
+                    _navigateWithoutAnimation(context, const ParticipantsListScreen());
+                  }
+                },
+                isSelected: selectedIndex == 1,
+              ),
+              _buildDrawerItem(
+                context,
+                Icons.task_alt,
+                'Aufgaben',
+                () {
+                  Navigator.of(context).pop();
+                  if (selectedIndex != 9) {
+                    _navigateWithoutAnimation(context, const TasksScreen());
+                  }
+                },
+                isSelected: selectedIndex == 9,
+              ),
+
+              const SizedBox(height: AppConstants.spacingM),
+              const Divider(color: Colors.white24, height: 1),
+              const SizedBox(height: AppConstants.spacingM),
+
+              // FINANZEN Section
+              _buildDrawerSectionHeader('FINANZEN'),
+              _buildDrawerItem(
+                context,
+                Icons.payment,
+                'Zahlungseingänge',
+                () {
+                  Navigator.of(context).pop();
+                  if (selectedIndex != 3) {
+                    _navigateWithoutAnimation(context, const PaymentsListScreen());
+                  }
+                },
+                isSelected: selectedIndex == 3,
+              ),
+              _buildDrawerItem(
+                context,
+                Icons.attach_money,
+                'Sonstige Einnahmen',
+                () {
+                  Navigator.of(context).pop();
+                  if (selectedIndex != 5) {
+                    _navigateWithoutAnimation(context, const IncomesListScreen());
+                  }
+                },
+                isSelected: selectedIndex == 5,
+              ),
+              _buildDrawerItem(
+                context,
+                Icons.shopping_cart,
+                'Ausgaben',
+                () {
+                  Navigator.of(context).pop();
+                  if (selectedIndex != 4) {
+                    _navigateWithoutAnimation(context, const ExpensesListScreen());
+                  }
+                },
+                isSelected: selectedIndex == 4,
+              ),
+              _buildDrawerItem(
+                context,
+                Icons.receipt_long,
+                'Kassenstand',
+                () {
+                  Navigator.of(context).pop();
+                  if (selectedIndex != 6) {
+                    _navigateWithoutAnimation(context, const CashStatusScreen());
+                  }
+                },
+                isSelected: selectedIndex == 6,
+              ),
+
+              const SizedBox(height: AppConstants.spacingM),
+              const Divider(color: Colors.white24, height: 1),
+              const SizedBox(height: AppConstants.spacingM),
+
+              // EINSTELLUNGEN Section
+              _buildDrawerSectionHeader('EINSTELLUNGEN'),
+              _buildDrawerItem(
+                context,
+                Icons.settings,
+                'Einstellungen',
+                () {
+                  Navigator.of(context).pop();
+                  if (selectedIndex != 10) {
+                    _navigateWithoutAnimation(context, const SettingsScreen());
+                  }
+                },
+                isSelected: selectedIndex == 10,
+              ),
+
+              const SizedBox(height: AppConstants.spacingXL),
+              const Divider(color: Colors.white24, height: 1),
+              const SizedBox(height: AppConstants.spacingM),
+
+              // Freizeit wechseln (special item)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                  ),
+                  child: _buildDrawerItem(
+                    context,
+                    Icons.swap_horiz,
+                    'Freizeit wechseln',
+                    () {
+                      ref.read(currentEventProvider.notifier).clearEvent();
+                      Navigator.of(context).pushReplacementNamed('/');
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacing),
+            ],
           ),
         ),
       ),
