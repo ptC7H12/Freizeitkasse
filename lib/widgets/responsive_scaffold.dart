@@ -103,49 +103,20 @@ class ResponsiveScaffold extends ConsumerWidget {
   }
 
   Widget _buildNavigationRail(BuildContext context, WidgetRef ref) {
+    final currentEvent = ref.watch(currentEventProvider);
+
     return Container(
       width: 280,
       color: const Color(0xFF2196F3),
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          // Header mit Logo
-          SafeArea(
-            bottom: false,
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                children: [
-                  Container(
-                    padding: AppConstants.paddingAll8,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.account_balance_wallet,
-                      size: 28,
-                      color: Color(0xFF2196F3),
-                    ),
-                  ),
-                  const SizedBox(width: AppConstants.spacingM),
-                  const Text(
-                    'Freizeitkasse',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const Divider(color: Colors.white24, height: 1),
-          const SizedBox(height: AppConstants.spacing),
+      child: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            // Event Header (nur wenn Event ausgewählt)
+            if (currentEvent != null) _buildEventHeader(currentEvent),
 
-          // VERWALTUNG Section
-          _buildNavigationSectionHeader('VERWALTUNG'),
+            // VERWALTUNG Section
+            _buildNavigationSectionHeader('VERWALTUNG'),
           _buildNavigationItem(
             context,
             Icons.dashboard,
@@ -232,6 +203,32 @@ class ResponsiveScaffold extends ConsumerWidget {
             },
             isSelected: selectedIndex == 10,
           ),
+
+          const SizedBox(height: AppConstants.spacingXL),
+          const Divider(color: Colors.white24, height: 1),
+          const SizedBox(height: AppConstants.spacingM),
+
+          // Freizeit wechseln (special item)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+              ),
+              child: _buildNavigationItem(
+                context,
+                Icons.swap_horiz,
+                'Freizeit wechseln',
+                () {
+                  ref.read(currentEventProvider.notifier).clearEvent();
+                  Navigator.of(context).pushReplacementNamed('/');
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacing),
         ],
       ),
     );
