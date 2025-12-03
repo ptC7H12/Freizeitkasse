@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../data/database/app_database.dart';
 import '../providers/current_event_provider.dart';
 import '../utils/constants.dart';
 import '../screens/dashboard/dashboard_screen.dart';
