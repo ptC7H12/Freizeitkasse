@@ -1,56 +1,15 @@
 import 'dart:io';
 import 'package:excel/excel.dart';
 import '../data/repositories/participant_repository.dart';
-import 'package:flutter/foundation.dart';
+import '../data/repositories/family_repository.dart';
+import '../utils/logger.dart';
 
 class ExcelImportService {
   final ParticipantRepository _participantRepository;
+  final FamilyRepository _familyRepository;
 
-  ExcelImportService(this._participantRepository);
+  ExcelImportService(this._participantRepository, this._familyRepository);
   Future<ExcelImportResult> importParticipantsFromExcel({
-    required String filePath,
-    required int eventId,
-  }) async {
-    final result = ExcelImportResult();
-
-    try {
-      final bytes = File(filePath).readAsBytesSync();
-      final excel = Excel.decodeBytes(bytes);
-      final sheet = excel.tables[excel.tables.keys.first];
-
-      if (sheet == null) {
-        result.errors.add('Excel-Datei enthält keine Tabellen');
-        return result;
-      }
-
-      // TEMPORÄR: Debug-Ausgabe aller Header und ersten Datenzeile
-      final headerRow = sheet.rows[0];
-      final dataRow = sheet.rows[1];
-
-      StringBuffer debug = StringBuffer();
-      debug.writeln('=== HEADER ROW ===');
-      for (var i = 0; i < headerRow.length; i++) {
-        debug.writeln('[$i]: "${headerRow[i]?.value}"');
-      }
-      debug.writeln('=== DATA ROW 1 ===');
-      for (var i = 0; i < dataRow.length; i++) {
-        debug.writeln('[$i]: "${dataRow[i]?.value}"');
-      }
-
-      result.errors.add(debug.toString());
-      return result;  // Sofort abbrechen
-    }catch (e, stackTrace) {
-      debugPrint('DEBUG: Fatal error: $e');
-      debugPrint('DEBUG: StackTrace: $stackTrace');
-      result.errors.add('Fehler beim Lesen der Excel-Datei: $e');
-    }
-    return result;
-  }
-
-
-
-      /// Import participants from Excel file
-  Future<ExcelImportResult> _BACKUP_importParticipantsFromExcel({
     required String filePath,
     required int eventId,
   }) async {
@@ -72,8 +31,13 @@ class ExcelImportService {
       final headerRow = sheet.rows[0];
       final columnMapping = _buildColumnMapping(headerRow);
 
-      debugPrint('DEBUG: Column Mapping: $columnMapping');
+      AppLogger.info('[ExcelImport] Column Mapping: $columnMapping');
 
+      // PHASE 1: Create families based on Familien-Nr
+      final familyMap = await _createFamilies(sheet, columnMapping, eventId, result);
+      AppLogger.info('[ExcelImport] Created ${familyMap.length} families');
+
+      // PHASE 2: Import participants with family assignments
       // Skip header row (row 0)
       for (var rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
         final row = sheet.rows[rowIndex];
@@ -81,8 +45,6 @@ class ExcelImportService {
         try {
           // Parse row data with dynamic column mapping
           final participantData = _parseRowWithMapping(row, columnMapping, rowIndex);
-
-          debugPrint('DEBUG: Row ${rowIndex + 1} parsed: ${participantData.keys.toList()}');
 
           // Validate required fields
           if (participantData['first_name'] == null ||
@@ -92,6 +54,14 @@ class ExcelImportService {
               'Zeile ${rowIndex + 1}: Vorname, Nachname und Geburtsdatum sind erforderlich',
             );
             continue;
+          }
+
+          // Get family ID if Familien-Nr exists
+          int? familyId;
+          if (participantData.containsKey('family_number') &&
+              participantData['family_number'] != null) {
+            final familyNumber = participantData['family_number'].toString();
+            familyId = familyMap[familyNumber];
           }
 
           // Create participant
@@ -113,26 +83,97 @@ class ExcelImportService {
             dietaryRestrictions: participantData['dietary_restrictions'] as String?,
             swimAbility: participantData['swim_ability'] as String?,
             notes: participantData['notes'] as String?,
+            familyId: familyId,
           );
 
           result.successCount++;
-          debugPrint('DEBUG: Participant created successfully: ${participantData['first_name']} ${participantData['last_name']}');
+          AppLogger.debug('[ExcelImport] Participant created: ${participantData['first_name']} ${participantData['last_name']}${familyId != null ? ' (Familie ID: $familyId)' : ''}');
         } catch (e, stackTrace) {
-          debugPrint('DEBUG: Error in row ${rowIndex + 1}: $e');
-          debugPrint('DEBUG: StackTrace: $stackTrace');
+          AppLogger.error('[ExcelImport] Error in row ${rowIndex + 1}', error: e, stackTrace: stackTrace);
           result.errors.add('Zeile ${rowIndex + 1}: $e');
         }
       }
 
       result.totalRows = sheet.maxRows - 1; // Exclude header
     } catch (e, stackTrace) {
-      debugPrint('DEBUG: Fatal error: $e');
-      debugPrint('DEBUG: StackTrace: $stackTrace');
+      AppLogger.error('[ExcelImport] Fatal error during import', error: e, stackTrace: stackTrace);
       result.errors.add('Fehler beim Lesen der Excel-Datei: $e');
     }
 
     return result;
   }
+
+  /// Create families based on Familien-Nr column
+  /// Returns a map of family_number -> family_id
+  Future<Map<String, int>> _createFamilies(
+    Sheet sheet,
+    Map<String, int> columnMapping,
+    int eventId,
+    ExcelImportResult result,
+  ) async {
+    final familyMap = <String, int>{};
+
+    // Return early if no family column
+    if (!columnMapping.containsKey('family_number')) {
+      AppLogger.info('[ExcelImport] No Familien-Nr column found');
+      return familyMap;
+    }
+
+    // Group rows by family number and track first person name
+    final familyGroups = <String, String>{};  // family_number -> first_person_name
+
+    for (var rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
+      final row = sheet.rows[rowIndex];
+      final familyNumberCell = _getCellValue(row, columnMapping['family_number']!);
+
+      if (familyNumberCell != null && familyNumberCell.isNotEmpty) {
+        final familyNumber = familyNumberCell.toString().trim();
+
+        // Skip if already processed
+        if (familyGroups.containsKey(familyNumber)) {
+          continue;
+        }
+
+        // Get first person's name for family name
+        String? firstName;
+        String? lastName;
+
+        if (columnMapping.containsKey('first_name')) {
+          firstName = _getCellValue(row, columnMapping['first_name']!);
+        }
+        if (columnMapping.containsKey('last_name')) {
+          lastName = _getCellValue(row, columnMapping['last_name']!);
+        }
+
+        if (firstName != null && lastName != null) {
+          familyGroups[familyNumber] = '$firstName $lastName';
+        }
+      }
+    }
+
+    // Create families
+    for (var entry in familyGroups.entries) {
+      final familyNumber = entry.key;
+      final firstPersonName = entry.value;
+      final familyName = 'Familie $firstPersonName';
+
+      try {
+        final familyId = await _familyRepository.createFamily(
+          eventId: eventId,
+          familyName: familyName,
+        );
+
+        familyMap[familyNumber] = familyId;
+        AppLogger.info('[ExcelImport] Created family: $familyName (Nr: $familyNumber, ID: $familyId)');
+      } catch (e) {
+        AppLogger.error('[ExcelImport] Failed to create family for number $familyNumber', error: e);
+        result.errors.add('Fehler beim Erstellen der Familie "$familyName": $e');
+      }
+    }
+
+    return familyMap;
+  }
+
 
   /// Build column mapping from header row
   Map<String, int> _buildColumnMapping(List<Data?> headerRow) {
@@ -180,8 +221,8 @@ class ExcelImportService {
         mapping['swim_ability'] = i;
       } else if (headerName.contains('notiz') || headerName.contains('bemerkung')) {
         mapping['notes'] = i;
-      } else if (headerName.contains('familie')) {
-        // Ignore family column for now
+      } else if (headerName.contains('familie') && (headerName.contains('nr') || headerName.contains('nummer'))) {
+        mapping['family_number'] = i;
       }
     }
 
@@ -267,6 +308,10 @@ class ExcelImportService {
 
     if (columnMapping.containsKey('notes')) {
       data['notes'] = _getCellValue(row, columnMapping['notes']!);
+    }
+
+    if (columnMapping.containsKey('family_number')) {
+      data['family_number'] = _getCellValue(row, columnMapping['family_number']!);
     }
 
     return data;
@@ -410,6 +455,7 @@ class ExcelImportService {
       'Nachname *',
       'Geburtsdatum * (TT.MM.JJJJ)',
       'Geschlecht',
+      'Familien-Nr',
       'Straße und Hausnummer',
       'PLZ',
       'Stadt',
@@ -429,29 +475,18 @@ class ExcelImportService {
           TextCellValue(headers[i]);
     }
 
-    // Example row
+    // Example rows (family with 2 members + 1 single person)
     final exampleData = [
-      'Max',
-      'Mustermann',
-      '15.06.2010',
-      'Männlich',
-      'Musterstraße 42',
-      '12345',
-      'Musterstadt',
-      'max@example.com',
-      '0123456789',
-      'Maria Mustermann',
-      '0123456789',
-      'Erdnüsse',
-      'Keine',
-      'Vegetarisch',
-      'Schwimmer',
-      'Spielt gerne Fußball',
+      ['Max', 'Mustermann', '15.06.2010', 'Männlich', '1', 'Musterstraße 42', '12345', 'Musterstadt', 'max@example.com', '0123456789', 'Maria Mustermann', '0123456789', 'Erdnüsse', 'Keine', 'Vegetarisch', 'Schwimmer', 'Spielt gerne Fußball'],
+      ['Anna', 'Mustermann', '10.03.2012', 'Weiblich', '1', 'Musterstraße 42', '12345', 'Musterstadt', 'anna@example.com', '0123456789', 'Maria Mustermann', '0123456789', '', 'Keine', '', 'Seepferdchen', ''],
+      ['Lisa', 'Schmidt', '22.08.2011', 'Weiblich', '', 'Beispielweg 7', '54321', 'Beispielstadt', 'lisa@example.com', '9876543210', 'Peter Schmidt', '9876543210', '', 'Keine', '', 'Schwimmer', ''],
     ];
 
-    for (var i = 0; i < exampleData.length; i++) {
-      sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 1)).value =
-          TextCellValue(exampleData[i]);
+    for (var rowIndex = 0; rowIndex < exampleData.length; rowIndex++) {
+      for (var colIndex = 0; colIndex < exampleData[rowIndex].length; colIndex++) {
+        sheet.cell(CellIndex.indexByColumnRow(columnIndex: colIndex, rowIndex: rowIndex + 1)).value =
+            TextCellValue(exampleData[rowIndex][colIndex]);
+      }
     }
 
     // Save file
