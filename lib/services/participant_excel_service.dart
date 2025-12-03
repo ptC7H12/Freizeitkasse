@@ -5,13 +5,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../data/database/app_database.dart';
 import '../data/repositories/participant_repository.dart';
+import '../data/repositories/family_repository.dart';
 import '../utils/logger.dart';
 
 /// Service für Excel-Import/Export von Teilnehmern
 class ParticipantExcelService {
-  final ParticipantRepository _repository;
+  final ParticipantRepository _participantRepository;
+  final FamilyRepository _familyRepository;
 
-  ParticipantExcelService(this._repository);
+  ParticipantExcelService(this._participantRepository, this._familyRepository);
 
   /// Exportiere Teilnehmer als Excel
   Future<File> exportParticipants({
@@ -349,7 +351,7 @@ class ParticipantExcelService {
           }
 
           // Teilnehmer erstellen
-          await _repository.createParticipant(
+          await _participantRepository.createParticipant(
             eventId: eventId,
             firstName: firstName,
             lastName: lastName,
@@ -620,9 +622,9 @@ class ParticipantExcelService {
 
       try {
         // Create family in database
-        final familyId = await _repository.createFamily(
+        final familyId = await _familyRepository.createFamily(
           eventId: eventId,
-          name: familyName,
+          familyName: familyName,
         );
 
         familyMap[familyNumber] = familyId;
