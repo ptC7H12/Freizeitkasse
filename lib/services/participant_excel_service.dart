@@ -169,8 +169,23 @@ class ParticipantExcelService {
       AppLogger.debug('[ParticipantExcelService] File size: ${bytes.length} bytes');
 
       AppLogger.info('[ParticipantExcelService] Decoding Excel...');
-      final excel = Excel.decodeBytes(bytes);
-      AppLogger.info('[ParticipantExcelService] Excel decoded. Found ${excel.tables.length} sheets');
+      Excel excel;
+      try {
+        excel = Excel.decodeBytes(bytes);
+        AppLogger.info('[ParticipantExcelService] Excel decoded. Found ${excel.tables.length} sheets');
+      } catch (e, stackTrace) {
+        AppLogger.error('[ParticipantExcelService] Failed to decode Excel file', error: e, stackTrace: stackTrace);
+        return ImportResult(
+          success: false,
+          message: 'Die Excel-Datei konnte nicht gelesen werden. '
+              'Bitte stellen Sie sicher, dass:\n'
+              '1. Die Datei im .xlsx Format ist (nicht .xls)\n'
+              '2. Die Datei keine beschädigten Zellen enthält\n'
+              '3. Alle Zellen einfache Werte enthalten (keine Formeln)\n'
+              '4. Die Datei in Excel geöffnet und erneut gespeichert wurde\n\n'
+              'Fehlerdetails: $e',
+        );
+      }
 
       if (excel.tables.isEmpty) {
         AppLogger.error('[ParticipantExcelService] Excel file contains no tables');
