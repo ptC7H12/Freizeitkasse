@@ -408,14 +408,24 @@ class _ParticipantFormScreenState
   }
 
   Widget _buildGenderDropdown() {
-    return DropdownButtonFormField<String>(
-      initialValue: _gender,
+    return DropdownButtonFormField<String?>(
+      value: _gender?.isEmpty ?? true ? null : _gender,
       decoration: const InputDecoration(
         labelText: 'Geschlecht',
       ),
       items: const [
-        DropdownMenuItem(value: 'Männlich', child: Text('Männlich')),
-        DropdownMenuItem(value: 'Weiblich', child: Text('Weiblich')),
+        DropdownMenuItem<String?>(
+          value: null,
+          child: Text('Keine Angabe'),
+        ),
+        DropdownMenuItem<String?>(
+          value: 'Männlich',
+          child: Text('Männlich'),
+        ),
+        DropdownMenuItem<String?>(
+          value: 'Weiblich',
+          child: Text('Weiblich'),
+        ),
       ],
       onChanged: (value) {
         setState(() {
@@ -426,19 +436,19 @@ class _ParticipantFormScreenState
   }
 
   Widget _buildSwimAbilityDropdown() {
-    return DropdownButtonFormField<String>(
-      initialValue: _swimAbility,
+    return DropdownButtonFormField<String?>(
+      value: _swimAbility?.isEmpty ?? true ? null : _swimAbility,
       decoration: const InputDecoration(
         labelText: 'Schwimmfähigkeit',
         hintText: 'Bitte auswählen',
       ),
       items: [
-        const DropdownMenuItem(
+        const DropdownMenuItem<String?>(
           value: null,
           child: Text('Nicht angegeben'),
         ),
         ...AppConstants.swimAbilities.map(
-          (ability) => DropdownMenuItem(
+          (ability) => DropdownMenuItem<String?>(
             value: ability,
             child: Text(ability),
           ),
