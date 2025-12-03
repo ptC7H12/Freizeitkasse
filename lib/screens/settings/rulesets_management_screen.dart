@@ -149,6 +149,13 @@ class _RulesetsManagementScreenState
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    if (!isActive)
+                      IconButton(
+                        icon: const Icon(Icons.play_circle_outline, size: 20),
+                        onPressed: () => _activateRuleset(ruleset),
+                        tooltip: 'Aktivieren',
+                        color: Colors.green,
+                      ),
                     IconButton(
                       icon: const Icon(Icons.visibility, size: 20),
                       onPressed: () => _showRulesetPreview(ruleset),
@@ -380,6 +387,108 @@ class _RulesetsManagementScreenState
         ],
       ),
     );
+  }
+
+  Future<void> _activateRuleset(Ruleset ruleset) async {
+    // Confirm activation
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Regelwerk aktivieren?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Möchten Sie das Regelwerk "${ruleset.name}" aktivieren?'),
+            const SizedBox(height: 16),
+            const Text(
+              'Dies wird:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text('• Alle anderen Regelwerke deaktivieren'),
+            const Text('• Alle Teilnehmerpreise neu berechnen'),
+            const SizedBox(height: 16),
+            const Text(
+              'Hinweis: Teilnehmer mit manuellen Preisen werden übersprungen.',
+              style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Aktivieren'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final repository = ref.read(rulesetRepositoryProvider);
+
+      // Show loading indicator
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Regelwerk wird aktiviert...'),
+                    Text('Preise werden neu berechnet...', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await repository.activateRuleset(ruleset.id);
+
+      // Close loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Regelwerk "${ruleset.name}" wurde aktiviert'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog if open
+      if (mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+
+      // Show error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Fehler beim Aktivieren: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showRulesetPreview(Ruleset ruleset) {

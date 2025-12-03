@@ -1,11 +1,14 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../../services/ruleset_parser_service.dart';
+import '../../utils/logger.dart';
+import 'participant_repository.dart';
 
 class RulesetRepository {
   final AppDatabase _database;
+  final ParticipantRepository? _participantRepository;
 
-  RulesetRepository(this._database);
+  RulesetRepository(this._database, [this._participantRepository]);
 
   /// Get all rulesets for a specific event
   Stream<List<Ruleset>> watchRulesetsByEvent(int eventId) {
@@ -61,6 +64,7 @@ class RulesetRepository {
     required String name,
     required String yamlContent,
     required DateTime validFrom,
+    DateTime? validUntil,
     String? description,
   }) async {
     // Validate YAML content
@@ -75,6 +79,7 @@ class RulesetRepository {
       name: Value(name),
       yamlContent: Value(yamlContent),
       validFrom: Value(validFrom),
+      validUntil: Value(validUntil),
       description: Value(description),
       isActive: const Value(true),
       createdAt: Value(DateTime.now()),
@@ -254,5 +259,98 @@ family_discount:
     - children_count: 4
       discount_percent: 20.0
 ''';
+  }
+
+  /// Activate a ruleset and deactivate all others for the same event
+  ///
+  /// This will:
+  /// 1. Deactivate all other rulesets for the event
+  /// 2. Activate the selected ruleset
+  /// 3. Recalculate all participant prices with the new ruleset
+  Future<void> activateRuleset(int rulesetId) async {
+    AppLogger.info('[RulesetRepository] Activating ruleset $rulesetId');
+
+    // Get the ruleset to activate
+    final ruleset = await (_database.select(_database.rulesets)
+          ..where((t) => t.id.equals(rulesetId)))
+        .getSingleOrNull();
+
+    if (ruleset == null) {
+      throw Exception('Ruleset $rulesetId not found');
+    }
+
+    final eventId = ruleset.eventId;
+
+    // Step 1: Deactivate all rulesets for this event
+    await (_database.update(_database.rulesets)
+          ..where((t) => t.eventId.equals(eventId)))
+        .write(
+      RulesetsCompanion(
+        isActive: const Value(false),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+
+    AppLogger.info('[RulesetRepository] Deactivated all rulesets for event $eventId');
+
+    // Step 2: Activate the selected ruleset
+    await (_database.update(_database.rulesets)
+          ..where((t) => t.id.equals(rulesetId)))
+        .write(
+      RulesetsCompanion(
+        isActive: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+
+    AppLogger.info('[RulesetRepository] Activated ruleset $rulesetId');
+
+    // Step 3: Recalculate all participant prices
+    if (_participantRepository != null) {
+      await _recalculateAllParticipantPrices(eventId);
+      AppLogger.info('[RulesetRepository] Recalculated all participant prices for event $eventId');
+    } else {
+      AppLogger.warning('[RulesetRepository] ParticipantRepository not provided, skipping price recalculation');
+    }
+  }
+
+  /// Recalculate prices for all participants in an event
+  Future<void> _recalculateAllParticipantPrices(int eventId) async {
+    if (_participantRepository == null) return;
+
+    AppLogger.info('[RulesetRepository] Recalculating all participant prices for event $eventId');
+
+    // Get all active participants for the event
+    final participants = await (_database.select(_database.participants)
+          ..where((tbl) => tbl.eventId.equals(eventId))
+          ..where((tbl) => tbl.isActive.equals(true)))
+        .get();
+
+    AppLogger.info('[RulesetRepository] Found ${participants.length} participants to recalculate');
+
+    int recalculatedCount = 0;
+    int skippedCount = 0;
+
+    for (var participant in participants) {
+      // Skip participants with manual price override
+      if (participant.manualPriceOverride != null) {
+        AppLogger.debug('[RulesetRepository] Skipping ${participant.firstName} ${participant.lastName} (manual price override)');
+        skippedCount++;
+        continue;
+      }
+
+      try {
+        // Use the updateParticipant method to recalculate price
+        await _participantRepository!.updateParticipant(
+          id: participant.id,
+          recalculatePrice: true,
+        );
+        recalculatedCount++;
+      } catch (e) {
+        AppLogger.error('[RulesetRepository] Failed to recalculate price for participant ${participant.id}', error: e);
+      }
+    }
+
+    AppLogger.info('[RulesetRepository] Price recalculation complete: $recalculatedCount recalculated, $skippedCount skipped');
   }
 }

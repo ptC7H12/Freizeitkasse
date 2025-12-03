@@ -344,10 +344,23 @@ class ParticipantRepository {
           ..where((tbl) => tbl.eventId.equals(eventId))
           ..where((tbl) => tbl.isActive.equals(true))
           ..where((tbl) => tbl.validFrom.isSmallerOrEqualValue(event.startDate))
-          ..where((tbl) => tbl.validUntil.isBiggerOrEqualValue(event.startDate)))
+          ..where((tbl) =>
+              tbl.validUntil.isNull() |
+              tbl.validUntil.isBiggerOrEqualValue(event.startDate)))
         .getSingleOrNull();
 
     if (ruleset == null) {
+      AppLogger.error('[ParticipantRepository] Kein aktives Regelwerk gefunden für Event $eventId (startDate: ${event.startDate})');
+
+      // Debug: Alle Rulesets für Event anzeigen
+      final allRulesets = await (_db.select(_db.rulesets)
+            ..where((tbl) => tbl.eventId.equals(eventId)))
+          .get();
+      AppLogger.debug('[ParticipantRepository] Verfügbare Rulesets: ${allRulesets.length}');
+      for (var r in allRulesets) {
+        AppLogger.debug('[ParticipantRepository] - ${r.name}: isActive=${r.isActive}, validFrom=${r.validFrom}, validUntil=${r.validUntil}');
+      }
+
       return 0.0;
     }
 

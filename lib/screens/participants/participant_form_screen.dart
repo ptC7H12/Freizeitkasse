@@ -467,19 +467,19 @@ class _ParticipantFormScreenState
       builder: (context, snapshot) {
         final roles = snapshot.data ?? [];
 
-        return DropdownButtonFormField<int>(
-          initialValue: _selectedRoleId,
+        return DropdownButtonFormField<int?>(
+          value: _selectedRoleId,
           decoration: const InputDecoration(
             labelText: 'Rolle',
             hintText: 'Keine Rolle',
           ),
           items: [
-            const DropdownMenuItem(
+            const DropdownMenuItem<int?>(
               value: null,
               child: Text('Keine Rolle'),
             ),
             ...roles.map(
-              (role) => DropdownMenuItem(
+              (role) => DropdownMenuItem<int?>(
                 value: role.id,
                 child: Text(role.displayName),
               ),
@@ -510,19 +510,19 @@ class _ParticipantFormScreenState
       builder: (context, snapshot) {
         final families = snapshot.data ?? [];
 
-        return DropdownButtonFormField<int>(
-          initialValue: _selectedFamilyId,
+        return DropdownButtonFormField<int?>(
+          value: _selectedFamilyId,
           decoration: const InputDecoration(
             labelText: 'Familie',
             hintText: 'Keine Familie',
           ),
           items: [
-            const DropdownMenuItem(
+            const DropdownMenuItem<int?>(
               value: null,
               child: Text('Keine Familie'),
             ),
             ...families.map(
-              (family) => DropdownMenuItem(
+              (family) => DropdownMenuItem<int?>(
                 value: family.id,
                 child: Text(family.familyName),
               ),

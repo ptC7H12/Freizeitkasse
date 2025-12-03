@@ -3,11 +3,13 @@ import '../data/database/app_database.dart';
 import '../data/repositories/ruleset_repository.dart';
 import 'database_provider.dart';
 import 'current_event_provider.dart';
+import 'participant_provider.dart';
 
 /// Provider for RulesetRepository
 final rulesetRepositoryProvider = Provider<RulesetRepository>((ref) {
   final database = ref.watch(databaseProvider);
-  return RulesetRepository(database);
+  final participantRepository = ref.watch(participantRepositoryProvider);
+  return RulesetRepository(database, participantRepository);
 });
 
 /// Provider for watching rulesets for the current event
