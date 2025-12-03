@@ -103,8 +103,6 @@ class _GeneralSettingsTab extends ConsumerStatefulWidget {
 }
 
 class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
-  //final _formKey = GlobalKey<FormState>();
-
   // Form Controllers
   final _organizationController = TextEditingController();
   final _addressController = TextEditingController();
@@ -114,6 +112,14 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
   final _accountHolderController = TextEditingController();
   final _subjectController = TextEditingController();
   final _footerController = TextEditingController();
+
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
 
   @override
   void dispose() {
@@ -126,6 +132,79 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
     _subjectController.dispose();
     _footerController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSettings() async {
+    final currentEvent = ref.read(currentEventProvider);
+    if (currentEvent == null) return;
+
+    final repository = ref.read(settingsRepositoryProvider);
+    final settings = await repository.getOrCreateSettings(currentEvent.id);
+
+    if (mounted) {
+      setState(() {
+        _organizationController.text = settings.organizationName ?? '';
+        _addressController.text = settings.organizationStreet ?? '';
+        // _contactController could map to a new field or be stored in city temporarily
+        _ibanController.text = settings.iban ?? '';
+        _bicController.text = settings.bic ?? '';
+        _accountHolderController.text = settings.bankName ?? '';
+        _footerController.text = settings.invoiceFooter ?? '';
+      });
+    }
+  }
+
+  Future<void> _saveSettings() async {
+    final currentEvent = ref.read(currentEventProvider);
+    if (currentEvent == null) {
+      if (mounted) {
+        context.showError('Kein Event ausgewählt');
+      }
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final repository = ref.read(settingsRepositoryProvider);
+      await repository.updateSettings(
+        eventId: currentEvent.id,
+        organizationName: _organizationController.text.trim().isEmpty
+            ? null
+            : _organizationController.text.trim(),
+        organizationStreet: _addressController.text.trim().isEmpty
+            ? null
+            : _addressController.text.trim(),
+        iban: _ibanController.text.trim().isEmpty
+            ? null
+            : _ibanController.text.trim(),
+        bic: _bicController.text.trim().isEmpty
+            ? null
+            : _bicController.text.trim(),
+        bankName: _accountHolderController.text.trim().isEmpty
+            ? null
+            : _accountHolderController.text.trim(),
+        invoiceFooter: _footerController.text.trim().isEmpty
+            ? null
+            : _footerController.text.trim(),
+      );
+
+      if (mounted) {
+        context.showSuccess('Einstellungen erfolgreich gespeichert');
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showError('Fehler beim Speichern: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -283,17 +362,15 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
 
         // Speichern Button
         ElevatedButton.icon(
-          onPressed: () {
-            // TODO: Implement save functionality
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Speichern-Funktion wird noch implementiert'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          },
-          icon: const Icon(Icons.save),
-          label: const Text('Speichern'),
+          onPressed: _isLoading ? null : _saveSettings,
+          icon: _isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.save),
+          label: Text(_isLoading ? 'Wird gespeichert...' : 'Speichern'),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.all(16),
           ),

@@ -596,20 +596,41 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(
-                            leading: CircleAvatar(
-                              child: Text(
-                                participant.firstName[0].toUpperCase(),
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
+                            leading: const Icon(
+                              Icons.person,
+                              size: 40,
                             ),
                             title: Text(
-                              '${participant.firstName} ${participant.lastName}',
+                              '${participant.lastName}, ${participant.firstName}',
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 4),
+                                // Familie-Info (wenn vorhanden)
+                                if (participant.familyId != null)
+                                  FutureBuilder(
+                                    future: ref.read(databaseProvider).select(ref.read(databaseProvider).families)
+                                      .get()
+                                      .then((families) => families.where((f) => f.id == participant.familyId).firstOrNull),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData && snapshot.data != null) {
+                                        return Padding(
+                                          padding: const EdgeInsets.only(bottom: 2),
+                                          child: Text(
+                                            snapshot.data!.familyName,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600],
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      return const SizedBox.shrink();
+                                    },
+                                  ),
                                 Text(
                                   'Geb.: ${AppDateUtils.formatGerman(participant.birthDate)} (${AppDateUtils.calculateAge(participant.birthDate)} Jahre)',
                                 ),
