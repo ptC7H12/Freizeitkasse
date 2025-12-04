@@ -6,6 +6,7 @@ import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/income_provider.dart';
+import '../../providers/subsidy_provider.dart';
 /// import '../../providers/payment_provider.dart';
 /// import '../../providers/participant_provider.dart';
 import '../../providers/pdf_export_provider.dart';
@@ -1608,6 +1609,9 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   }
 
   Widget _buildSollSection(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
+    // Erwartete Zuschüsse aus SubsidyProvider
+    final expectedSubsidiesAsync = ref.watch(expectedSubsidiesProvider);
+
     return StreamBuilder<List<db.Participant>>(
       stream: (database.select(database.participants)
             ..where((tbl) => tbl.eventId.equals(eventId))
@@ -1620,17 +1624,17 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
           (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
         );
 
-        return StreamBuilder<List<db.Income>>(
-          stream: (database.select(database.incomes)
-                ..where((tbl) => tbl.eventId.equals(eventId))
-                ..where((tbl) => tbl.isActive.equals(true)))
-              .watch(),
-          builder: (context, incomeSnapshot) {
-            final incomes = incomeSnapshot.data ?? [];
-            final sonstigeEinnahmen = incomes.fold<double>(
-              0.0,
-              (sum, income) => sum + income.amount,
-            );
+        return expectedSubsidiesAsync.when(
+          data: (sonstigeEinnahmen) {
+            // Sonstige Einnahmen = Erwartete Zuschüsse (SOLL)
+            return StreamBuilder<List<db.Income>>(
+              stream: (database.select(database.incomes)
+                    ..where((tbl) => tbl.eventId.equals(eventId))
+                    ..where((tbl) => tbl.isActive.equals(true)))
+                  .watch(),
+              builder: (context, incomeSnapshot) {
+                // Incomes werden hier nicht mehr für SOLL benötigt,
+                // sondern nur für IST-Werte (bereits erhaltene Zuschüsse)
 
             return StreamBuilder<List<db.Expense>>(
               stream: (database.select(database.expenses)
@@ -1662,6 +1666,66 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                       sonstigeEinnahmen,
                       'Zuschüsse',
                       const Color(0xFF4CAF50),
+                    ),
+                    const SizedBox(height: AppConstants.spacingS),
+                    _buildStatRow(
+                      context,
+                      'Ausgaben',
+                      ausgaben,
+                      null,
+                      const Color(0xFFE91E63),
+                    ),
+                    const Divider(height: 24),
+                    _buildStatRow(
+                      context,
+                      'Saldo',
+                      saldo,
+                      null,
+                      saldo >= 0 ? const Color(0xFF4CAF50) : const Color(0xFFE91E63),
+                      isBold: true,
+                    ),
+                      ],
+                    );
+                  },
+                );
+              },
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) {
+            // Fehler beim Laden der erwarteten Zuschüsse - Fallback: 0.0
+            final sonstigeEinnahmen = 0.0;
+
+            return StreamBuilder<List<db.Expense>>(
+              stream: (database.select(database.expenses)
+                    ..where((tbl) => tbl.eventId.equals(eventId))
+                    ..where((tbl) => tbl.isActive.equals(true)))
+                  .watch(),
+              builder: (context, expenseSnapshot) {
+                final expenses = expenseSnapshot.data ?? [];
+                final ausgaben = expenses.fold<double>(
+                  0.0,
+                  (sum, expense) => sum + expense.amount,
+                );
+
+                final saldo = einnahmenTeilnehmer + sonstigeEinnahmen - ausgaben;
+
+                return Column(
+                  children: [
+                    _buildStatRow(
+                      context,
+                      'Einnahmen (Teilnehmer)',
+                      einnahmenTeilnehmer,
+                      'Teilnahmegebühren',
+                      const Color(0xFF2196F3),
+                    ),
+                    const SizedBox(height: AppConstants.spacingS),
+                    _buildStatRow(
+                      context,
+                      'Sonstige Einnahmen',
+                      sonstigeEinnahmen,
+                      'Zuschüsse (Fehler beim Laden)',
+                      const Color(0xFFFF9800),
                     ),
                     const SizedBox(height: AppConstants.spacingS),
                     _buildStatRow(
