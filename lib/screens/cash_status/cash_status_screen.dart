@@ -1256,41 +1256,224 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
   // ========== TAB 3: ZUSCHÜSSE ==========
   Widget _buildSubsidiesTab(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
-    return StreamBuilder<List<db.Participant>>(
-      stream: (database.select(database.participants)
-            ..where((tbl) => tbl.eventId.equals(eventId))
-            ..where((tbl) => tbl.isActive.equals(true)))
-          .watch(),
-      builder: (context, participantSnapshot) {
-        if (!participantSnapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    // Nutze SubsidyProvider für korrekte Berechnungen
+    final subsidiesByRoleAsync = ref.watch(subsidiesByRoleProvider);
+    final subsidiesByDiscountTypeAsync = ref.watch(subsidiesByDiscountTypeProvider);
+    final expectedSubsidiesAsync = ref.watch(expectedSubsidiesProvider);
 
-        return StreamBuilder<List<db.Role>>(
-          stream: (database.select(database.roles)
-                ..where((tbl) => tbl.eventId.equals(eventId)))
-              .watch(),
-          builder: (context, roleSnapshot) {
-            if (!roleSnapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    return ListView(
+      padding: AppConstants.paddingAll16,
+      children: [
+        // Gesamtübersicht Card
+        expectedSubsidiesAsync.when(
+          data: (totalSubsidies) => Card(
+            elevation: 2,
+            color: const Color(0xFFF0F7FF),
+            child: Padding(
+              padding: AppConstants.paddingAll16,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.euro, color: Color(0xFF2196F3), size: 24),
+                      SizedBox(width: AppConstants.spacingS),
+                      Text(
+                        'Erwartete Zuschüsse (Gesamt)',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    NumberFormat.currency(locale: 'de_DE', symbol: '€').format(totalSubsidies),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4CAF50),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          loading: () => const Card(
+            child: Padding(
+              padding: AppConstants.paddingAll16,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          ),
+          error: (error, stack) => Card(
+            child: Padding(
+              padding: AppConstants.paddingAll16,
+              child: Text('Fehler beim Laden der Zuschüsse: $error'),
+            ),
+          ),
+        ),
 
-            final participants = participantSnapshot.data!;
-            final roles = roleSnapshot.data!;
+        const SizedBox(height: AppConstants.spacing),
 
-            // Nur Teilnehmer OHNE manualPriceOverride (regelwerk-basierte Preise)
-            final rulesetParticipants = participants
-                .where((p) => p.manualPriceOverride == null && p.discountPercent > 0)
-                .toList();
+        // Zuschüsse nach Rolle
+        Card(
+          child: Padding(
+            padding: AppConstants.paddingAll16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.groups, color: Color(0xFF2196F3), size: 20),
+                    SizedBox(width: AppConstants.spacingS),
+                    Text(
+                      'Zuschüsse nach Rolle',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacing),
 
-            return _buildSubsidiesContent(context, rulesetParticipants, roles);
-          },
-        );
-      },
+                subsidiesByRoleAsync.when(
+                  data: (subsidiesByRole) {
+                    if (subsidiesByRole.isEmpty) {
+                      return const Text(
+                        'Keine rollenbasierten Zuschüsse gefunden',
+                        style: TextStyle(color: Colors.grey),
+                      );
+                    }
+
+                    return DataTable(
+                      columnSpacing: 24,
+                      headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
+                      columns: const [
+                        DataColumn(label: Text('Rolle', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                        DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                        DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                      ],
+                      rows: subsidiesByRole.values.map((roleData) {
+                        return DataRow(
+                          cells: [
+                            DataCell(Text(roleData.roleName)),
+                            DataCell(Text('${roleData.discountPercent.toStringAsFixed(0)}%')),
+                            DataCell(Text('${roleData.participantCount}')),
+                            DataCell(
+                              Text(
+                                NumberFormat.currency(locale: 'de_DE', symbol: '€').format(roleData.totalSubsidy),
+                                style: const TextStyle(
+                                  color: Color(0xFF4CAF50),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => Text('Fehler: $error'),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppConstants.spacing),
+
+        // Zuschüsse nach Rabatttyp (OHNE BUT!)
+        Card(
+          child: Padding(
+            padding: AppConstants.paddingAll16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.discount, color: Color(0xFFFF9800), size: 20),
+                    SizedBox(width: AppConstants.spacingS),
+                    Text(
+                      'Zuschüsse nach Rabatttyp',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const Text(
+                  'Bildung & Teilhabe (BuT) wird separat abgerechnet',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacing),
+
+                subsidiesByDiscountTypeAsync.when(
+                  data: (subsidiesByType) {
+                    if (subsidiesByType.isEmpty) {
+                      return const Text(
+                        'Keine Zuschüsse gefunden',
+                        style: TextStyle(color: Colors.grey),
+                      );
+                    }
+
+                    return DataTable(
+                      columnSpacing: 24,
+                      headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
+                      columns: const [
+                        DataColumn(label: Text('Rabatttyp', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                        DataColumn(label: Text('Ø Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                        DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                      ],
+                      rows: subsidiesByType.values.map((typeData) {
+                        return DataRow(
+                          cells: [
+                            DataCell(Text(typeData.discountType)),
+                            DataCell(Text('${typeData.participantCount}')),
+                            DataCell(Text('${typeData.avgDiscountPercent.toStringAsFixed(1)}%')),
+                            DataCell(
+                              Text(
+                                NumberFormat.currency(locale: 'de_DE', symbol: '€').format(typeData.totalSubsidy),
+                                style: const TextStyle(
+                                  color: Color(0xFF4CAF50),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => Text('Fehler: $error'),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppConstants.spacing),
+
+        // TODO: Export-Buttons (PDF/Excel) für Zuschussanträge
+        // wird im nächsten Schritt implementiert
+      ],
     );
   }
 
-  Widget _buildSubsidiesContent(BuildContext context, List<db.Participant> participants, List<db.Role> roles) {
+  // [ALTE METHODE ENTFERNT]
+  // _buildSubsidiesContent wurde ersetzt durch die neue Implementierung in _buildSubsidiesTab
+  // Die neue Version nutzt SubsidyProvider mit korrekter Berechnungslogik
+
+  Widget _buildSubsidiesContent_OLD_DEPRECATED(BuildContext context, List<db.Participant> participants, List<db.Role> roles) {
     // Helper: Berechne Zuschuss-Betrag
     double calculateSubsidy(db.Participant p) {
       if (p.discountPercent <= 0) {
