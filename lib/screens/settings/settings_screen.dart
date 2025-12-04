@@ -682,7 +682,7 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                     labelText: 'Pfad zum Regelwerk',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.link),
-                    hintText: 'https://github.com/ptC7H12/MGBFreizeitplaner/tree/main/rulesets/valid',
+                    hintText: 'https://raw.githubusercontent.com/ptC7H12/Freizeitkasse/master/rulesets/valid',
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingS),
