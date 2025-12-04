@@ -337,7 +337,6 @@ class DashboardScreen extends ConsumerWidget {
                         );
                       },
                     ),
-                  ),
 
                   const Divider(height: 32),
 

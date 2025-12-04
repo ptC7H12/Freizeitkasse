@@ -1,3 +1,4 @@
+import 'dart:convert';
 import '../data/database/app_database.dart';
 import '../utils/logger.dart';
 
@@ -93,10 +94,18 @@ class SubsidyCalculatorService {
       return 0.0;
     }
 
+    // Parse JSON string to Map
+    final roleDiscountsMap = jsonDecode(ruleset.roleDiscounts!) as Map<String, dynamic>;
+
+    if (roleDiscountsMap.isEmpty) {
+      AppLogger.debug('  → Keine Rollenrabatte im Ruleset definiert');
+      return 0.0;
+    }
+
     double totalRoleSubsidies = 0.0;
 
     // Iteriere über alle Rollenrabatte im Ruleset
-    for (final roleEntry in ruleset.roleDiscounts!.entries) {
+    for (final roleEntry in roleDiscountsMap.entries) {
       final roleName = roleEntry.key;
       final roleConfig = roleEntry.value as Map<String, dynamic>;
 
@@ -133,9 +142,13 @@ class SubsidyCalculatorService {
       );
 
       // Berechne Zuschuss für jeden Teilnehmer
+      final ageGroupsList = ruleset.ageGroups != null && ruleset.ageGroups!.isNotEmpty
+          ? jsonDecode(ruleset.ageGroups!) as List<dynamic>
+          : <dynamic>[];
+
       for (final participant in roleParticipants) {
         final age = _calculateAge(participant.birthDate, event.startDate);
-        final basePrice = _getBasePriceByAge(age, ruleset.ageGroups ?? []);
+        final basePrice = _getBasePriceByAge(age, ageGroupsList);
         final subsidyAmount = basePrice * (discountPercent / 100);
 
         totalRoleSubsidies += subsidyAmount;
@@ -173,8 +186,15 @@ class SubsidyCalculatorService {
   }) {
     AppLogger.debug('[SubsidyCalculatorService] calculateFamilySubsidies()');
 
-    if (ruleset.familyDiscount == null ||
-        ruleset.familyDiscount!['enabled'] != true) {
+    if (ruleset.familyDiscount == null || ruleset.familyDiscount!.isEmpty) {
+      AppLogger.debug('  → Familienrabatt nicht definiert');
+      return 0.0;
+    }
+
+    // Parse JSON string to Map
+    final familyDiscountMap = jsonDecode(ruleset.familyDiscount!) as Map<String, dynamic>;
+
+    if (familyDiscountMap['enabled'] != true) {
       AppLogger.debug('  → Familienrabatt nicht aktiviert');
       return 0.0;
     }
@@ -188,6 +208,12 @@ class SubsidyCalculatorService {
 
     AppLogger.debug('  → Teilnehmer mit Familie: ${familyParticipants.length}');
 
+    // Parse JSON string to Map
+    final familyDiscountMap = jsonDecode(ruleset.familyDiscount!) as Map<String, dynamic>;
+    final ageGroupsList = ruleset.ageGroups != null && ruleset.ageGroups!.isNotEmpty
+        ? jsonDecode(ruleset.ageGroups!) as List<dynamic>
+        : <dynamic>[];
+
     for (final participant in familyParticipants) {
       final age = _calculateAge(participant.birthDate, event.startDate);
 
@@ -200,7 +226,7 @@ class SubsidyCalculatorService {
         continue;
       }
 
-      final basePrice = _getBasePriceByAge(age, ruleset.ageGroups ?? []);
+      final basePrice = _getBasePriceByAge(age, ageGroupsList);
 
       // Position in Familie ermitteln (sortiert nach Geburtsdatum, ältestes = 1)
       final siblings = participants
@@ -216,11 +242,11 @@ class SubsidyCalculatorService {
         }
       }
 
-      // Familienrabatt berechnen (nutzt die Methode aus PriceCalculatorService)
+      // Familienrabatt berechnen
       final familyDiscountPercent = _getFamilyDiscountPercent(
         age,
         childPosition,
-        ruleset.familyDiscount!,
+        familyDiscountMap,
       );
 
       if (familyDiscountPercent <= 0) {
@@ -261,8 +287,11 @@ class SubsidyCalculatorService {
       return subsidiesByRole;
     }
 
+    // Parse JSON string to Map
+    final roleDiscountsMap = jsonDecode(ruleset.roleDiscounts!) as Map<String, dynamic>;
+
     // Iteriere über alle Rollenrabatte
-    for (final roleEntry in ruleset.roleDiscounts!.entries) {
+    for (final roleEntry in roleDiscountsMap.entries) {
       final roleName = roleEntry.key;
       final roleConfig = roleEntry.value as Map<String, dynamic>;
 
@@ -288,9 +317,13 @@ class SubsidyCalculatorService {
       double totalSubsidy = 0.0;
       final List<SubsidyParticipant> participantDetails = [];
 
+      final ageGroupsList = ruleset.ageGroups != null && ruleset.ageGroups!.isNotEmpty
+          ? jsonDecode(ruleset.ageGroups!) as List<dynamic>
+          : <dynamic>[];
+
       for (final participant in roleParticipants) {
         final age = _calculateAge(participant.birthDate, event.startDate);
-        final basePrice = _getBasePriceByAge(age, ruleset.ageGroups ?? []);
+        final basePrice = _getBasePriceByAge(age, ageGroupsList);
         final subsidyAmount = basePrice * (discountPercent / 100);
 
         totalSubsidy += subsidyAmount;
@@ -340,6 +373,10 @@ class SubsidyCalculatorService {
 
     AppLogger.debug('  → Teilnehmer mit Rabatten: ${discountedParticipants.length}');
 
+    final ageGroupsList = ruleset.ageGroups != null && ruleset.ageGroups!.isNotEmpty
+        ? jsonDecode(ruleset.ageGroups!) as List<dynamic>
+        : <dynamic>[];
+
     for (final participant in discountedParticipants) {
       // WICHTIG: Bildung & Teilhabe überspringen!
       if (participant.bildungUndTeilhabe) {
@@ -368,7 +405,7 @@ class SubsidyCalculatorService {
 
       // Zuschuss berechnen
       final age = _calculateAge(participant.birthDate, event.startDate);
-      final basePrice = _getBasePriceByAge(age, ruleset.ageGroups ?? []);
+      final basePrice = _getBasePriceByAge(age, ageGroupsList);
       final subsidyAmount = basePrice * (participant.discountPercent / 100);
 
       // Zu Typ hinzufügen
