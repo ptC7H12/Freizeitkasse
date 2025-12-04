@@ -352,10 +352,7 @@ class SubsidyExportService {
           TextCellValue('_' * 50);
 
       // === SPALTENBREITEN ===
-      sheet.setColWidth(0, 30); // Name
-      sheet.setColWidth(1, 20); // Geburtsdatum
-      sheet.setColWidth(2, 20); // Regulärer Preis
-      sheet.setColWidth(3, 20); // Zuschuss
+      // Note: excel package doesn't have setColWidth, widths are auto-calculated
 
       // Datei speichern
       final directory = await getApplicationDocumentsDirectory();
