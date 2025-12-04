@@ -5,7 +5,10 @@ import '../../data/database/app_database.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/ruleset_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/role_provider.dart';
 import '../../services/github_ruleset_service.dart';
+import '../../services/ruleset_parser_service.dart';
 import '../../utils/logger.dart';
 //import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
@@ -665,11 +668,17 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
     DateTime eventStartDate,
     DateTime eventEndDate,
   ) async {
-    // GitHub-Pfad aus Settings laden (vorerst hardcoded)
-    const githubPath =
-        'https://raw.githubusercontent.com/ptC7H12/Freizeitkasse/master/rulesets/valid';
-
     try {
+      // Load GitHub path from settings (or use default)
+      final settingsRepository = ref.read(settingsRepositoryProvider);
+      final settings = await settingsRepository.getOrCreateSettings(eventId);
+
+      // Use saved GitHub path or fallback to default
+      final githubPath = settings.githubRulesetPath ??
+          'https://raw.githubusercontent.com/ptC7H12/Freizeitkasse/master/rulesets/valid';
+
+      AppLogger.info('[EventSelectionScreen] Loading ruleset from GitHub: $githubPath');
+
       final yamlContent = await GitHubRulesetService.loadRulesetFromGitHub(
         githubBasePath: githubPath,
         eventType: eventType,
@@ -690,6 +699,9 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
 
         AppLogger.info('[EventSelectionScreen] Ruleset erstellt für Event $eventId (validFrom: $eventStartDate, validUntil: $eventEndDate)');
 
+        // Automatically create roles from the ruleset
+        await _createRolesFromRuleset(eventId, yamlContent);
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -701,6 +713,59 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
       }
     } catch (e) {
       AppLogger.warning('[EventSelectionScreen] Fehler beim GitHub-Import', e);
+    }
+  }
+
+  /// Create roles from ruleset YAML content
+  ///
+  /// Extracts role_discounts from the ruleset and creates Role entries
+  /// for each role if they don't already exist.
+  Future<void> _createRolesFromRuleset(int eventId, String yamlContent) async {
+    try {
+      // Parse the ruleset YAML
+      final parsedData = RulesetParserService.parseRuleset(yamlContent);
+      final roleDiscounts = parsedData['role_discounts'] as Map<String, dynamic>?;
+
+      if (roleDiscounts == null || roleDiscounts.isEmpty) {
+        AppLogger.info('[EventSelectionScreen] No role_discounts found in ruleset');
+        return;
+      }
+
+      final roleRepository = ref.read(roleRepositoryProvider);
+      int createdCount = 0;
+      int skippedCount = 0;
+
+      for (var entry in roleDiscounts.entries) {
+        final roleName = entry.key;
+        final roleData = entry.value as Map<String, dynamic>;
+        final description = roleData['description'] as String?;
+
+        // Check if role already exists
+        final existingRole = await roleRepository.getRoleByName(eventId, roleName);
+
+        if (existingRole != null) {
+          AppLogger.debug('[EventSelectionScreen] Role "$roleName" already exists, skipping');
+          skippedCount++;
+          continue;
+        }
+
+        // Create the role
+        try {
+          await roleRepository.createRole(
+            eventId: eventId,
+            name: roleName,
+            description: description,
+          );
+          createdCount++;
+          AppLogger.info('[EventSelectionScreen] Created role: $roleName');
+        } catch (e) {
+          AppLogger.error('[EventSelectionScreen] Failed to create role "$roleName"', error: e);
+        }
+      }
+
+      AppLogger.info('[EventSelectionScreen] Roles created: $createdCount, skipped: $skippedCount');
+    } catch (e) {
+      AppLogger.error('[EventSelectionScreen] Failed to create roles from ruleset', error: e);
     }
   }
 
