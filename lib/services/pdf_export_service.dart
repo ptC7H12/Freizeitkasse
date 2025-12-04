@@ -416,9 +416,7 @@ class PdfExportService {
             data: [
               [
                 '1',
-                'Teilnahmegebühr $eventName\n'
-                    'Teilnehmer: ${participant.firstName} ${participant.lastName}\n'
-                    'Alter: ${AppDateUtils.calculateAge(participant.birthDate)} Jahre',
+                _buildParticipantDescription(participant, eventName),
                 '${totalPrice.toStringAsFixed(2)} €',
               ],
             ],
@@ -631,7 +629,7 @@ class PdfExportService {
             pw.SizedBox(height: 10),
             pw.Table.fromTextArray(
               context: context,
-              headers: ['Pos.', 'Name', 'Alter', 'Betrag'],
+              headers: ['Pos.', 'Name', 'Details', 'Betrag'],
               data: familyMembers.asMap().entries.map((entry) {
                 final index = entry.key + 1;
                 final member = entry.value;
@@ -639,7 +637,7 @@ class PdfExportService {
                 return [
                   index.toString(),
                   '${member.firstName} ${member.lastName}',
-                  '${AppDateUtils.calculateAge(member.birthDate)} Jahre',
+                  _buildMemberDetails(member),
                   '${price.toStringAsFixed(2)} €',
                 ];
               }).toList(),
@@ -753,5 +751,75 @@ class PdfExportService {
     await file.writeAsBytes(await pdf.save());
 
     return file.path;
+  }
+
+  /// Build detailed participant description for invoice
+  String _buildParticipantDescription(Participant participant, String eventName) {
+    final buffer = StringBuffer();
+
+    // Basic info
+    buffer.writeln('Teilnahmegebühr $eventName');
+    buffer.writeln('Teilnehmer: ${participant.firstName} ${participant.lastName}');
+    buffer.writeln('Alter: ${AppDateUtils.calculateAge(participant.birthDate)} Jahre');
+
+    // Price breakdown
+    final calculatedPrice = participant.calculatedPrice;
+    final manualPrice = participant.manualPriceOverride;
+    final discountPercent = participant.discountPercent;
+    final discountReason = participant.discountReason;
+
+    // Show price details if there are discounts or manual override
+    if (manualPrice != null || discountPercent > 0) {
+      buffer.writeln();
+      buffer.writeln('Preisberechnung:');
+
+      if (manualPrice != null) {
+        // Manual price override
+        buffer.writeln('• Berechneter Preis: ${calculatedPrice.toStringAsFixed(2)} €');
+        buffer.writeln('• Manuell angepasster Preis: ${manualPrice.toStringAsFixed(2)} €');
+        if (discountReason != null && discountReason.isNotEmpty) {
+          buffer.writeln('  Grund: $discountReason');
+        }
+      } else if (discountPercent > 0) {
+        // Discount applied
+        buffer.writeln('• Basispreis: ${calculatedPrice.toStringAsFixed(2)} €');
+        buffer.writeln('• Rabatt: ${discountPercent.toStringAsFixed(0)}%');
+        if (discountReason != null && discountReason.isNotEmpty) {
+          buffer.writeln('  Grund: $discountReason');
+        }
+        final discountAmount = calculatedPrice * (discountPercent / 100);
+        final finalPrice = calculatedPrice - discountAmount;
+        buffer.writeln('• Preis nach Rabatt: ${finalPrice.toStringAsFixed(2)} €');
+      }
+    }
+
+    return buffer.toString().trimRight();
+  }
+
+  /// Build member details for family invoice
+  String _buildMemberDetails(Participant member) {
+    final buffer = StringBuffer();
+
+    // Age
+    buffer.writeln('Alter: ${AppDateUtils.calculateAge(member.birthDate)} Jahre');
+
+    // Show discount/override info if present
+    final manualPrice = member.manualPriceOverride;
+    final discountPercent = member.discountPercent;
+    final discountReason = member.discountReason;
+
+    if (manualPrice != null) {
+      buffer.writeln('Manueller Preis');
+      if (discountReason != null && discountReason.isNotEmpty) {
+        buffer.write('Grund: $discountReason');
+      }
+    } else if (discountPercent > 0) {
+      buffer.writeln('Rabatt: ${discountPercent.toStringAsFixed(0)}%');
+      if (discountReason != null && discountReason.isNotEmpty) {
+        buffer.write('Grund: $discountReason');
+      }
+    }
+
+    return buffer.toString().trimRight();
   }
 }
