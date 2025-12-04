@@ -54,9 +54,9 @@ class _ParticipantsFamiliesScreenState
         controller: _tabController,
         children: const [
           // Participants Tab
-          ParticipantsListScreen(),
+          ParticipantsListScreen(embedded: true),
           // Families Tab
-          FamiliesListScreen(),
+          FamiliesListScreen(embedded: true),
         ],
       ),
     );

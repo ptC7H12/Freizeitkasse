@@ -9,6 +9,7 @@ import '../../data/database/app_database.dart';
 import '../../utils/date_utils.dart';
 import '../../utils/route_helpers.dart';
 import 'participant_form_screen.dart';
+import 'participant_detail_screen.dart';
 /// import 'participant_import_screen.dart';
 import '../../utils/constants.dart';
 import '../../extensions/context_extensions.dart';
@@ -660,21 +661,15 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                                 Text(
                                   'Geb.: ${AppDateUtils.formatGerman(participant.birthDate)} (${AppDateUtils.calculateAge(participant.birthDate)} Jahre)',
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Preis: ${_getDisplayPrice(participant).toStringAsFixed(2)} €',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green,
-                                  ),
-                                ),
+                                const SizedBox(height: 4),
+                                _buildPaymentStatusRow(participant),
                               ],
                             ),
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) => ParticipantFormScreen(
+                                  builder: (context) => ParticipantDetailScreen(
                                     participantId: participant.id,
                                   ),
                                 ),
@@ -749,5 +744,52 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
 
   double _getDisplayPrice(Participant participant) {
     return participant.manualPriceOverride ?? participant.calculatedPrice;
+  }
+
+  Widget _buildPaymentStatusRow(Participant participant) {
+    final totalPrice = _getDisplayPrice(participant);
+    final totalPaid = _participantPayments[participant.id] ?? 0.0;
+    final outstanding = totalPrice - totalPaid;
+
+    Color statusColor;
+    if (outstanding <= 0) {
+      statusColor = Colors.green; // Vollständig bezahlt
+    } else if (totalPaid > 0) {
+      statusColor = Colors.orange; // Teilweise bezahlt
+    } else {
+      statusColor = Colors.red; // Noch nicht bezahlt
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              outstanding <= 0 ? Icons.check_circle : Icons.payments,
+              size: 14,
+              color: statusColor,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'Preis: ${totalPrice.toStringAsFixed(2)} €',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: statusColor,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'Bezahlt: ${totalPaid.toStringAsFixed(2)} € | Offen: ${outstanding.toStringAsFixed(2)} €',
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey[700],
+          ),
+        ),
+      ],
+    );
   }
 }
