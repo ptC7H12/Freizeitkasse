@@ -106,6 +106,14 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
       final currentEvent = ref.read(currentEventProvider);
       final database = ref.read(databaseProvider);
 
+      // Lade Settings
+      Setting? settings;
+      if (currentEvent != null) {
+        settings = await (database.select(database.settings)
+              ..where((tbl) => tbl.eventId.equals(currentEvent.id)))
+            .getSingleOrNull();
+      }
+
       // Wenn Teilnehmer zu Familie gehört, Familienrechnung erstellen
       if (_family != null) {
         // Lade alle Familienmitglieder
@@ -134,6 +142,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
           eventName: currentEvent?.name ?? 'Veranstaltung',
           familyMembers: familyMembers,
           familyPayments: allPayments,
+          settings: settings,
         );
         if (mounted) {
           context.showSuccess('Familienrechnung erstellt: $filePath');
@@ -144,6 +153,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
           participant: _participant!,
           eventName: currentEvent?.name ?? 'Veranstaltung',
           payments: _payments,
+          settings: settings,
         );
         if (mounted) {
           context.showSuccess('Rechnung erstellt: $filePath');
