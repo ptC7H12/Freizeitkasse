@@ -333,4 +333,388 @@ class PdfExportService {
       cellAlignment: pw.Alignment.centerLeft,
     );
   }
+
+  /// Generate a participant invoice as PDF
+  Future<String> generateParticipantInvoice({
+    required Participant participant,
+    required String eventName,
+  }) async {
+    final pdf = pw.Document();
+    final now = DateTime.now();
+    final invoiceNumber = 'R-${participant.id.toString().padLeft(6, '0')}-${now.year}';
+    final invoiceDate = DateFormat('dd.MM.yyyy', 'de_DE').format(now);
+
+    // Load payments for this participant
+    final totalPrice = participant.manualPriceOverride ?? participant.calculatedPrice;
+    // Note: We would need to pass payments as parameter or load them here
+    // For now, using placeholder
+    final totalPaid = 0.0; // TODO: Load actual payments
+    final outstanding = totalPrice - totalPaid;
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (context) => [
+          // Header
+          pw.Header(
+            level: 0,
+            child: pw.Text(
+              'Rechnung',
+              style: pw.TextStyle(
+                fontSize: 28,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.blue800,
+              ),
+            ),
+          ),
+          pw.SizedBox(height: 20),
+
+          // Invoice Info
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'Rechnungsnummer: $invoiceNumber',
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  ),
+                  pw.SizedBox(height: 5),
+                  pw.Text('Rechnungsdatum: $invoiceDate'),
+                  pw.SizedBox(height: 5),
+                  pw.Text('Teilnehmer-ID: ${participant.id}'),
+                ],
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 20),
+
+          // Recipient
+          pw.Text(
+            'Rechnung für:',
+            style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 5),
+          pw.Text('${participant.firstName} ${participant.lastName}'),
+          if (participant.street != null) pw.Text(participant.street!),
+          if (participant.postalCode != null && participant.city != null)
+            pw.Text('${participant.postalCode} ${participant.city}'),
+          pw.SizedBox(height: 20),
+
+          // Subject
+          pw.Text(
+            'Teilnahme an: $eventName',
+            style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 20),
+
+          // Positions Table
+          pw.Table.fromTextArray(
+            context: context,
+            headers: ['Pos.', 'Beschreibung', 'Betrag'],
+            data: [
+              [
+                '1',
+                'Teilnahmegebühr $eventName\n'
+                    'Teilnehmer: ${participant.firstName} ${participant.lastName}\n'
+                    'Alter: ${AppDateUtils.calculateAge(participant.birthDate)} Jahre',
+                '${totalPrice.toStringAsFixed(2)} €',
+              ],
+            ],
+            headerStyle: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.white,
+            ),
+            headerDecoration: const pw.BoxDecoration(color: PdfColors.blue800),
+            cellAlignment: pw.Alignment.centerLeft,
+            cellHeight: 40,
+          ),
+          pw.SizedBox(height: 20),
+
+          // Summary
+          pw.Container(
+            alignment: pw.Alignment.centerRight,
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                  children: [
+                    pw.SizedBox(
+                      width: 150,
+                      child: pw.Text('Zwischensumme:'),
+                    ),
+                    pw.SizedBox(
+                      width: 100,
+                      child: pw.Text(
+                        '${totalPrice.toStringAsFixed(2)} €',
+                        textAlign: pw.TextAlign.right,
+                      ),
+                    ),
+                  ],
+                ),
+                pw.SizedBox(height: 5),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                  children: [
+                    pw.SizedBox(
+                      width: 150,
+                      child: pw.Text('Bereits bezahlt:'),
+                    ),
+                    pw.SizedBox(
+                      width: 100,
+                      child: pw.Text(
+                        '${totalPaid.toStringAsFixed(2)} €',
+                        textAlign: pw.TextAlign.right,
+                      ),
+                    ),
+                  ],
+                ),
+                pw.Divider(thickness: 2),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                  children: [
+                    pw.SizedBox(
+                      width: 150,
+                      child: pw.Text(
+                        'Offener Betrag:',
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
+                    ),
+                    pw.SizedBox(
+                      width: 100,
+                      child: pw.Text(
+                        '${outstanding.toStringAsFixed(2)} €',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.blue800,
+                        ),
+                        textAlign: pw.TextAlign.right,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          pw.SizedBox(height: 40),
+
+          // Payment Information
+          if (outstanding > 0) ...[
+            pw.Text(
+              'Zahlungsinformationen:',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.SizedBox(height: 10),
+            pw.Text(
+              'Bitte überweisen Sie den offenen Betrag unter Angabe der Rechnungsnummer.\n\n'
+              'Vielen Dank für Ihre Zahlung!',
+            ),
+          ] else ...[
+            pw.Container(
+              padding: const pw.EdgeInsets.all(10),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.green100,
+                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+              ),
+              child: pw.Text(
+                'Status: Vollständig bezahlt',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.green900,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    // Save file
+    final directory = await getApplicationDocumentsDirectory();
+    final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final fileName = 'rechnung_${participant.firstName}_${participant.lastName}_$timestamp.pdf';
+    final file = File('${directory.path}/$fileName');
+    await file.writeAsBytes(await pdf.save());
+
+    return file.path;
+  }
+
+  /// Generate a family invoice as PDF
+  Future<String> generateFamilyInvoice({
+    required Family family,
+    required String eventName,
+  }) async {
+    final pdf = pw.Document();
+    final now = DateTime.now();
+    final invoiceNumber = 'RF-${family.id.toString().padLeft(6, '0')}-${now.year}';
+    final invoiceDate = DateFormat('dd.MM.yyyy', 'de_DE').format(now);
+
+    // Note: We would need to pass family members and payments as parameters
+    // For now, using placeholder values
+    final totalPrice = 0.0; // TODO: Calculate from family members
+    final totalPaid = 0.0; // TODO: Load actual payments
+    final outstanding = totalPrice - totalPaid;
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (context) => [
+          // Header
+          pw.Header(
+            level: 0,
+            child: pw.Text(
+              'Familienrechnung',
+              style: pw.TextStyle(
+                fontSize: 28,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.green800,
+              ),
+            ),
+          ),
+          pw.SizedBox(height: 20),
+
+          // Invoice Info
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'Rechnungsnummer: $invoiceNumber',
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  ),
+                  pw.SizedBox(height: 5),
+                  pw.Text('Rechnungsdatum: $invoiceDate'),
+                  pw.SizedBox(height: 5),
+                  pw.Text('Familien-ID: ${family.id}'),
+                  pw.SizedBox(height: 5),
+                  pw.Text('Art: Sammelrechnung'),
+                ],
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 20),
+
+          // Recipient
+          pw.Text(
+            'Sammelrechnung für Familie:',
+            style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 5),
+          pw.Text(
+            family.familyName,
+            style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+          ),
+          if (family.contactPerson != null) pw.Text('Ansprechpartner: ${family.contactPerson}'),
+          if (family.street != null) pw.Text(family.street!),
+          if (family.postalCode != null && family.city != null)
+            pw.Text('${family.postalCode} ${family.city}'),
+          pw.SizedBox(height: 20),
+
+          // Note about family members
+          pw.Container(
+            padding: const pw.EdgeInsets.all(10),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.blue50,
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+            ),
+            child: pw.Text(
+              'Diese Rechnung umfasst alle Familienmitglieder für die Veranstaltung "$eventName".\n'
+              'Bitte laden Sie die Detailansicht der Familie, um alle Teilnehmer zu sehen.',
+              style: const pw.TextStyle(fontSize: 10),
+            ),
+          ),
+          pw.SizedBox(height: 20),
+
+          // Summary
+          pw.Container(
+            padding: const pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.grey),
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+            ),
+            child: pw.Column(
+              children: [
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('Gesamtsumme:'),
+                    pw.Text('${totalPrice.toStringAsFixed(2)} €'),
+                  ],
+                ),
+                pw.Divider(),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('Bereits bezahlt:'),
+                    pw.Text('${totalPaid.toStringAsFixed(2)} €'),
+                  ],
+                ),
+                pw.Divider(thickness: 2),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text(
+                      'Offener Betrag:',
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      '${outstanding.toStringAsFixed(2)} €',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.green800,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          pw.SizedBox(height: 40),
+
+          // Payment Information
+          if (outstanding > 0) ...[
+            pw.Text(
+              'Zahlungsinformationen:',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.SizedBox(height: 10),
+            pw.Text(
+              'Bitte überweisen Sie den offenen Betrag unter Angabe der Rechnungsnummer.\n\n'
+              'Vielen Dank für Ihre Zahlung!',
+            ),
+          ] else ...[
+            pw.Container(
+              padding: const pw.EdgeInsets.all(10),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.green100,
+                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+              ),
+              child: pw.Text(
+                'Status: Vollständig bezahlt',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.green900,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    // Save file
+    final directory = await getApplicationDocumentsDirectory();
+    final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final fileName = 'familienrechnung_${family.familyName.replaceAll(' ', '_')}_$timestamp.pdf';
+    final file = File('${directory.path}/$fileName');
+    await file.writeAsBytes(await pdf.save());
+
+    return file.path;
+  }
 }
