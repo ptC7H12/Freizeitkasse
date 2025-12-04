@@ -402,7 +402,7 @@ class _ParticipantFormScreenState
 
   Widget _buildGenderDropdown() {
     return DropdownButtonFormField<String?>(
-      value: _gender?.isEmpty ?? true ? null : _gender,
+      initialValue: _gender?.isEmpty ?? true ? null : _gender,
       decoration: const InputDecoration(
         labelText: 'Geschlecht',
       ),
@@ -444,7 +444,7 @@ class _ParticipantFormScreenState
         // Warte bis Daten geladen sind
         if (!snapshot.hasData) {
           return DropdownButtonFormField<int?>(
-            value: null,
+            initialValue: null,
             decoration: const InputDecoration(
               labelText: 'Rolle',
               hintText: 'Laden...',
@@ -481,7 +481,7 @@ class _ParticipantFormScreenState
         }
 
         return DropdownButtonFormField<int?>(
-          value: roleExists ? _selectedRoleId : null,
+          initialValue: roleExists ? _selectedRoleId : null,
           decoration: const InputDecoration(
             labelText: 'Rolle',
             hintText: 'Keine Rolle',
@@ -524,7 +524,7 @@ class _ParticipantFormScreenState
         // Warte bis Daten geladen sind
         if (!snapshot.hasData) {
           return DropdownButtonFormField<int?>(
-            value: null,
+            initialValue: null,
             decoration: const InputDecoration(
               labelText: 'Familie',
               hintText: 'Laden...',
@@ -561,7 +561,7 @@ class _ParticipantFormScreenState
         }
 
         return DropdownButtonFormField<int?>(
-          value: familyExists ? _selectedFamilyId : null,
+          initialValue: familyExists ? _selectedFamilyId : null,
           decoration: const InputDecoration(
             labelText: 'Familie',
             hintText: 'Keine Familie',

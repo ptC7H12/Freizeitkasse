@@ -303,7 +303,7 @@ class DashboardScreen extends ConsumerWidget {
                               error: (error, stack) {
                                 // Fehler beim Laden der erwarteten Zuschüsse
                                 // Fallback: 0.0
-                                final sollSonstigeEinnahmen = 0.0;
+                                const sollSonstigeEinnahmen = 0.0;
 
                                 return StreamBuilder<List<Income>>(
                                   stream: (database.select(database.incomes)
@@ -326,7 +326,7 @@ class DashboardScreen extends ConsumerWidget {
                                         final sollEinnahmenGesamt = sollEinnahmenTeilnehmer + sollSonstigeEinnahmen;
                                         final istEinnahmenGesamt = istEinnahmenZahlungen + sollSonstigeEinnahmen;
 
-                                        return Text('Fehler beim Laden der Zuschüsse');
+                                        return const Text('Fehler beim Laden der Zuschüsse');
                                       },
                                     );
                                   },

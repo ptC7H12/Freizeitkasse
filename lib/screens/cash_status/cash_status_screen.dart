@@ -2105,7 +2105,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) {
             // Fehler beim Laden der erwarteten Zuschüsse - Fallback: 0.0
-            final sonstigeEinnahmen = 0.0;
+            const sonstigeEinnahmen = 0.0;
 
             return StreamBuilder<List<db.Expense>>(
               stream: (database.select(database.expenses)

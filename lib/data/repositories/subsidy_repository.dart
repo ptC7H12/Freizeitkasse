@@ -275,7 +275,7 @@ class SubsidyRepository {
       // Ruleset laden
       final ruleset = await _getActiveRuleset(eventId, event.startDate);
       if (ruleset == null) {
-        throw BusinessRuleException('Kein aktives Ruleset für Event gefunden');
+        throw const BusinessRuleException('Kein aktives Ruleset für Event gefunden');
       }
 
       // Rolle laden

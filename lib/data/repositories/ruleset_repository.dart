@@ -369,7 +369,7 @@ family_discount:
 
       try {
         // Use the updateParticipant method to recalculate price
-        await _participantRepository!.updateParticipant(
+        await _participantRepository.updateParticipant(
           id: participant.id,
           recalculatePrice: true,
         );

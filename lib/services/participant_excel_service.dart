@@ -231,7 +231,7 @@ class ParticipantExcelService {
       if (!columnMapping.containsKey('first_name') ||
           !columnMapping.containsKey('last_name') ||
           !columnMapping.containsKey('birth_date')) {
-        final error = 'Erforderliche Spalten fehlen: Vorname, Nachname, Geburtsdatum';
+        const error = 'Erforderliche Spalten fehlen: Vorname, Nachname, Geburtsdatum';
         AppLogger.error('[ParticipantExcelService] $error');
         return ImportResult(
           success: false,
@@ -294,7 +294,7 @@ class ParticipantExcelService {
           String? familyNumber;
           if (columnMapping.containsKey('family_number')) {
             familyNumber = _getCellValue(row, columnMapping['family_number']!);
-            if (familyNumber != null && familyNumber.isNotEmpty) {
+            if (familyNumber.isNotEmpty) {
               familyId = familyMap[familyNumber];
               if (familyId != null) {
                 AppLogger.debug('[ParticipantExcelService] Row ${i + 1}: Assigning to family $familyNumber (ID: $familyId)');
@@ -347,7 +347,7 @@ class ParticipantExcelService {
           }
           if (columnMapping.containsKey('bildung_und_teilhabe')) {
             final value = _getCellValue(row, columnMapping['bildung_und_teilhabe']!);
-            bildungUndTeilhabe = value?.toLowerCase() == 'ja';
+            bildungUndTeilhabe = value.toLowerCase() == 'ja';
           }
 
           // Teilnehmer erstellen

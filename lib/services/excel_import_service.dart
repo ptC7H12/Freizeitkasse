@@ -31,7 +31,7 @@ class ExcelImportService {
 
       // Get first sheet
       if (excel.tables.isEmpty) {
-        final error = 'Excel-Datei enthält keine Tabellen';
+        const error = 'Excel-Datei enthält keine Tabellen';
         AppLogger.error('[ExcelImport] $error');
         result.errors.add(error);
         return result;
@@ -52,7 +52,7 @@ class ExcelImportService {
 
       // Validate sheet has data
       if (sheet.maxRows < 2) {
-        final error = 'Excel-Datei muss mindestens eine Header-Zeile und eine Datenzeile enthalten';
+        const error = 'Excel-Datei muss mindestens eine Header-Zeile und eine Datenzeile enthalten';
         AppLogger.error('[ExcelImport] $error');
         result.errors.add(error);
         return result;
@@ -62,7 +62,7 @@ class ExcelImportService {
       AppLogger.debug('[ExcelImport] Reading header row...');
       final headerRow = sheet.rows.firstOrNull;
       if (headerRow == null) {
-        final error = 'Header-Zeile konnte nicht gelesen werden';
+        const error = 'Header-Zeile konnte nicht gelesen werden';
         AppLogger.error('[ExcelImport] $error');
         result.errors.add(error);
         return result;
@@ -75,7 +75,7 @@ class ExcelImportService {
       if (!columnMapping.containsKey('first_name') ||
           !columnMapping.containsKey('last_name') ||
           !columnMapping.containsKey('birth_date')) {
-        final error = 'Erforderliche Spalten fehlen: Vorname, Nachname, Geburtsdatum';
+        const error = 'Erforderliche Spalten fehlen: Vorname, Nachname, Geburtsdatum';
         AppLogger.error('[ExcelImport] $error');
         result.errors.add(error);
         return result;
