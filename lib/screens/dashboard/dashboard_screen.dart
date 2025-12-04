@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
+import '../../providers/subsidy_provider.dart';
 import '../../data/database/app_database.dart';
 import '../participants/participants_families_screen.dart';
 import '../../utils/constants.dart';
@@ -172,31 +173,32 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppConstants.spacing),
 
-                  StreamBuilder<List<Participant>>(
-                    stream: (database.select(database.participants)
-                          ..where((tbl) => tbl.eventId.equals(eventId))
-                          ..where((tbl) => tbl.isActive.equals(true)))
-                        .watch(),
-                    builder: (context, participantSnapshot) {
-                      final participants = participantSnapshot.data ?? [];
-                      final sollEinnahmenTeilnehmer = participants.fold<double>(
-                        0.0,
-                        (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
-                      );
+                  // === EINNAHMEN-ÜBERSICHT ===
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final expectedSubsidiesAsync = ref.watch(expectedSubsidiesProvider);
 
-                      return StreamBuilder<List<Income>>(
-                        stream: (database.select(database.incomes)
+                      return StreamBuilder<List<Participant>>(
+                        stream: (database.select(database.participants)
                               ..where((tbl) => tbl.eventId.equals(eventId))
                               ..where((tbl) => tbl.isActive.equals(true)))
                             .watch(),
-                        builder: (context, incomeSnapshot) {
-                          final incomes = incomeSnapshot.data ?? [];
-                          final sollSonstigeEinnahmen = incomes.fold<double>(
+                        builder: (context, participantSnapshot) {
+                          final participants = participantSnapshot.data ?? [];
+                          final sollEinnahmenTeilnehmer = participants.fold<double>(
                             0.0,
-                            (sum, income) => sum + income.amount,
+                            (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
                           );
 
-                          return StreamBuilder<List<Payment>>(
+                          return expectedSubsidiesAsync.when(
+                            data: (sollSonstigeEinnahmen) {
+                              return StreamBuilder<List<Income>>(
+                                stream: (database.select(database.incomes)
+                                      ..where((tbl) => tbl.eventId.equals(eventId))
+                                      ..where((tbl) => tbl.isActive.equals(true)))
+                                    .watch(),
+                                builder: (context, incomeSnapshot) {
+                                  return StreamBuilder<List<Payment>>(
                             stream: (database.select(database.payments)
                                   ..where((tbl) => tbl.eventId.equals(eventId))
                                   ..where((tbl) => tbl.isActive.equals(true)))
@@ -292,11 +294,49 @@ class DashboardScreen extends ConsumerWidget {
                                         ),
                                       ],
                                     );
-                            },
-                          );
-                        },
-                      );
-                    },
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                              loading: () => const Center(child: CircularProgressIndicator()),
+                              error: (error, stack) {
+                                // Fehler beim Laden der erwarteten Zuschüsse
+                                // Fallback: 0.0
+                                final sollSonstigeEinnahmen = 0.0;
+
+                                return StreamBuilder<List<Income>>(
+                                  stream: (database.select(database.incomes)
+                                        ..where((tbl) => tbl.eventId.equals(eventId))
+                                        ..where((tbl) => tbl.isActive.equals(true)))
+                                      .watch(),
+                                  builder: (context, incomeSnapshot) {
+                                    return StreamBuilder<List<Payment>>(
+                                      stream: (database.select(database.payments)
+                                            ..where((tbl) => tbl.eventId.equals(eventId))
+                                            ..where((tbl) => tbl.isActive.equals(true)))
+                                          .watch(),
+                                      builder: (context, paymentSnapshot) {
+                                        final payments = paymentSnapshot.data ?? [];
+                                        final istEinnahmenZahlungen = payments.fold<double>(
+                                          0.0,
+                                          (sum, payment) => sum + payment.amount,
+                                        );
+
+                                        final sollEinnahmenGesamt = sollEinnahmenTeilnehmer + sollSonstigeEinnahmen;
+                                        final istEinnahmenGesamt = istEinnahmenZahlungen + sollSonstigeEinnahmen;
+
+                                        return Text('Fehler beim Laden der Zuschüsse');
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
 
                   const Divider(height: 32),

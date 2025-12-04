@@ -6,6 +6,7 @@ import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/income_provider.dart';
+import '../../providers/subsidy_provider.dart';
 /// import '../../providers/payment_provider.dart';
 /// import '../../providers/participant_provider.dart';
 import '../../providers/pdf_export_provider.dart';
@@ -1255,41 +1256,452 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
   // ========== TAB 3: ZUSCHÜSSE ==========
   Widget _buildSubsidiesTab(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
-    return StreamBuilder<List<db.Participant>>(
-      stream: (database.select(database.participants)
-            ..where((tbl) => tbl.eventId.equals(eventId))
-            ..where((tbl) => tbl.isActive.equals(true)))
-          .watch(),
-      builder: (context, participantSnapshot) {
-        if (!participantSnapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    // Nutze SubsidyProvider für korrekte Berechnungen
+    final subsidiesByRoleAsync = ref.watch(subsidiesByRoleProvider);
+    final subsidiesByDiscountTypeAsync = ref.watch(subsidiesByDiscountTypeProvider);
+    final expectedSubsidiesAsync = ref.watch(expectedSubsidiesProvider);
 
-        return StreamBuilder<List<db.Role>>(
-          stream: (database.select(database.roles)
-                ..where((tbl) => tbl.eventId.equals(eventId)))
-              .watch(),
-          builder: (context, roleSnapshot) {
-            if (!roleSnapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    return ListView(
+      padding: AppConstants.paddingAll16,
+      children: [
+        // Gesamtübersicht Card
+        expectedSubsidiesAsync.when(
+          data: (totalSubsidies) => Card(
+            elevation: 2,
+            color: const Color(0xFFF0F7FF),
+            child: Padding(
+              padding: AppConstants.paddingAll16,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.euro, color: Color(0xFF2196F3), size: 24),
+                      SizedBox(width: AppConstants.spacingS),
+                      Text(
+                        'Erwartete Zuschüsse (Gesamt)',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    NumberFormat.currency(locale: 'de_DE', symbol: '€').format(totalSubsidies),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4CAF50),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          loading: () => const Card(
+            child: Padding(
+              padding: AppConstants.paddingAll16,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          ),
+          error: (error, stack) => Card(
+            child: Padding(
+              padding: AppConstants.paddingAll16,
+              child: Text('Fehler beim Laden der Zuschüsse: $error'),
+            ),
+          ),
+        ),
 
-            final participants = participantSnapshot.data!;
-            final roles = roleSnapshot.data!;
+        const SizedBox(height: AppConstants.spacing),
 
-            // Nur Teilnehmer OHNE manualPriceOverride (regelwerk-basierte Preise)
-            final rulesetParticipants = participants
-                .where((p) => p.manualPriceOverride == null && p.discountPercent > 0)
-                .toList();
+        // Zuschüsse nach Rolle
+        Card(
+          child: Padding(
+            padding: AppConstants.paddingAll16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.groups, color: Color(0xFF2196F3), size: 20),
+                    SizedBox(width: AppConstants.spacingS),
+                    Text(
+                      'Zuschüsse nach Rolle',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacing),
 
-            return _buildSubsidiesContent(context, rulesetParticipants, roles);
-          },
-        );
-      },
+                subsidiesByRoleAsync.when(
+                  data: (subsidiesByRole) {
+                    if (subsidiesByRole.isEmpty) {
+                      return const Text(
+                        'Keine rollenbasierten Zuschüsse gefunden',
+                        style: TextStyle(color: Colors.grey),
+                      );
+                    }
+
+                    return DataTable(
+                      columnSpacing: 24,
+                      headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
+                      columns: const [
+                        DataColumn(label: Text('Rolle', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                        DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                        DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                      ],
+                      rows: subsidiesByRole.values.map((roleData) {
+                        return DataRow(
+                          cells: [
+                            DataCell(Text(roleData.roleName)),
+                            DataCell(Text('${roleData.discountPercent.toStringAsFixed(0)}%')),
+                            DataCell(Text('${roleData.participantCount}')),
+                            DataCell(
+                              Text(
+                                NumberFormat.currency(locale: 'de_DE', symbol: '€').format(roleData.totalSubsidy),
+                                style: const TextStyle(
+                                  color: Color(0xFF4CAF50),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => Text('Fehler: $error'),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppConstants.spacing),
+
+        // Zuschüsse nach Rabatttyp (OHNE BUT!)
+        Card(
+          child: Padding(
+            padding: AppConstants.paddingAll16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.discount, color: Color(0xFFFF9800), size: 20),
+                    SizedBox(width: AppConstants.spacingS),
+                    Text(
+                      'Zuschüsse nach Rabatttyp',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const Text(
+                  'Bildung & Teilhabe (BuT) wird separat abgerechnet',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacing),
+
+                subsidiesByDiscountTypeAsync.when(
+                  data: (subsidiesByType) {
+                    if (subsidiesByType.isEmpty) {
+                      return const Text(
+                        'Keine Zuschüsse gefunden',
+                        style: TextStyle(color: Colors.grey),
+                      );
+                    }
+
+                    return DataTable(
+                      columnSpacing: 24,
+                      headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
+                      columns: const [
+                        DataColumn(label: Text('Rabatttyp', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                        DataColumn(label: Text('Ø Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                        DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                      ],
+                      rows: subsidiesByType.values.map((typeData) {
+                        return DataRow(
+                          cells: [
+                            DataCell(Text(typeData.discountType)),
+                            DataCell(Text('${typeData.participantCount}')),
+                            DataCell(Text('${typeData.avgDiscountPercent.toStringAsFixed(1)}%')),
+                            DataCell(
+                              Text(
+                                NumberFormat.currency(locale: 'de_DE', symbol: '€').format(typeData.totalSubsidy),
+                                style: const TextStyle(
+                                  color: Color(0xFF4CAF50),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => Text('Fehler: $error'),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppConstants.spacing),
+
+        // Export-Buttons
+        Card(
+          child: Padding(
+            padding: AppConstants.paddingAll16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.file_download, color: Color(0xFF607D8B), size: 20),
+                    SizedBox(width: AppConstants.spacingS),
+                    Text(
+                      'Zuschussanträge exportieren',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacingS),
+                const Text(
+                  'Erstelle Zuschussanträge für die Beantragung bei Förderstellen',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacing),
+
+                // Export-Buttons
+                Wrap(
+                  spacing: AppConstants.spacingS,
+                  runSpacing: AppConstants.spacingS,
+                  children: [
+                    // PDF Export (alle Rollen)
+                    ElevatedButton.icon(
+                      onPressed: () => _exportAllRoleSubsidiesPDF(context, ref),
+                      icon: const Icon(Icons.picture_as_pdf),
+                      label: const Text('Alle Rollen als PDF'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE91E63),
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+
+                    // Excel Export (alle Rollen)
+                    ElevatedButton.icon(
+                      onPressed: () => _exportAllRoleSubsidiesExcel(context, ref),
+                      icon: const Icon(Icons.table_chart),
+                      label: const Text('Alle Rollen als Excel'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4CAF50),
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: AppConstants.spacingS),
+                const Text(
+                  'Hinweis: Es wird für jede Rolle eine separate Datei erstellt',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildSubsidiesContent(BuildContext context, List<db.Participant> participants, List<db.Role> roles) {
+  // ========== EXPORT-METHODEN ==========
+
+  /// Exportiert alle rollenbasierten Zuschüsse als PDF
+  Future<void> _exportAllRoleSubsidiesPDF(BuildContext context, WidgetRef ref) async {
+    try {
+      final currentEvent = ref.read(currentEventProvider);
+      if (currentEvent == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Kein Event ausgewählt')),
+          );
+        }
+        return;
+      }
+
+      // Zeige Loading-Dialog
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Erstelle PDF-Dateien...'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Lade Zuschüsse nach Rollen
+      final subsidiesByRole = await ref.read(subsidiesByRoleProvider.future);
+
+      if (subsidiesByRole.isEmpty) {
+        if (context.mounted) {
+          Navigator.of(context).pop(); // Schließe Loading-Dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Keine rollenbasierten Zuschüsse gefunden')),
+          );
+        }
+        return;
+      }
+
+      // Exportiere PDFs
+      final exportService = ref.read(subsidyExportServiceProvider);
+      final filePaths = await exportService.exportAllRoleSubsidiesPDF(
+        event: currentEvent,
+        subsidiesByRole: subsidiesByRole,
+      );
+
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Schließe Loading-Dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${filePaths.length} PDF-Dateien erstellt'),
+            action: SnackBarAction(
+              label: 'OK',
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Schließe Loading-Dialog falls offen
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler beim Exportieren: $e')),
+        );
+      }
+    }
+  }
+
+  /// Exportiert alle rollenbasierten Zuschüsse als Excel
+  Future<void> _exportAllRoleSubsidiesExcel(BuildContext context, WidgetRef ref) async {
+    try {
+      final currentEvent = ref.read(currentEventProvider);
+      if (currentEvent == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Kein Event ausgewählt')),
+          );
+        }
+        return;
+      }
+
+      // Zeige Loading-Dialog
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Erstelle Excel-Dateien...'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Lade Zuschüsse nach Rollen
+      final subsidiesByRole = await ref.read(subsidiesByRoleProvider.future);
+
+      if (subsidiesByRole.isEmpty) {
+        if (context.mounted) {
+          Navigator.of(context).pop(); // Schließe Loading-Dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Keine rollenbasierten Zuschüsse gefunden')),
+          );
+        }
+        return;
+      }
+
+      // Exportiere Excel-Dateien
+      final exportService = ref.read(subsidyExportServiceProvider);
+      final filePaths = await exportService.exportAllRoleSubsidiesExcel(
+        event: currentEvent,
+        subsidiesByRole: subsidiesByRole,
+      );
+
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Schließe Loading-Dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${filePaths.length} Excel-Dateien erstellt'),
+            action: SnackBarAction(
+              label: 'OK',
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Schließe Loading-Dialog falls offen
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler beim Exportieren: $e')),
+        );
+      }
+    }
+  }
+
+  // [ALTE METHODE ENTFERNT]
+  // _buildSubsidiesContent wurde ersetzt durch die neue Implementierung in _buildSubsidiesTab
+  // Die neue Version nutzt SubsidyProvider mit korrekter Berechnungslogik
+
+  Widget _buildSubsidiesContent_OLD_DEPRECATED(BuildContext context, List<db.Participant> participants, List<db.Role> roles) {
     // Helper: Berechne Zuschuss-Betrag
     double calculateSubsidy(db.Participant p) {
       if (p.discountPercent <= 0) {
@@ -1608,6 +2020,9 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   }
 
   Widget _buildSollSection(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
+    // Erwartete Zuschüsse aus SubsidyProvider
+    final expectedSubsidiesAsync = ref.watch(expectedSubsidiesProvider);
+
     return StreamBuilder<List<db.Participant>>(
       stream: (database.select(database.participants)
             ..where((tbl) => tbl.eventId.equals(eventId))
@@ -1620,17 +2035,17 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
           (sum, p) => sum + (p.manualPriceOverride ?? p.calculatedPrice),
         );
 
-        return StreamBuilder<List<db.Income>>(
-          stream: (database.select(database.incomes)
-                ..where((tbl) => tbl.eventId.equals(eventId))
-                ..where((tbl) => tbl.isActive.equals(true)))
-              .watch(),
-          builder: (context, incomeSnapshot) {
-            final incomes = incomeSnapshot.data ?? [];
-            final sonstigeEinnahmen = incomes.fold<double>(
-              0.0,
-              (sum, income) => sum + income.amount,
-            );
+        return expectedSubsidiesAsync.when(
+          data: (sonstigeEinnahmen) {
+            // Sonstige Einnahmen = Erwartete Zuschüsse (SOLL)
+            return StreamBuilder<List<db.Income>>(
+              stream: (database.select(database.incomes)
+                    ..where((tbl) => tbl.eventId.equals(eventId))
+                    ..where((tbl) => tbl.isActive.equals(true)))
+                  .watch(),
+              builder: (context, incomeSnapshot) {
+                // Incomes werden hier nicht mehr für SOLL benötigt,
+                // sondern nur für IST-Werte (bereits erhaltene Zuschüsse)
 
             return StreamBuilder<List<db.Expense>>(
               stream: (database.select(database.expenses)
@@ -1662,6 +2077,66 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                       sonstigeEinnahmen,
                       'Zuschüsse',
                       const Color(0xFF4CAF50),
+                    ),
+                    const SizedBox(height: AppConstants.spacingS),
+                    _buildStatRow(
+                      context,
+                      'Ausgaben',
+                      ausgaben,
+                      null,
+                      const Color(0xFFE91E63),
+                    ),
+                    const Divider(height: 24),
+                    _buildStatRow(
+                      context,
+                      'Saldo',
+                      saldo,
+                      null,
+                      saldo >= 0 ? const Color(0xFF4CAF50) : const Color(0xFFE91E63),
+                      isBold: true,
+                    ),
+                      ],
+                    );
+                  },
+                );
+              },
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) {
+            // Fehler beim Laden der erwarteten Zuschüsse - Fallback: 0.0
+            final sonstigeEinnahmen = 0.0;
+
+            return StreamBuilder<List<db.Expense>>(
+              stream: (database.select(database.expenses)
+                    ..where((tbl) => tbl.eventId.equals(eventId))
+                    ..where((tbl) => tbl.isActive.equals(true)))
+                  .watch(),
+              builder: (context, expenseSnapshot) {
+                final expenses = expenseSnapshot.data ?? [];
+                final ausgaben = expenses.fold<double>(
+                  0.0,
+                  (sum, expense) => sum + expense.amount,
+                );
+
+                final saldo = einnahmenTeilnehmer + sonstigeEinnahmen - ausgaben;
+
+                return Column(
+                  children: [
+                    _buildStatRow(
+                      context,
+                      'Einnahmen (Teilnehmer)',
+                      einnahmenTeilnehmer,
+                      'Teilnahmegebühren',
+                      const Color(0xFF2196F3),
+                    ),
+                    const SizedBox(height: AppConstants.spacingS),
+                    _buildStatRow(
+                      context,
+                      'Sonstige Einnahmen',
+                      sonstigeEinnahmen,
+                      'Zuschüsse (Fehler beim Laden)',
+                      const Color(0xFFFF9800),
                     ),
                     const SizedBox(height: AppConstants.spacingS),
                     _buildStatRow(
