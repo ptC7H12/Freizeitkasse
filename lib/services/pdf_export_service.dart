@@ -3,6 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:barcode/barcode.dart';
 import '../data/database/app_database.dart';
 import '../utils/date_utils.dart';
 
@@ -339,6 +340,7 @@ class PdfExportService {
     required Participant participant,
     required String eventName,
     List<Payment>? payments,
+    Setting? settings,
   }) async {
     final pdf = pw.Document();
     final now = DateTime.now();
@@ -355,6 +357,36 @@ class PdfExportService {
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
         build: (context) => [
+          // Organization Header (if settings available)
+          if (settings != null && settings.organizationName != null) ...[
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      settings.organizationName!,
+                      style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    if (settings.organizationStreet != null)
+                      pw.Text(settings.organizationStreet!, style: const pw.TextStyle(fontSize: 10)),
+                    if (settings.organizationPostalCode != null && settings.organizationCity != null)
+                      pw.Text(
+                        '${settings.organizationPostalCode} ${settings.organizationCity}',
+                        style: const pw.TextStyle(fontSize: 10),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 20),
+          ],
+
           // Header
           pw.Header(
             level: 0,
@@ -500,14 +532,55 @@ class PdfExportService {
 
           // Payment Information
           if (outstanding > 0) ...[
-            pw.Text(
-              'Zahlungsinformationen:',
-              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+            pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                // Bank Information
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'Zahlungsinformationen:',
+                        style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                      ),
+                      pw.SizedBox(height: 10),
+                      if (settings != null && settings.iban != null) ...[
+                        pw.Text('IBAN: ${settings.iban}'),
+                        if (settings.bic != null) pw.Text('BIC: ${settings.bic}'),
+                        if (settings.bankName != null) pw.Text('Bank: ${settings.bankName}'),
+                        pw.SizedBox(height: 10),
+                      ],
+                      pw.Text(
+                        'Verwendungszweck: $invoiceNumber',
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
+                      pw.Text('Betrag: ${outstanding.toStringAsFixed(2)} EUR'),
+                    ],
+                  ),
+                ),
+                // QR Code
+                if (settings != null && settings.iban != null)
+                  pw.Container(
+                    width: 100,
+                    height: 100,
+                    child: pw.BarcodeWidget(
+                      barcode: Barcode.qrCode(),
+                      data: _generateSepaQrCode(
+                        recipientName: settings.organizationName ?? 'Organisation',
+                        iban: settings.iban!,
+                        bic: settings.bic,
+                        amount: outstanding,
+                        reference: invoiceNumber,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            pw.SizedBox(height: 10),
+            pw.SizedBox(height: 20),
             pw.Text(
-              'Bitte überweisen Sie den offenen Betrag unter Angabe der Rechnungsnummer.\n\n'
-              'Vielen Dank für Ihre Zahlung!',
+              'Bitte überweisen Sie den offenen Betrag unter Angabe der Rechnungsnummer.',
+              style: const pw.TextStyle(fontSize: 10),
             ),
           ] else ...[
             pw.Container(
@@ -525,7 +598,31 @@ class PdfExportService {
               ),
             ),
           ],
+
+          // Footer
+          if (settings != null && settings.invoiceFooter != null) ...[
+            pw.SizedBox(height: 40),
+            pw.Divider(),
+            pw.SizedBox(height: 10),
+            pw.Text(
+              settings.invoiceFooter!,
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
+              textAlign: pw.TextAlign.center,
+            ),
+          ],
         ],
+        footer: (context) {
+          return pw.Column(
+            children: [
+              pw.Divider(),
+              pw.SizedBox(height: 5),
+              pw.Text(
+                'Seite ${context.pageNumber} von ${context.pagesCount}',
+                style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey),
+              ),
+            ],
+          );
+        },
       ),
     );
 
@@ -545,6 +642,7 @@ class PdfExportService {
     required String eventName,
     List<Participant>? familyMembers,
     List<Payment>? familyPayments,
+    Setting? settings,
   }) async {
     final pdf = pw.Document();
     final now = DateTime.now();
@@ -567,6 +665,36 @@ class PdfExportService {
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
         build: (context) => [
+          // Organization Header (if settings available)
+          if (settings != null && settings.organizationName != null) ...[
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      settings.organizationName!,
+                      style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    if (settings.organizationStreet != null)
+                      pw.Text(settings.organizationStreet!, style: const pw.TextStyle(fontSize: 10)),
+                    if (settings.organizationPostalCode != null && settings.organizationCity != null)
+                      pw.Text(
+                        '${settings.organizationPostalCode} ${settings.organizationCity}',
+                        style: const pw.TextStyle(fontSize: 10),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 20),
+          ],
+
           // Header
           pw.Header(
             level: 0,
@@ -714,14 +842,55 @@ class PdfExportService {
 
           // Payment Information
           if (outstanding > 0) ...[
-            pw.Text(
-              'Zahlungsinformationen:',
-              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+            pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                // Bank Information
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'Zahlungsinformationen:',
+                        style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                      ),
+                      pw.SizedBox(height: 10),
+                      if (settings != null && settings.iban != null) ...[
+                        pw.Text('IBAN: ${settings.iban}'),
+                        if (settings.bic != null) pw.Text('BIC: ${settings.bic}'),
+                        if (settings.bankName != null) pw.Text('Bank: ${settings.bankName}'),
+                        pw.SizedBox(height: 10),
+                      ],
+                      pw.Text(
+                        'Verwendungszweck: $invoiceNumber',
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
+                      pw.Text('Betrag: ${outstanding.toStringAsFixed(2)} EUR'),
+                    ],
+                  ),
+                ),
+                // QR Code
+                if (settings != null && settings.iban != null)
+                  pw.Container(
+                    width: 100,
+                    height: 100,
+                    child: pw.BarcodeWidget(
+                      barcode: Barcode.qrCode(),
+                      data: _generateSepaQrCode(
+                        recipientName: settings.organizationName ?? 'Organisation',
+                        iban: settings.iban!,
+                        bic: settings.bic,
+                        amount: outstanding,
+                        reference: invoiceNumber,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            pw.SizedBox(height: 10),
+            pw.SizedBox(height: 20),
             pw.Text(
-              'Bitte überweisen Sie den offenen Betrag unter Angabe der Rechnungsnummer.\n\n'
-              'Vielen Dank für Ihre Zahlung!',
+              'Bitte überweisen Sie den offenen Betrag unter Angabe der Rechnungsnummer.',
+              style: const pw.TextStyle(fontSize: 10),
             ),
           ] else ...[
             pw.Container(
@@ -739,7 +908,31 @@ class PdfExportService {
               ),
             ),
           ],
+
+          // Footer
+          if (settings != null && settings.invoiceFooter != null) ...[
+            pw.SizedBox(height: 40),
+            pw.Divider(),
+            pw.SizedBox(height: 10),
+            pw.Text(
+              settings.invoiceFooter!,
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
+              textAlign: pw.TextAlign.center,
+            ),
+          ],
         ],
+        footer: (context) {
+          return pw.Column(
+            children: [
+              pw.Divider(),
+              pw.SizedBox(height: 5),
+              pw.Text(
+                'Seite ${context.pageNumber} von ${context.pagesCount}',
+                style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey),
+              ),
+            ],
+          );
+        },
       ),
     );
 
@@ -821,5 +1014,32 @@ class PdfExportService {
     }
 
     return buffer.toString().trimRight();
+  }
+
+  /// Generate SEPA QR Code data (EPC QR Code)
+  String _generateSepaQrCode({
+    required String recipientName,
+    required String iban,
+    String? bic,
+    required double amount,
+    required String reference,
+  }) {
+    // EPC QR Code Format (https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/quick-response-code-guidelines-enable-data-capture-initiation)
+    final lines = <String>[
+      'BCD', // Service Tag
+      '002', // Version
+      '1', // Character Set (1 = UTF-8)
+      'SCT', // Identification (SEPA Credit Transfer)
+      bic ?? '', // BIC (optional)
+      recipientName, // Beneficiary Name
+      iban.replaceAll(' ', ''), // Beneficiary Account (IBAN)
+      'EUR${amount.toStringAsFixed(2)}', // Amount
+      '', // Purpose (empty)
+      reference, // Structured Reference
+      '', // Unstructured Remittance
+      '', // Beneficiary to Originator Information
+    ];
+
+    return lines.join('\n');
   }
 }
