@@ -338,17 +338,16 @@ class PdfExportService {
   Future<String> generateParticipantInvoice({
     required Participant participant,
     required String eventName,
+    List<Payment>? payments,
   }) async {
     final pdf = pw.Document();
     final now = DateTime.now();
     final invoiceNumber = 'R-${participant.id.toString().padLeft(6, '0')}-${now.year}';
     final invoiceDate = DateFormat('dd.MM.yyyy', 'de_DE').format(now);
 
-    // Load payments for this participant
+    // Calculate payment totals
     final totalPrice = participant.manualPriceOverride ?? participant.calculatedPrice;
-    // Note: We would need to pass payments as parameter or load them here
-    // For now, using placeholder
-    final totalPaid = 0.0; // TODO: Load actual payments
+    final totalPaid = payments?.fold<double>(0, (sum, payment) => sum + payment.amount) ?? 0.0;
     final outstanding = totalPrice - totalPaid;
 
     pdf.addPage(
@@ -546,16 +545,23 @@ class PdfExportService {
   Future<String> generateFamilyInvoice({
     required Family family,
     required String eventName,
+    List<Participant>? familyMembers,
+    List<Payment>? familyPayments,
   }) async {
     final pdf = pw.Document();
     final now = DateTime.now();
     final invoiceNumber = 'RF-${family.id.toString().padLeft(6, '0')}-${now.year}';
     final invoiceDate = DateFormat('dd.MM.yyyy', 'de_DE').format(now);
 
-    // Note: We would need to pass family members and payments as parameters
-    // For now, using placeholder values
-    final totalPrice = 0.0; // TODO: Calculate from family members
-    final totalPaid = 0.0; // TODO: Load actual payments
+    // Calculate totals from family members
+    final totalPrice = familyMembers?.fold<double>(
+          0,
+          (sum, member) => sum + (member.manualPriceOverride ?? member.calculatedPrice),
+        ) ??
+        0.0;
+
+    // Calculate total payments (both direct family payments and member payments)
+    final totalPaid = familyPayments?.fold<double>(0, (sum, payment) => sum + payment.amount) ?? 0.0;
     final outstanding = totalPrice - totalPaid;
 
     pdf.addPage(
@@ -616,20 +622,51 @@ class PdfExportService {
             pw.Text('${family.postalCode} ${family.city}'),
           pw.SizedBox(height: 20),
 
-          // Note about family members
-          pw.Container(
-            padding: const pw.EdgeInsets.all(10),
-            decoration: pw.BoxDecoration(
-              color: PdfColors.blue50,
-              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+          // Family members table (if available)
+          if (familyMembers != null && familyMembers.isNotEmpty) ...[
+            pw.Text(
+              'Familienmitglieder:',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
             ),
-            child: pw.Text(
-              'Diese Rechnung umfasst alle Familienmitglieder für die Veranstaltung "$eventName".\n'
-              'Bitte laden Sie die Detailansicht der Familie, um alle Teilnehmer zu sehen.',
-              style: const pw.TextStyle(fontSize: 10),
+            pw.SizedBox(height: 10),
+            pw.Table.fromTextArray(
+              context: context,
+              headers: ['Pos.', 'Name', 'Alter', 'Betrag'],
+              data: familyMembers.asMap().entries.map((entry) {
+                final index = entry.key + 1;
+                final member = entry.value;
+                final price = member.manualPriceOverride ?? member.calculatedPrice;
+                return [
+                  index.toString(),
+                  '${member.firstName} ${member.lastName}',
+                  '${AppDateUtils.calculateAge(member.birthDate)} Jahre',
+                  '${price.toStringAsFixed(2)} €',
+                ];
+              }).toList(),
+              headerStyle: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.white,
+              ),
+              headerDecoration: const pw.BoxDecoration(color: PdfColors.green800),
+              cellAlignment: pw.Alignment.centerLeft,
+              cellHeight: 30,
             ),
-          ),
-          pw.SizedBox(height: 20),
+            pw.SizedBox(height: 20),
+          ] else ...[
+            // Note about family members if not provided
+            pw.Container(
+              padding: const pw.EdgeInsets.all(10),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.blue50,
+                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+              ),
+              child: pw.Text(
+                'Diese Rechnung umfasst alle Familienmitglieder für die Veranstaltung "$eventName".',
+                style: const pw.TextStyle(fontSize: 10),
+              ),
+            ),
+            pw.SizedBox(height: 20),
+          ],
 
           // Summary
           pw.Container(

@@ -103,12 +103,36 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
     try {
       final pdfService = ref.read(pdfExportServiceProvider);
       final currentEvent = ref.read(currentEventProvider);
+      final database = ref.read(databaseProvider);
 
       // Wenn Teilnehmer zu Familie gehört, Familienrechnung erstellen
       if (_family != null) {
+        // Lade alle Familienmitglieder
+        final familyMembers = await (database.select(database.participants)
+              ..where((tbl) => tbl.familyId.equals(_family!.id))
+              ..where((tbl) => tbl.isActive.equals(true)))
+            .get();
+
+        // Lade alle Zahlungen für die Familie (sowohl direkte als auch von Mitgliedern)
+        final familyPayments = await (database.select(database.payments)
+              ..where((tbl) => tbl.familyId.equals(_family!.id))
+              ..where((tbl) => tbl.isActive.equals(true)))
+            .get();
+
+        // Lade auch Zahlungen der einzelnen Mitglieder
+        final memberPayments = await (database.select(database.payments)
+              ..where((tbl) => tbl.participantId.isIn(familyMembers.map((m) => m.id).toList()))
+              ..where((tbl) => tbl.isActive.equals(true)))
+            .get();
+
+        // Kombiniere beide Zahlungslisten
+        final allPayments = [...familyPayments, ...memberPayments];
+
         final filePath = await pdfService.generateFamilyInvoice(
           family: _family!,
           eventName: currentEvent?.name ?? 'Veranstaltung',
+          familyMembers: familyMembers,
+          familyPayments: allPayments,
         );
         if (mounted) {
           context.showSuccess('Familienrechnung erstellt: $filePath');
@@ -118,6 +142,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
         final filePath = await pdfService.generateParticipantInvoice(
           participant: _participant!,
           eventName: currentEvent?.name ?? 'Veranstaltung',
+          payments: _payments,
         );
         if (mounted) {
           context.showSuccess('Rechnung erstellt: $filePath');
