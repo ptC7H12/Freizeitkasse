@@ -40,6 +40,7 @@ class RoleRepository {
   Future<int> createRole({
     required int eventId,
     required String name,
+    String? displayName,
     String? description,
   }) async {
     // Check if role with same name already exists
@@ -51,6 +52,7 @@ class RoleRepository {
     final companion = RolesCompanion(
       eventId: Value(eventId),
       name: Value(name),
+      displayName: Value(displayName ?? name), // Use name if displayName not provided
       description: Value(description),
       createdAt: Value(DateTime.now()),
       updatedAt: Value(DateTime.now()),
@@ -63,6 +65,7 @@ class RoleRepository {
   Future<bool> updateRole({
     required int id,
     String? name,
+    String? displayName,
     String? description,
   }) async {
     final existing = await getRoleById(id);
@@ -81,6 +84,7 @@ class RoleRepository {
     final companion = RolesCompanion(
       id: Value(id),
       name: name != null ? Value(name) : const Value.absent(),
+      displayName: displayName != null ? Value(displayName) : const Value.absent(),
       description: description != null ? Value(description) : const Value.absent(),
       updatedAt: Value(DateTime.now()),
     );
