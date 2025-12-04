@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
+import '../../utils/logger.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../providers/role_provider.dart';
 import '../../extensions/context_extensions.dart';
 import '../../services/github_ruleset_import_service.dart';
 import '../../services/ruleset_parser_service.dart';
@@ -494,12 +496,14 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
 
           // Parse YAML to get validFrom date
           DateTime validFrom;
+          Map<String, dynamic> parsed;
           try {
-            final parsed = RulesetParserService.parseRuleset(yamlContent);
+            parsed = RulesetParserService.parseRuleset(yamlContent);
             validFrom = parsed['valid_from'] as DateTime;
           } catch (e) {
             // Fallback to current date if parsing fails
             validFrom = DateTime.now();
+            parsed = {};
           }
 
           // Import the ruleset
@@ -509,6 +513,9 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
             yamlContent: yamlContent,
             validFrom: validFrom,
           );
+
+          // Automatically create roles from the ruleset
+          await _createRolesFromRuleset(currentEvent.id, yamlContent, parsed);
 
           return 0; // Return dummy id
         },
@@ -584,6 +591,66 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
         ],
       ),
     );
+  }
+
+  /// Create roles from ruleset YAML content
+  ///
+  /// Extracts role_discounts from the ruleset and creates Role entries
+  /// for each role if they don't already exist.
+  Future<void> _createRolesFromRuleset(
+    int eventId,
+    String yamlContent,
+    Map<String, dynamic> parsed,
+  ) async {
+    try {
+      // Use already parsed data or parse again
+      final Map<String, dynamic> parsedData = parsed.isEmpty
+          ? RulesetParserService.parseRuleset(yamlContent)
+          : parsed;
+
+      final roleDiscounts = parsedData['role_discounts'] as Map<String, dynamic>?;
+
+      if (roleDiscounts == null || roleDiscounts.isEmpty) {
+        AppLogger.info('[SettingsScreen] No role_discounts found in ruleset');
+        return;
+      }
+
+      final roleRepository = ref.read(roleRepositoryProvider);
+      int createdCount = 0;
+      int skippedCount = 0;
+
+      for (var entry in roleDiscounts.entries) {
+        final roleName = entry.key;
+        final roleData = entry.value as Map<String, dynamic>;
+        final description = roleData['description'] as String?;
+
+        // Check if role already exists
+        final existingRole = await roleRepository.getRoleByName(eventId, roleName);
+
+        if (existingRole != null) {
+          AppLogger.debug('[SettingsScreen] Role "$roleName" already exists, skipping');
+          skippedCount++;
+          continue;
+        }
+
+        // Create the role
+        try {
+          await roleRepository.createRole(
+            eventId: eventId,
+            name: roleName,
+            description: description,
+          );
+          createdCount++;
+          AppLogger.info('[SettingsScreen] Created role: $roleName');
+        } catch (e) {
+          AppLogger.error('[SettingsScreen] Failed to create role "$roleName"', error: e);
+        }
+      }
+
+      AppLogger.info('[SettingsScreen] Roles created: $createdCount, skipped: $skippedCount');
+    } catch (e) {
+      AppLogger.error('[SettingsScreen] Failed to create roles from ruleset', error: e);
+    }
   }
 
   @override
