@@ -209,7 +209,6 @@ class SubsidyCalculatorService {
     AppLogger.debug('  → Teilnehmer mit Familie: ${familyParticipants.length}');
 
     // Parse JSON string to Map
-    final familyDiscountMap = jsonDecode(ruleset.familyDiscount!) as Map<String, dynamic>;
     final ageGroupsList = ruleset.ageGroups != null && ruleset.ageGroups!.isNotEmpty
         ? jsonDecode(ruleset.ageGroups!) as List<dynamic>
         : <dynamic>[];
