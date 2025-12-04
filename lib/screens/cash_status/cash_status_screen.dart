@@ -1463,10 +1463,238 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
         const SizedBox(height: AppConstants.spacing),
 
-        // TODO: Export-Buttons (PDF/Excel) für Zuschussanträge
-        // wird im nächsten Schritt implementiert
+        // Export-Buttons
+        Card(
+          child: Padding(
+            padding: AppConstants.paddingAll16,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.file_download, color: Color(0xFF607D8B), size: 20),
+                    SizedBox(width: AppConstants.spacingS),
+                    Text(
+                      'Zuschussanträge exportieren',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppConstants.spacingS),
+                const Text(
+                  'Erstelle Zuschussanträge für die Beantragung bei Förderstellen',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: AppConstants.spacing),
+
+                // Export-Buttons
+                Wrap(
+                  spacing: AppConstants.spacingS,
+                  runSpacing: AppConstants.spacingS,
+                  children: [
+                    // PDF Export (alle Rollen)
+                    ElevatedButton.icon(
+                      onPressed: () => _exportAllRoleSubsidiesPDF(context, ref),
+                      icon: const Icon(Icons.picture_as_pdf),
+                      label: const Text('Alle Rollen als PDF'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE91E63),
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+
+                    // Excel Export (alle Rollen)
+                    ElevatedButton.icon(
+                      onPressed: () => _exportAllRoleSubsidiesExcel(context, ref),
+                      icon: const Icon(Icons.table_chart),
+                      label: const Text('Alle Rollen als Excel'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4CAF50),
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: AppConstants.spacingS),
+                const Text(
+                  'Hinweis: Es wird für jede Rolle eine separate Datei erstellt',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
+  }
+
+  // ========== EXPORT-METHODEN ==========
+
+  /// Exportiert alle rollenbasierten Zuschüsse als PDF
+  Future<void> _exportAllRoleSubsidiesPDF(BuildContext context, WidgetRef ref) async {
+    try {
+      final currentEvent = ref.read(currentEventProvider);
+      if (currentEvent == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Kein Event ausgewählt')),
+          );
+        }
+        return;
+      }
+
+      // Zeige Loading-Dialog
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Erstelle PDF-Dateien...'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Lade Zuschüsse nach Rollen
+      final subsidiesByRole = await ref.read(subsidiesByRoleProvider.future);
+
+      if (subsidiesByRole.isEmpty) {
+        if (context.mounted) {
+          Navigator.of(context).pop(); // Schließe Loading-Dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Keine rollenbasierten Zuschüsse gefunden')),
+          );
+        }
+        return;
+      }
+
+      // Exportiere PDFs
+      final exportService = ref.read(subsidyExportServiceProvider);
+      final filePaths = await exportService.exportAllRoleSubsidiesPDF(
+        event: currentEvent,
+        subsidiesByRole: subsidiesByRole,
+      );
+
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Schließe Loading-Dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${filePaths.length} PDF-Dateien erstellt'),
+            action: SnackBarAction(
+              label: 'OK',
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Schließe Loading-Dialog falls offen
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler beim Exportieren: $e')),
+        );
+      }
+    }
+  }
+
+  /// Exportiert alle rollenbasierten Zuschüsse als Excel
+  Future<void> _exportAllRoleSubsidiesExcel(BuildContext context, WidgetRef ref) async {
+    try {
+      final currentEvent = ref.read(currentEventProvider);
+      if (currentEvent == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Kein Event ausgewählt')),
+          );
+        }
+        return;
+      }
+
+      // Zeige Loading-Dialog
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Erstelle Excel-Dateien...'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Lade Zuschüsse nach Rollen
+      final subsidiesByRole = await ref.read(subsidiesByRoleProvider.future);
+
+      if (subsidiesByRole.isEmpty) {
+        if (context.mounted) {
+          Navigator.of(context).pop(); // Schließe Loading-Dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Keine rollenbasierten Zuschüsse gefunden')),
+          );
+        }
+        return;
+      }
+
+      // Exportiere Excel-Dateien
+      final exportService = ref.read(subsidyExportServiceProvider);
+      final filePaths = await exportService.exportAllRoleSubsidiesExcel(
+        event: currentEvent,
+        subsidiesByRole: subsidiesByRole,
+      );
+
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Schließe Loading-Dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${filePaths.length} Excel-Dateien erstellt'),
+            action: SnackBarAction(
+              label: 'OK',
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Schließe Loading-Dialog falls offen
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Fehler beim Exportieren: $e')),
+        );
+      }
+    }
   }
 
   // [ALTE METHODE ENTFERNT]

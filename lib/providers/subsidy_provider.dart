@@ -1,16 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/repositories/subsidy_repository.dart';
 import '../services/subsidy_calculator_service.dart';
+import '../services/subsidy_export_service.dart';
 import 'database_provider.dart';
 import 'current_event_provider.dart';
 import '../utils/logger.dart';
 
-// ========== REPOSITORY PROVIDER ==========
+// ========== REPOSITORY & SERVICE PROVIDERS ==========
 
 /// Provider für SubsidyRepository
 final subsidyRepositoryProvider = Provider<SubsidyRepository>((ref) {
   final database = ref.watch(databaseProvider);
   return SubsidyRepository(database);
+});
+
+/// Provider für SubsidyExportService
+final subsidyExportServiceProvider = Provider<SubsidyExportService>((ref) {
+  return SubsidyExportService();
 });
 
 // ========== SUBSIDY DATA PROVIDERS ==========
