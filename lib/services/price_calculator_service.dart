@@ -46,15 +46,17 @@ class PriceCalculatorService {
       rulesetData['family_discount'] as Map<String, dynamic>? ?? {},
     );
 
-    // Alle Rabatte vom Basispreis berechnen (nicht gestapelt!)
-    // WICHTIG: Beide Rabatte werden vom Basispreis berechnet, nicht vom bereits
-    // reduzierten Preis. Beispiel: Basispreis 100€, Rollenrabatt 50%, Familienrabatt 20%
-    // → Endpreis = 100€ - 50€ - 20€ = 30€ (NICHT 100€ - 50€ - 10€ = 40€)
-    final roleDiscountAmount = basePrice * (roleDiscountPercent / 100);
-    final familyDiscountAmount = basePrice * (familyDiscountPercent / 100);
+    // WICHTIG: Rabatte werden NICHT gestapelt!
+    // Rollenrabatt hat Vorrang: Wenn vorhanden, wird NUR dieser angewendet.
+    // Familienrabatt wird nur angewendet, wenn KEIN Rollenrabatt vorhanden ist.
+    final appliedDiscountPercent = roleDiscountPercent > 0
+        ? roleDiscountPercent
+        : familyDiscountPercent;
 
-    // Endpreis = Basispreis - Summe aller Rabatte
-    final finalPrice = basePrice - roleDiscountAmount - familyDiscountAmount;
+    final discountAmount = basePrice * (appliedDiscountPercent / 100);
+
+    // Endpreis = Basispreis - angewendeter Rabatt (nur einer!)
+    final finalPrice = basePrice - discountAmount;
 
     AppLogger.debug(
         '[PriceCalculation] calculateParticipantPrice:\n'
@@ -63,9 +65,9 @@ class PriceCalculatorService {
             '  familyChildrenCount: $familyChildrenCount\n'
             '  basePrice: $basePrice\n'
             '  roleDiscountPercent: $roleDiscountPercent\n'
-            '  roleDiscountAmount: $roleDiscountAmount\n'
             '  familyDiscountPercent: $familyDiscountPercent\n'
-            '  familyDiscountAmount: $familyDiscountAmount\n'
+            '  appliedDiscountPercent: $appliedDiscountPercent (${roleDiscountPercent > 0 ? "role" : "family"})\n'
+            '  discountAmount: $discountAmount\n'
             '  finalPrice: ${finalPrice.toStringAsFixed(2)}\n'
     );
 
@@ -321,21 +323,32 @@ class PriceCalculatorService {
       );
     }
 
-    // Familienrabatt ermitteln (vom Basispreis, NICHT gestapelt!)
+    // Familienrabatt ermitteln (nur wenn KEIN Rollenrabatt vorhanden!)
     // Nur für Kinder unter 18
     breakdown['family_discount_percent'] = _getFamilyDiscount(
       age,
       familyChildrenCount,
       rulesetData['family_discount'] as Map<String, dynamic>? ?? {},
     );
-    breakdown['family_discount_amount'] =
-        breakdown['base_price'] * (breakdown['family_discount_percent'] / 100);
 
-    if ((breakdown['family_discount_percent'] as num) > 0) {
-      breakdown['has_discounts'] = true;
-      breakdown['discount_reasons'].add(
-        'Kinderzuschuss durch MGB ($familyChildrenCount. Kind): ${breakdown['family_discount_percent'].toStringAsFixed(0)}%',
-      );
+    // WICHTIG: Rabatte werden NICHT gestapelt!
+    // Wenn Rollenrabatt vorhanden → NUR Rollenrabatt wird angewendet
+    // Sonst → Familienrabatt wird angewendet
+    if ((breakdown['role_discount_percent'] as num) > 0) {
+      // Rollenrabatt hat Vorrang - Familienrabatt wird NICHT angewendet
+      breakdown['family_discount_amount'] = 0.0;
+      breakdown['family_discount_percent'] = 0.0; // Für UI anzeigen, dass kein Familienrabatt aktiv
+    } else {
+      // Kein Rollenrabatt → Familienrabatt anwenden
+      breakdown['family_discount_amount'] =
+          breakdown['base_price'] * (breakdown['family_discount_percent'] / 100);
+
+      if ((breakdown['family_discount_percent'] as num) > 0) {
+        breakdown['has_discounts'] = true;
+        breakdown['discount_reasons'].add(
+          'Kinderzuschuss durch MGB ($familyChildrenCount. Kind): ${breakdown['family_discount_percent'].toStringAsFixed(0)}%',
+        );
+      }
     }
 
     // Preis nach automatischen Rabatten (für Display-Zwecke)
