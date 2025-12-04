@@ -37,7 +37,7 @@ class SettingsRepository {
           bic: const Value(null),
           invoiceFooter: const Value(null),
           // Default GitHub ruleset path
-          githubRulesetPath: const Value('https://github.com/ptC7H12/MGBFreizeitplaner/tree/main/rulesets/valid'),
+          githubRulesetPath: const Value('https://raw.githubusercontent.com/ptC7H12/Freizeitkasse/master/rulesets/valid'),
         ),
       );
 
