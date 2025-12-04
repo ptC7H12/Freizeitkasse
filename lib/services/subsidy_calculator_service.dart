@@ -147,8 +147,8 @@ class SubsidyCalculatorService {
           : <dynamic>[];
 
       for (final participant in roleParticipants) {
-        final age = _calculateAge(participant.birthDate, event.startDate);
-        final basePrice = _getBasePriceByAge(age, ageGroupsList);
+        final age = calculateAge(participant.birthDate, event.startDate);
+        final basePrice = getBasePriceByAge(age, ageGroupsList);
         final subsidyAmount = basePrice * (discountPercent / 100);
 
         totalRoleSubsidies += subsidyAmount;
@@ -214,7 +214,7 @@ class SubsidyCalculatorService {
         : <dynamic>[];
 
     for (final participant in familyParticipants) {
-      final age = _calculateAge(participant.birthDate, event.startDate);
+      final age = calculateAge(participant.birthDate, event.startDate);
 
       // Nur Kinder unter 18
       if (age >= 18) {
@@ -225,7 +225,7 @@ class SubsidyCalculatorService {
         continue;
       }
 
-      final basePrice = _getBasePriceByAge(age, ageGroupsList);
+      final basePrice = getBasePriceByAge(age, ageGroupsList);
 
       // Position in Familie ermitteln (sortiert nach Geburtsdatum, ältestes = 1)
       final siblings = participants
@@ -321,8 +321,8 @@ class SubsidyCalculatorService {
           : <dynamic>[];
 
       for (final participant in roleParticipants) {
-        final age = _calculateAge(participant.birthDate, event.startDate);
-        final basePrice = _getBasePriceByAge(age, ageGroupsList);
+        final age = calculateAge(participant.birthDate, event.startDate);
+        final basePrice = getBasePriceByAge(age, ageGroupsList);
         final subsidyAmount = basePrice * (discountPercent / 100);
 
         totalSubsidy += subsidyAmount;
@@ -393,7 +393,7 @@ class SubsidyCalculatorService {
         discountType = participant.discountReason!;
       } else if (participant.familyId != null) {
         // Familienrabatt
-        final age = _calculateAge(participant.birthDate, event.startDate);
+        final age = calculateAge(participant.birthDate, event.startDate);
         if (age < 18) {
           discountType = 'Familienrabatt';
         }
@@ -403,8 +403,8 @@ class SubsidyCalculatorService {
       }
 
       // Zuschuss berechnen
-      final age = _calculateAge(participant.birthDate, event.startDate);
-      final basePrice = _getBasePriceByAge(age, ageGroupsList);
+      final age = calculateAge(participant.birthDate, event.startDate);
+      final basePrice = getBasePriceByAge(age, ageGroupsList);
       final subsidyAmount = basePrice * (participant.discountPercent / 100);
 
       // Zu Typ hinzufügen
@@ -461,7 +461,7 @@ class SubsidyCalculatorService {
   // ========== HELPER METHODS ==========
 
   /// Berechnet das Alter eines Teilnehmers am Startdatum des Events
-  static int _calculateAge(DateTime birthDate, DateTime eventStartDate) {
+  static int calculateAge(DateTime birthDate, DateTime eventStartDate) {
     int age = eventStartDate.year - birthDate.year;
     if (eventStartDate.month < birthDate.month ||
         (eventStartDate.month == birthDate.month && eventStartDate.day < birthDate.day)) {
@@ -471,7 +471,7 @@ class SubsidyCalculatorService {
   }
 
   /// Ermittelt den Basispreis basierend auf dem Alter
-  static double _getBasePriceByAge(int age, List<dynamic> ageGroups) {
+  static double getBasePriceByAge(int age, List<dynamic> ageGroups) {
     if (ageGroups.isEmpty) {
       AppLogger.warning('[SubsidyCalculatorService] ageGroups ist leer!');
       return 0.0;

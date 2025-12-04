@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../../services/subsidy_calculator_service.dart';
@@ -294,8 +295,14 @@ class SubsidyRepository {
             ..where((tbl) => tbl.manualPriceOverride.isNull()))
           .get();
 
-      // Rollenconfig aus Ruleset holen
-      final roleConfig = ruleset.roleDiscounts?[role.name.toLowerCase()] as Map<String, dynamic>?;
+      // Rollenconfig aus Ruleset holen (JSON parsen)
+      if (ruleset.roleDiscounts == null || ruleset.roleDiscounts!.isEmpty) {
+        AppLogger.warning('[SubsidyRepository] Keine Rollenrabatte im Ruleset');
+        return [];
+      }
+
+      final roleDiscountsMap = jsonDecode(ruleset.roleDiscounts!) as Map<String, dynamic>;
+      final roleConfig = roleDiscountsMap[role.name.toLowerCase()] as Map<String, dynamic>?;
       if (roleConfig == null) {
         AppLogger.warning('[SubsidyRepository] Keine Rollenkonfiguration für ${role.name}');
         return [];
@@ -303,13 +310,18 @@ class SubsidyRepository {
 
       final discountPercent = (roleConfig['discount_percent'] as num?)?.toDouble() ?? 0.0;
 
+      // Parse ageGroups JSON
+      final ageGroupsList = ruleset.ageGroups != null && ruleset.ageGroups!.isNotEmpty
+          ? jsonDecode(ruleset.ageGroups!) as List<dynamic>
+          : <dynamic>[];
+
       // SubsidyParticipant-Objekte erstellen
       final subsidyParticipants = <SubsidyParticipant>[];
       for (final participant in participants) {
-        final age = SubsidyCalculatorService._calculateAge(participant.birthDate, event.startDate);
-        final basePrice = SubsidyCalculatorService._getBasePriceByAge(
+        final age = SubsidyCalculatorService.calculateAge(participant.birthDate, event.startDate);
+        final basePrice = SubsidyCalculatorService.getBasePriceByAge(
           age,
-          ruleset.ageGroups ?? [],
+          ageGroupsList,
         );
         final subsidyAmount = basePrice * (discountPercent / 100);
 
