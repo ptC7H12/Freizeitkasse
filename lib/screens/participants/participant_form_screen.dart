@@ -35,9 +35,7 @@ class _ParticipantFormScreenState
   // Form Controllers
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
-  final _streetController = TextEditingController();
-  final _postalCodeController = TextEditingController();
-  final _cityController = TextEditingController();
+  final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _emergencyContactController = TextEditingController();
@@ -81,9 +79,7 @@ class _ParticipantFormScreenState
           _lastNameController.text = participant.lastName;
           _birthDate = participant.birthDate;
           _gender = participant.gender;
-          _streetController.text = participant.street ?? '';
-          _postalCodeController.text = participant.postalCode ?? '';
-          _cityController.text = participant.city ?? '';
+          _addressController.text = participant.address ?? '';
           _phoneController.text = participant.phone ?? '';
           _emailController.text = participant.email ?? '';
           _emergencyContactController.text = participant.emergencyContactName ?? '';
@@ -121,9 +117,7 @@ class _ParticipantFormScreenState
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _streetController.dispose();
-    _postalCodeController.dispose();
-    _cityController.dispose();
+    _addressController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _emergencyContactController.dispose();
@@ -190,30 +184,9 @@ class _ParticipantFormScreenState
             // Adresse
             _buildSectionHeader('Adresse'),
             _buildTextField(
-              controller: _streetController,
-              label: 'Straße und Hausnummer',
-            ),
-            const SizedBox(height: AppConstants.spacing),
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: _buildTextField(
-                    controller: _postalCodeController,
-                    label: 'PLZ',
-                    keyboardType: TextInputType.number,
-                    validator: Validators.postalCode,
-                  ),
-                ),
-                const SizedBox(width: AppConstants.spacing),
-                Expanded(
-                  flex: 2,
-                  child: _buildTextField(
-                    controller: _cityController,
-                    label: 'Ort',
-                  ),
-                ),
-              ],
+              controller: _addressController,
+              label: 'Adresse',
+              maxLines: 3,
             ),
 
             const SizedBox(height: AppConstants.spacingL),
@@ -689,10 +662,7 @@ class _ParticipantFormScreenState
           lastName: _lastNameController.text,
           birthDate: _birthDate!,
           gender: _gender,
-          street: _streetController.text.isNotEmpty ? _streetController.text : null,
-          postalCode:
-              _postalCodeController.text.isNotEmpty ? _postalCodeController.text : null,
-          city: _cityController.text.isNotEmpty ? _cityController.text : null,
+          address: _addressController.text.isNotEmpty ? _addressController.text : null,
           phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
           email: _emailController.text.isNotEmpty ? _emailController.text : null,
           emergencyContactName: _emergencyContactController.text.isNotEmpty
@@ -732,10 +702,7 @@ class _ParticipantFormScreenState
           lastName: _lastNameController.text,
           birthDate: _birthDate!,
           gender: _gender,
-          street: _streetController.text.isNotEmpty ? _streetController.text : null,
-          postalCode:
-              _postalCodeController.text.isNotEmpty ? _postalCodeController.text : null,
-          city: _cityController.text.isNotEmpty ? _cityController.text : null,
+          address: _addressController.text.isNotEmpty ? _addressController.text : null,
           phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
           email: _emailController.text.isNotEmpty ? _emailController.text : null,
           emergencyContactName: _emergencyContactController.text.isNotEmpty

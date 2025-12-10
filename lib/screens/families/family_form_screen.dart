@@ -29,9 +29,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
   final _contactPersonController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
-  final _streetController = TextEditingController();
-  final _postalCodeController = TextEditingController();
-  final _cityController = TextEditingController();
+  final _addressController = TextEditingController();
 
   bool _isLoading = false;
   bool _isInitialized = false;
@@ -54,9 +52,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
           _contactPersonController.text = family.contactPerson ?? '';
           _phoneController.text = family.phone ?? '';
           _emailController.text = family.email ?? '';
-          _streetController.text = family.street ?? '';
-          _postalCodeController.text = family.postalCode ?? '';
-          _cityController.text = family.city ?? '';
+          _addressController.text = family.address ?? '';
           _isInitialized = true;
         });
       }
@@ -73,9 +69,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
     _contactPersonController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
-    _streetController.dispose();
-    _postalCodeController.dispose();
-    _cityController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
@@ -166,38 +160,11 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
             const SizedBox(height: AppConstants.spacing),
 
             TextFormField(
-              controller: _streetController,
+              controller: _addressController,
               decoration: const InputDecoration(
-                labelText: 'Straße',
+                labelText: 'Adresse',
               ),
-            ),
-
-            const SizedBox(height: AppConstants.spacing),
-
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: TextFormField(
-                    controller: _postalCodeController,
-                    decoration: const InputDecoration(
-                      labelText: 'PLZ',
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: Validators.postalCode,
-                  ),
-                ),
-                const SizedBox(width: AppConstants.spacing),
-                Expanded(
-                  flex: 2,
-                  child: TextFormField(
-                    controller: _cityController,
-                    decoration: const InputDecoration(
-                      labelText: 'Ort',
-                    ),
-                  ),
-                ),
-              ],
+              maxLines: 3,
             ),
 
             const SizedBox(height: 32),
@@ -252,12 +219,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               : null,
           phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
           email: _emailController.text.isNotEmpty ? _emailController.text : null,
-          street:
-              _streetController.text.isNotEmpty ? _streetController.text : null,
-          postalCode: _postalCodeController.text.isNotEmpty
-              ? _postalCodeController.text
-              : null,
-          city: _cityController.text.isNotEmpty ? _cityController.text : null,
+          address: _addressController.text.isNotEmpty ? _addressController.text : null,
         );
 
         if (mounted) {
@@ -274,12 +236,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               : null,
           phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
           email: _emailController.text.isNotEmpty ? _emailController.text : null,
-          street:
-              _streetController.text.isNotEmpty ? _streetController.text : null,
-          postalCode: _postalCodeController.text.isNotEmpty
-              ? _postalCodeController.text
-              : null,
-          city: _cityController.text.isNotEmpty ? _cityController.text : null,
+          address: _addressController.text.isNotEmpty ? _addressController.text : null,
         );
 
         if (mounted) {
