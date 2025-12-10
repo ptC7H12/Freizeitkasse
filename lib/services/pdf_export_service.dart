@@ -341,6 +341,11 @@ class PdfExportService {
     required String eventName,
     List<Payment>? payments,
     Setting? settings,
+    String? verwendungszweckPrefix,
+    double? directPayments,
+    double? familyPaymentShare,
+    double? totalPaidWithFamily,
+    double? outstandingWithFamily,
   }) async {
     final pdf = pw.Document();
     final now = DateTime.now();
@@ -349,8 +354,15 @@ class PdfExportService {
 
     // Calculate payment totals
     final totalPrice = participant.manualPriceOverride ?? participant.calculatedPrice;
-    final totalPaid = payments?.fold<double>(0, (sum, payment) => sum + payment.amount) ?? 0.0;
-    final outstanding = totalPrice - totalPaid;
+    // Verwende die übergebenen Werte (inkl. Familienzahlungen) oder fallback zu alten Berechnungen
+    final totalPaid = totalPaidWithFamily ?? (payments?.fold<double>(0, (sum, payment) => sum + payment.amount) ?? 0.0);
+    final outstanding = outstandingWithFamily ?? (totalPrice - totalPaid);
+
+    // Build Verwendungszweck
+    final participantName = '${participant.firstName} ${participant.lastName}';
+    final verwendungszweck = verwendungszweckPrefix != null && verwendungszweckPrefix.isNotEmpty
+        ? '$verwendungszweckPrefix $participantName'
+        : invoiceNumber;
 
     pdf.addPage(
       pw.MultiPage(
@@ -373,13 +385,8 @@ class PdfExportService {
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
-                    if (settings.organizationStreet != null)
-                      pw.Text(settings.organizationStreet!, style: const pw.TextStyle(fontSize: 10)),
-                    if (settings.organizationPostalCode != null && settings.organizationCity != null)
-                      pw.Text(
-                        '${settings.organizationPostalCode} ${settings.organizationCity}',
-                        style: const pw.TextStyle(fontSize: 10),
-                      ),
+                    if (settings.organizationAddress != null && settings.organizationAddress!.isNotEmpty)
+                      pw.Text(settings.organizationAddress!, style: const pw.TextStyle(fontSize: 10)),
                   ],
                 ),
               ],
@@ -552,7 +559,7 @@ class PdfExportService {
                         pw.SizedBox(height: 10),
                       ],
                       pw.Text(
-                        'Verwendungszweck: $invoiceNumber',
+                        'Verwendungszweck: $verwendungszweck',
                         style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                       ),
                       pw.Text('Betrag: ${outstanding.toStringAsFixed(2)} EUR'),
@@ -571,7 +578,7 @@ class PdfExportService {
                         iban: settings.iban!,
                         bic: settings.bic,
                         amount: outstanding,
-                        reference: invoiceNumber,
+                        reference: verwendungszweck,
                       ),
                     ),
                   ),
@@ -579,7 +586,7 @@ class PdfExportService {
             ),
             pw.SizedBox(height: 20),
             pw.Text(
-              'Bitte überweisen Sie den offenen Betrag unter Angabe der Rechnungsnummer.',
+              'Bitte überweisen Sie den offenen Betrag unter Angabe des Verwendungszwecks.',
               style: const pw.TextStyle(fontSize: 10),
             ),
           ] else ...[
@@ -643,6 +650,7 @@ class PdfExportService {
     List<Participant>? familyMembers,
     List<Payment>? familyPayments,
     Setting? settings,
+    String? verwendungszweckPrefix,
   }) async {
     final pdf = pw.Document();
     final now = DateTime.now();
@@ -659,6 +667,12 @@ class PdfExportService {
     // Calculate total payments (both direct family payments and member payments)
     final totalPaid = familyPayments?.fold<double>(0, (sum, payment) => sum + payment.amount) ?? 0.0;
     final outstanding = totalPrice - totalPaid;
+
+    // Build Verwendungszweck
+    final familyName = family.lastName;
+    final verwendungszweck = verwendungszweckPrefix != null && verwendungszweckPrefix.isNotEmpty
+        ? '$verwendungszweckPrefix $familyName'
+        : invoiceNumber;
 
     pdf.addPage(
       pw.MultiPage(
@@ -681,13 +695,8 @@ class PdfExportService {
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
-                    if (settings.organizationStreet != null)
-                      pw.Text(settings.organizationStreet!, style: const pw.TextStyle(fontSize: 10)),
-                    if (settings.organizationPostalCode != null && settings.organizationCity != null)
-                      pw.Text(
-                        '${settings.organizationPostalCode} ${settings.organizationCity}',
-                        style: const pw.TextStyle(fontSize: 10),
-                      ),
+                    if (settings.organizationAddress != null && settings.organizationAddress!.isNotEmpty)
+                      pw.Text(settings.organizationAddress!, style: const pw.TextStyle(fontSize: 10)),
                   ],
                 ),
               ],
@@ -862,7 +871,7 @@ class PdfExportService {
                         pw.SizedBox(height: 10),
                       ],
                       pw.Text(
-                        'Verwendungszweck: $invoiceNumber',
+                        'Verwendungszweck: $verwendungszweck',
                         style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                       ),
                       pw.Text('Betrag: ${outstanding.toStringAsFixed(2)} EUR'),
@@ -881,7 +890,7 @@ class PdfExportService {
                         iban: settings.iban!,
                         bic: settings.bic,
                         amount: outstanding,
-                        reference: invoiceNumber,
+                        reference: verwendungszweck,
                       ),
                     ),
                   ),
@@ -889,7 +898,7 @@ class PdfExportService {
             ),
             pw.SizedBox(height: 20),
             pw.Text(
-              'Bitte überweisen Sie den offenen Betrag unter Angabe der Rechnungsnummer.',
+              'Bitte überweisen Sie den offenen Betrag unter Angabe des Verwendungszwecks.',
               style: const pw.TextStyle(fontSize: 10),
             ),
           ] else ...[

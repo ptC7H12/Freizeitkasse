@@ -967,6 +967,8 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   }
 
   Widget _buildTransactionHistoryContent(BuildContext context, List<Transaction> allTransactions) {
+    final isMobile = MediaQuery.of(context).size.width <= 800;
+
     // Filter anwenden
     List<Transaction> filteredTransactions = allTransactions;
 
@@ -1160,7 +1162,149 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                       ),
                     ),
                   )
+                else if (isMobile)
+                  // Mobile: Card-basierte Ansicht
+                  Column(
+                    children: filteredTransactions.map((transaction) {
+                      final Color typeColor = transaction.type == 'Zahlung'
+                          ? const Color(0xFF2196F3)
+                          : transaction.type == 'Einnahme'
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFFE91E63);
+
+                      final Color amountColor = transaction.amount >= 0
+                          ? const Color(0xFF4CAF50)
+                          : const Color(0xFFE91E63);
+
+                      final Color saldoColor = transaction.runningBalance >= 0
+                          ? const Color(0xFF4CAF50)
+                          : const Color(0xFFE91E63);
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Kopfzeile: Datum + Typ
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    DateFormat('dd.MM.yyyy').format(transaction.date),
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: typeColor.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      transaction.type,
+                                      style: TextStyle(
+                                        color: typeColor,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              // Beschreibung
+                              Text(
+                                transaction.description,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (transaction.participantOrFamily != null) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  transaction.participantOrFamily!,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                              if (transaction.reference != null) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Ref: ${transaction.reference}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                              ],
+                              const Divider(height: 16),
+                              // Betrag + Saldo
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Betrag',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        NumberFormat.currency(locale: 'de_DE', symbol: '€')
+                                            .format(transaction.amount),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: amountColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'Saldo',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        NumberFormat.currency(locale: 'de_DE', symbol: '€')
+                                            .format(transaction.runningBalance),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: saldoColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  )
                 else
+                  // Desktop: DataTable
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: DataTable(
@@ -1256,6 +1400,8 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
   // ========== TAB 3: ZUSCHÜSSE ==========
   Widget _buildSubsidiesTab(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
+    final isMobile = MediaQuery.of(context).size.width <= 800;
+
     // Nutze SubsidyProvider für korrekte Berechnungen
     final subsidiesByRoleAsync = ref.watch(subsidiesByRoleProvider);
     final subsidiesByDiscountTypeAsync = ref.watch(subsidiesByDiscountTypeProvider);
@@ -1346,34 +1492,130 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                       );
                     }
 
-                    return DataTable(
-                      columnSpacing: 24,
-                      headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
-                      columns: const [
-                        DataColumn(label: Text('Rolle', style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text('Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                        DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                        DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                      ],
-                      rows: subsidiesByRole.values.map((roleData) {
-                        return DataRow(
-                          cells: [
-                            DataCell(Text(roleData.roleName)),
-                            DataCell(Text('${roleData.discountPercent.toStringAsFixed(0)}%')),
-                            DataCell(Text('${roleData.participantCount}')),
-                            DataCell(
-                              Text(
-                                NumberFormat.currency(locale: 'de_DE', symbol: '€').format(roleData.totalSubsidy),
-                                style: const TextStyle(
-                                  color: Color(0xFF4CAF50),
-                                  fontWeight: FontWeight.w600,
-                                ),
+                    if (isMobile) {
+                      // Mobile: Card-basierte Ansicht
+                      return Column(
+                        children: subsidiesByRole.values.map((roleData) {
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            color: const Color(0xFFF8F9FA),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    roleData.roleName,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Rabatt',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            '${roleData.discountPercent.toStringAsFixed(0)}%',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Anzahl',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            '${roleData.participantCount}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            'Zuschuss (Soll)',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            NumberFormat.currency(locale: 'de_DE', symbol: '€')
+                                                .format(roleData.totalSubsidy),
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF4CAF50),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        );
-                      }).toList(),
-                    );
+                          );
+                        }).toList(),
+                      );
+                    } else {
+                      // Desktop: DataTable
+                      return DataTable(
+                        columnSpacing: 24,
+                        headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
+                        columns: const [
+                          DataColumn(label: Text('Rolle', style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text('Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                          DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                          DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                        ],
+                        rows: subsidiesByRole.values.map((roleData) {
+                          return DataRow(
+                            cells: [
+                              DataCell(Text(roleData.roleName)),
+                              DataCell(Text('${roleData.discountPercent.toStringAsFixed(0)}%')),
+                              DataCell(Text('${roleData.participantCount}')),
+                              DataCell(
+                                Text(
+                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(roleData.totalSubsidy),
+                                  style: const TextStyle(
+                                    color: Color(0xFF4CAF50),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      );
+                    }
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Text('Fehler: $error'),
@@ -1424,34 +1666,130 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                       );
                     }
 
-                    return DataTable(
-                      columnSpacing: 24,
-                      headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
-                      columns: const [
-                        DataColumn(label: Text('Rabatttyp', style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                        DataColumn(label: Text('Ø Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                        DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                      ],
-                      rows: subsidiesByType.values.map((typeData) {
-                        return DataRow(
-                          cells: [
-                            DataCell(Text(typeData.discountType)),
-                            DataCell(Text('${typeData.participantCount}')),
-                            DataCell(Text('${typeData.avgDiscountPercent.toStringAsFixed(1)}%')),
-                            DataCell(
-                              Text(
-                                NumberFormat.currency(locale: 'de_DE', symbol: '€').format(typeData.totalSubsidy),
-                                style: const TextStyle(
-                                  color: Color(0xFF4CAF50),
-                                  fontWeight: FontWeight.w600,
-                                ),
+                    if (isMobile) {
+                      // Mobile: Card-basierte Ansicht
+                      return Column(
+                        children: subsidiesByType.values.map((typeData) {
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            color: const Color(0xFFFFF8E1),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    typeData.discountType,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Anzahl',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            '${typeData.participantCount}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Ø Rabatt',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            '${typeData.avgDiscountPercent.toStringAsFixed(1)}%',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            'Zuschuss (Soll)',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            NumberFormat.currency(locale: 'de_DE', symbol: '€')
+                                                .format(typeData.totalSubsidy),
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF4CAF50),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        );
-                      }).toList(),
-                    );
+                          );
+                        }).toList(),
+                      );
+                    } else {
+                      // Desktop: DataTable
+                      return DataTable(
+                        columnSpacing: 24,
+                        headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
+                        columns: const [
+                          DataColumn(label: Text('Rabatttyp', style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                          DataColumn(label: Text('Ø Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                          DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                        ],
+                        rows: subsidiesByType.values.map((typeData) {
+                          return DataRow(
+                            cells: [
+                              DataCell(Text(typeData.discountType)),
+                              DataCell(Text('${typeData.participantCount}')),
+                              DataCell(Text('${typeData.avgDiscountPercent.toStringAsFixed(1)}%')),
+                              DataCell(
+                                Text(
+                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(typeData.totalSubsidy),
+                                  style: const TextStyle(
+                                    color: Color(0xFF4CAF50),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      );
+                    }
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Text('Fehler: $error'),

@@ -32,9 +32,7 @@ class Participants extends Table {
   TextColumn get lastName => text().withLength(min: 1, max: 100)();
   DateTimeColumn get birthDate => dateTime()();
   TextColumn get gender => text().withLength(max: 20).nullable()();
-  TextColumn get street => text().withLength(max: 200).nullable()();
-  TextColumn get postalCode => text().withLength(max: 10).nullable()();
-  TextColumn get city => text().withLength(max: 100).nullable()();
+  TextColumn get address => text().withLength(max: 500).nullable()();
   TextColumn get phone => text().withLength(max: 50).nullable()();
   TextColumn get email => text().withLength(max: 100).nullable()();
   TextColumn get emergencyContactName => text().withLength(max: 200).nullable()();
@@ -66,9 +64,7 @@ class Families extends Table {
   TextColumn get contactPerson => text().withLength(max: 200).nullable()();
   TextColumn get phone => text().withLength(max: 50).nullable()();
   TextColumn get email => text().withLength(max: 100).nullable()();
-  TextColumn get street => text().withLength(max: 200).nullable()();
-  TextColumn get postalCode => text().withLength(max: 10).nullable()();
-  TextColumn get city => text().withLength(max: 100).nullable()();
+  TextColumn get address => text().withLength(max: 500).nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -161,12 +157,11 @@ class Settings extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get eventId => integer().references(Events, #id)();
   TextColumn get organizationName => text().withLength(max: 200).nullable()();
-  TextColumn get organizationStreet => text().withLength(max: 200).nullable()();
-  TextColumn get organizationPostalCode => text().withLength(max: 10).nullable()();
-  TextColumn get organizationCity => text().withLength(max: 100).nullable()();
+  TextColumn get organizationAddress => text().withLength(max: 500).nullable()();
   TextColumn get bankName => text().withLength(max: 200).nullable()();
   TextColumn get iban => text().withLength(max: 34).nullable()();
   TextColumn get bic => text().withLength(max: 11).nullable()();
+  TextColumn get verwendungszweckPrefix => text().withLength(max: 100).nullable()();
   TextColumn get invoiceFooter => text().nullable()();
   TextColumn get githubRulesetPath => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
@@ -235,7 +230,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   // ============================================================================
   // MIGRATION LOGIC (entspricht Alembic-Migrationen)
@@ -307,6 +302,119 @@ class AppDatabase extends _$AppDatabase {
 
           // 6. Lösche Backup-Tabelle
           await customStatement('DROP TABLE rulesets_backup');
+        }
+
+        // Migration von Version 5 zu 6: Konsolidiere Adressfelder
+        if (from < 6) {
+          // ===== Participants Tabelle =====
+          // 1. Backup erstellen
+          await customStatement('''
+            CREATE TABLE participants_backup AS SELECT * FROM participants
+          ''');
+
+          // 2. Alte Tabelle löschen
+          await m.deleteTable('participants');
+
+          // 3. Neue Tabelle mit 'address' Feld erstellen
+          await m.createTable(participants);
+
+          // 4. Daten migrieren (street, postalCode, city -> address)
+          await customStatement('''
+            INSERT INTO participants (
+              id, event_id, first_name, last_name, birth_date, gender, address, phone, email,
+              emergency_contact_name, emergency_contact_phone, medications, allergies,
+              dietary_restrictions, notes, bildung_und_teilhabe, calculated_price,
+              manual_price_override, discount_percent, discount_reason, role_id, family_id,
+              is_active, deleted_at, created_at, updated_at
+            )
+            SELECT
+              id, event_id, first_name, last_name, birth_date, gender,
+              TRIM(
+                COALESCE(street, '') ||
+                CASE WHEN street IS NOT NULL AND (postal_code IS NOT NULL OR city IS NOT NULL) THEN ', ' ELSE '' END ||
+                COALESCE(postal_code, '') ||
+                CASE WHEN postal_code IS NOT NULL AND city IS NOT NULL THEN ' ' ELSE '' END ||
+                COALESCE(city, '')
+              ),
+              phone, email, emergency_contact_name, emergency_contact_phone, medications,
+              allergies, dietary_restrictions, notes, bildung_und_teilhabe, calculated_price,
+              manual_price_override, discount_percent, discount_reason, role_id, family_id,
+              is_active, deleted_at, created_at, updated_at
+            FROM participants_backup
+          ''');
+
+          // 5. Backup löschen
+          await customStatement('DROP TABLE participants_backup');
+
+          // ===== Families Tabelle =====
+          // 1. Backup erstellen
+          await customStatement('''
+            CREATE TABLE families_backup AS SELECT * FROM families
+          ''');
+
+          // 2. Alte Tabelle löschen
+          await m.deleteTable('families');
+
+          // 3. Neue Tabelle mit 'address' Feld erstellen
+          await m.createTable(families);
+
+          // 4. Daten migrieren (street, postalCode, city -> address)
+          await customStatement('''
+            INSERT INTO families (
+              id, event_id, family_name, contact_person, phone, email, address,
+              created_at, updated_at
+            )
+            SELECT
+              id, event_id, family_name, contact_person, phone, email,
+              TRIM(
+                COALESCE(street, '') ||
+                CASE WHEN street IS NOT NULL AND (postal_code IS NOT NULL OR city IS NOT NULL) THEN ', ' ELSE '' END ||
+                COALESCE(postal_code, '') ||
+                CASE WHEN postal_code IS NOT NULL AND city IS NOT NULL THEN ' ' ELSE '' END ||
+                COALESCE(city, '')
+              ),
+              created_at, updated_at
+            FROM families_backup
+          ''');
+
+          // 5. Backup löschen
+          await customStatement('DROP TABLE families_backup');
+
+          // ===== Settings Tabelle =====
+          // 1. Backup erstellen
+          await customStatement('''
+            CREATE TABLE settings_backup AS SELECT * FROM settings
+          ''');
+
+          // 2. Alte Tabelle löschen
+          await m.deleteTable('settings');
+
+          // 3. Neue Tabelle mit 'organization_address' Feld erstellen
+          await m.createTable(settings);
+
+          // 4. Daten migrieren (organizationStreet, organizationPostalCode, organizationCity -> organizationAddress)
+          await customStatement('''
+            INSERT INTO settings (
+              id, event_id, organization_name, organization_address, bank_name, iban, bic,
+              verwendungszweck_prefix, invoice_footer, github_ruleset_path,
+              created_at, updated_at
+            )
+            SELECT
+              id, event_id, organization_name,
+              TRIM(
+                COALESCE(organization_street, '') ||
+                CASE WHEN organization_street IS NOT NULL AND (organization_postal_code IS NOT NULL OR organization_city IS NOT NULL) THEN ', ' ELSE '' END ||
+                COALESCE(organization_postal_code, '') ||
+                CASE WHEN organization_postal_code IS NOT NULL AND organization_city IS NOT NULL THEN ' ' ELSE '' END ||
+                COALESCE(organization_city, '')
+              ),
+              bank_name, iban, bic, verwendungszweck_prefix, invoice_footer, github_ruleset_path,
+              created_at, updated_at
+            FROM settings_backup
+          ''');
+
+          // 5. Backup löschen
+          await customStatement('DROP TABLE settings_backup');
         }
       },
     );

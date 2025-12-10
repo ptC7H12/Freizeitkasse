@@ -5,6 +5,7 @@ import '../../data/database/app_database.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/pdf_export_provider.dart';
+import '../../providers/payment_provider.dart';
 import '../../utils/constants.dart';
 import '../../utils/date_utils.dart';
 import '../../extensions/context_extensions.dart';
@@ -31,7 +32,9 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
   Participant? _participant;
   Family? _family;
   Role? _role;
-  List<Payment> _payments = [];
+  List<Payment> _payments = []; // Direkte Zahlungen des Teilnehmers
+  List<Payment> _familyPayments = []; // Zahlungen der Familie
+  Map<String, double>? _paymentBreakdown; // Aufschlüsselung inkl. Familienzahlungen
   bool _isLoading = true;
 
   @override
@@ -43,6 +46,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
   Future<void> _loadData() async {
     try {
       final database = ref.read(databaseProvider);
+      final paymentRepository = ref.read(paymentRepositoryProvider);
 
       // Lade Teilnehmer
       final participant = await (database.select(database.participants)
@@ -73,20 +77,45 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
             .getSingleOrNull();
       }
 
-      // Lade alle Zahlungen für diesen Teilnehmer
+      // Lade direkte Zahlungen des Teilnehmers
       final payments = await (database.select(database.payments)
             ..where((tbl) => tbl.participantId.equals(widget.participantId))
             ..where((tbl) => tbl.isActive.equals(true))
             ..orderBy([(tbl) => OrderingTerm.desc(tbl.paymentDate)]))
           .get();
 
-      setState(() {
-        _participant = participant;
-        _family = family;
-        _role = role;
-        _payments = payments;
-        _isLoading = false;
+      // Lade Familienzahlungen (wenn Familie vorhanden)
+      List<Payment> familyPayments = [];
+      if (participant.familyId != null) {
+        familyPayments = await (database.select(database.payments)
+              ..where((tbl) => tbl.familyId.equals(participant.familyId!))
+              ..where((tbl) => tbl.isActive.equals(true))
+              ..orderBy([(tbl) => OrderingTerm.desc(tbl.paymentDate)]))
+            .get();
+      }
+
+      // Lade Zahlungsaufschlüsselung mit anteiligen Familienzahlungen
+      final paymentBreakdown = await paymentRepository.getPaymentBreakdown(widget.participantId);
+
+      AppLogger.info('Loaded participant with payment breakdown', {
+        'participantId': widget.participantId,
+        'directPayments': paymentBreakdown['directPayments'],
+        'familyShare': paymentBreakdown['familyShare'],
+        'totalPaid': paymentBreakdown['totalPaid'],
+        'outstanding': paymentBreakdown['outstanding'],
       });
+
+      if (mounted) {
+        setState(() {
+          _participant = participant;
+          _family = family;
+          _role = role;
+          _payments = payments;
+          _familyPayments = familyPayments;
+          _paymentBreakdown = paymentBreakdown;
+          _isLoading = false;
+        });
+      }
     } catch (e, stack) {
       AppLogger.error('Fehler beim Laden der Teilnehmerdaten', error: e, stackTrace: stack);
       if (mounted) {
@@ -143,17 +172,24 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
           familyMembers: familyMembers,
           familyPayments: allPayments,
           settings: settings,
+          verwendungszweckPrefix: settings?.verwendungszweckPrefix,
         );
         if (mounted) {
           context.showSuccess('Familienrechnung erstellt: $filePath');
         }
       } else {
-        // Einzelrechnung erstellen
+        // Einzelrechnung erstellen mit Zahlungsaufschlüsselung
         final filePath = await pdfService.generateParticipantInvoice(
           participant: _participant!,
           eventName: currentEvent?.name ?? 'Veranstaltung',
           payments: _payments,
           settings: settings,
+          verwendungszweckPrefix: settings?.verwendungszweckPrefix,
+          // Zahlungsaufschlüsselung mit anteiligen Familienzahlungen
+          directPayments: _paymentBreakdown!['directPayments'],
+          familyPaymentShare: _paymentBreakdown!['familyShare'],
+          totalPaidWithFamily: _paymentBreakdown!['totalPaid'],
+          outstandingWithFamily: _paymentBreakdown!['outstanding'],
         );
         if (mounted) {
           context.showSuccess('Rechnung erstellt: $filePath');
@@ -178,7 +214,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
       );
     }
 
-    if (_participant == null) {
+    if (_participant == null || _paymentBreakdown == null) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Teilnehmer-Details'),
@@ -187,9 +223,12 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
       );
     }
 
-    final totalPrice = _participant!.manualPriceOverride ?? _participant!.calculatedPrice;
-    final totalPaid = _payments.fold<double>(0, (sum, payment) => sum + payment.amount);
-    final outstanding = totalPrice - totalPaid;
+    // Verwende die Zahlungsaufschlüsselung inkl. anteiliger Familienzahlungen
+    final totalPrice = _paymentBreakdown!['expectedPrice']!;
+    final directPayments = _paymentBreakdown!['directPayments']!;
+    final familyShare = _paymentBreakdown!['familyShare']!;
+    final totalPaid = _paymentBreakdown!['totalPaid']!;
+    final outstanding = _paymentBreakdown!['outstanding']!;
 
     return Scaffold(
       appBar: AppBar(
@@ -222,8 +261,8 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
             _buildActionButtons(context, outstanding),
             const SizedBox(height: AppConstants.spacing),
 
-            // Zahlungsstatus Card
-            _buildPaymentStatusCard(totalPrice, totalPaid, outstanding),
+            // Zahlungsstatus Card (erweitert mit Aufschlüsselung)
+            _buildPaymentStatusCard(totalPrice, directPayments, familyShare, totalPaid, outstanding),
             const SizedBox(height: AppConstants.spacing),
 
             // Persönliche Daten
@@ -353,7 +392,13 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
     );
   }
 
-  Widget _buildPaymentStatusCard(double totalPrice, double totalPaid, double outstanding) {
+  Widget _buildPaymentStatusCard(
+    double totalPrice,
+    double directPayments,
+    double familyShare,
+    double totalPaid,
+    double outstanding,
+  ) {
     Color statusColor;
     String statusText;
     IconData statusIcon;
@@ -378,6 +423,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
       child: Padding(
         padding: AppConstants.paddingAll16,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
@@ -397,8 +443,30 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
             ),
             const Divider(height: 24),
             _buildPaymentRow('Gesamtpreis', totalPrice, fontWeight: FontWeight.bold),
+            const SizedBox(height: 16),
+
+            // Aufschlüsselung der Zahlungen
+            Text(
+              'Zahlungen:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
+              ),
+            ),
             const SizedBox(height: 8),
-            _buildPaymentRow('Bereits bezahlt', totalPaid, color: Colors.green),
+            _buildPaymentRow('  Direkte Zahlungen', directPayments, color: Colors.blue, fontSize: 14),
+            if (familyShare > 0) ...[
+              const SizedBox(height: 4),
+              _buildPaymentRow(
+                '  Anteilige Familienzahlungen',
+                familyShare,
+                color: Colors.purple,
+                fontSize: 14,
+              ),
+            ],
+            const Divider(height: 16),
+            _buildPaymentRow('Gesamt bezahlt', totalPaid, color: Colors.green, fontWeight: FontWeight.w600),
             const SizedBox(height: 8),
             _buildPaymentRow(
               'Offener Betrag',
@@ -417,21 +485,23 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
     double amount, {
     Color? color,
     FontWeight? fontWeight,
+    double? fontSize,
   }) {
+    final effectiveFontSize = fontSize ?? 14.0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: effectiveFontSize,
             fontWeight: fontWeight,
           ),
         ),
         Text(
           '${amount.toStringAsFixed(2)} €',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: effectiveFontSize,
             fontWeight: fontWeight,
             color: color,
           ),
