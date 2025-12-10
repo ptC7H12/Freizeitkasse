@@ -143,6 +143,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
           familyMembers: familyMembers,
           familyPayments: allPayments,
           settings: settings,
+          verwendungszweckPrefix: settings?.verwendungszweckPrefix,
         );
         if (mounted) {
           context.showSuccess('Familienrechnung erstellt: $filePath');
@@ -154,6 +155,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
           eventName: currentEvent?.name ?? 'Veranstaltung',
           payments: _payments,
           settings: settings,
+          verwendungszweckPrefix: settings?.verwendungszweckPrefix,
         );
         if (mounted) {
           context.showSuccess('Rechnung erstellt: $filePath');

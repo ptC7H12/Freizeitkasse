@@ -167,6 +167,7 @@ class Settings extends Table {
   TextColumn get bankName => text().withLength(max: 200).nullable()();
   TextColumn get iban => text().withLength(max: 34).nullable()();
   TextColumn get bic => text().withLength(max: 11).nullable()();
+  TextColumn get verwendungszweckPrefix => text().withLength(max: 100).nullable()();
   TextColumn get invoiceFooter => text().nullable()();
   TextColumn get githubRulesetPath => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
