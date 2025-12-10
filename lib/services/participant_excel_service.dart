@@ -6,14 +6,20 @@ import 'package:path/path.dart' as path;
 import '../data/database/app_database.dart';
 import '../data/repositories/participant_repository.dart';
 import '../data/repositories/family_repository.dart';
+import '../data/repositories/payment_repository.dart';
 import '../utils/logger.dart';
 
 /// Service für Excel-Import/Export von Teilnehmern
 class ParticipantExcelService {
   final ParticipantRepository _participantRepository;
   final FamilyRepository _familyRepository;
+  final PaymentRepository _paymentRepository;
 
-  ParticipantExcelService(this._participantRepository, this._familyRepository);
+  ParticipantExcelService(
+    this._participantRepository,
+    this._familyRepository,
+    this._paymentRepository,
+  );
 
   /// Exportiere Teilnehmer als Excel
   Future<File> exportParticipants({
@@ -48,6 +54,10 @@ class ParticipantExcelService {
       'Manueller Preis',
       'Rabatt %',
       'Rabattgrund',
+      'Direkte Zahlungen',
+      'Anteilige Familienzahlungen',
+      'Gesamt bezahlt',
+      'Noch offen',
     ];
 
     // Header schreiben
@@ -64,6 +74,13 @@ class ParticipantExcelService {
     for (var rowIndex = 0; rowIndex < participants.length; rowIndex++) {
       final participant = participants[rowIndex];
       final excelRowIndex = rowIndex + 1; // +1 wegen Header
+
+      // Zahlungsaufschlüsselung laden (inkl. anteiliger Familienzahlungen)
+      final paymentBreakdown = await _paymentRepository.getPaymentBreakdown(participant.id);
+      final directPayments = paymentBreakdown['directPayments'] ?? 0.0;
+      final familyShare = paymentBreakdown['familyShare'] ?? 0.0;
+      final totalPaid = paymentBreakdown['totalPaid'] ?? 0.0;
+      final outstanding = paymentBreakdown['outstanding'] ?? 0.0;
 
       final rowData = [
         participant.id.toString(),
@@ -89,6 +106,10 @@ class ParticipantExcelService {
         participant.manualPriceOverride?.toStringAsFixed(2) ?? '',
         participant.discountPercent.toStringAsFixed(0),
         participant.discountReason ?? '',
+        directPayments.toStringAsFixed(2),
+        familyShare.toStringAsFixed(2),
+        totalPaid.toStringAsFixed(2),
+        outstanding.toStringAsFixed(2),
       ];
 
       for (var colIndex = 0; colIndex < rowData.length; colIndex++) {

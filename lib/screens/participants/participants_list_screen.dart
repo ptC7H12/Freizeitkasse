@@ -5,6 +5,7 @@ import '../../providers/participant_provider.dart';
 import '../../providers/pdf_export_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/participant_excel_provider.dart';
+import '../../providers/payment_provider.dart';
 import '../../data/database/app_database.dart';
 import '../../utils/date_utils.dart';
 import '../../utils/route_helpers.dart';
@@ -14,6 +15,7 @@ import 'participant_detail_screen.dart';
 import '../../utils/constants.dart';
 import '../../extensions/context_extensions.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../utils/logger.dart';
 
 /// Participants List Screen
 ///
@@ -47,31 +49,52 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
     super.dispose();
   }
 
+  /// Lädt Zahlungen inkl. anteiliger Familienzahlungen für alle Teilnehmer
+  ///
+  /// WICHTIG: Diese Methode verwendet die neue Logik aus PaymentRepository,
+  /// die Familienzahlungen proportional zu offenen Beträgen verteilt.
   Future<void> _loadParticipantPayments() async {
     final currentEvent = ref.read(currentEventProvider);
     if (currentEvent == null) {
       return;
     }
 
-    final database = ref.read(databaseProvider);
-    final payments = await (database.select(database.payments)
-          ..where((tbl) => tbl.eventId.equals(currentEvent.id))
-          ..where((tbl) => tbl.isActive.equals(true))
-          ..where((tbl) => tbl.participantId.isNotNull()))
-        .get();
+    try {
+      final database = ref.read(databaseProvider);
+      final paymentRepository = ref.read(paymentRepositoryProvider);
 
-    // Gruppiere Zahlungen nach Teilnehmer
-    final paymentMap = <int, double>{};
-    for (final payment in payments) {
-      if (payment.participantId != null) {
-        paymentMap[payment.participantId!] =
-          (paymentMap[payment.participantId!] ?? 0) + payment.amount;
+      // Alle aktiven Teilnehmer des Events laden
+      final participants = await (database.select(database.participants)
+            ..where((tbl) => tbl.eventId.equals(currentEvent.id))
+            ..where((tbl) => tbl.isActive.equals(true)))
+          .get();
+
+      // Für jeden Teilnehmer: Gesamtzahlungen inkl. Familienzahlungen berechnen
+      final paymentMap = <int, double>{};
+      for (final participant in participants) {
+        final totalPaid = await paymentRepository.getTotalPaymentsWithFamilyShare(participant.id);
+        paymentMap[participant.id] = totalPaid;
+
+        AppLogger.debug('Loaded payment for participant ${participant.id}', {
+          'name': '${participant.firstName} ${participant.lastName}',
+          'totalPaid': totalPaid,
+        });
+      }
+
+      if (mounted) {
+        setState(() {
+          _participantPayments = paymentMap;
+        });
+
+        AppLogger.info('Loaded payments for ${paymentMap.length} participants');
+      }
+    } catch (e, stack) {
+      AppLogger.error('Failed to load participant payments', error: e, stackTrace: stack);
+
+      if (mounted) {
+        context.showError('Fehler beim Laden der Zahlungsinformationen');
       }
     }
-
-    setState(() {
-      _participantPayments = paymentMap;
-    });
   }
 
   List<Participant> _filterParticipants(List<Participant> participants) {

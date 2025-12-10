@@ -342,6 +342,10 @@ class PdfExportService {
     List<Payment>? payments,
     Setting? settings,
     String? verwendungszweckPrefix,
+    double? directPayments,
+    double? familyPaymentShare,
+    double? totalPaidWithFamily,
+    double? outstandingWithFamily,
   }) async {
     final pdf = pw.Document();
     final now = DateTime.now();
@@ -350,8 +354,9 @@ class PdfExportService {
 
     // Calculate payment totals
     final totalPrice = participant.manualPriceOverride ?? participant.calculatedPrice;
-    final totalPaid = payments?.fold<double>(0, (sum, payment) => sum + payment.amount) ?? 0.0;
-    final outstanding = totalPrice - totalPaid;
+    // Verwende die übergebenen Werte (inkl. Familienzahlungen) oder fallback zu alten Berechnungen
+    final totalPaid = totalPaidWithFamily ?? (payments?.fold<double>(0, (sum, payment) => sum + payment.amount) ?? 0.0);
+    final outstanding = outstandingWithFamily ?? (totalPrice - totalPaid);
 
     // Build Verwendungszweck
     final participantName = '${participant.firstName} ${participant.lastName}';
