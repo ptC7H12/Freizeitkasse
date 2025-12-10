@@ -59,6 +59,7 @@ class SettingsRepository {
     String? bankName,
     String? iban,
     String? bic,
+    String? verwendungszweckPrefix,
     String? invoiceFooter,
     String? githubRulesetPath,
   }) async {
@@ -78,6 +79,7 @@ class SettingsRepository {
             bankName: Value(bankName),
             iban: Value(iban),
             bic: Value(bic),
+            verwendungszweckPrefix: Value(verwendungszweckPrefix),
             invoiceFooter: Value(invoiceFooter),
             githubRulesetPath: Value(githubRulesetPath),
           ),
@@ -95,6 +97,7 @@ class SettingsRepository {
             bankName: Value(bankName),
             iban: Value(iban),
             bic: Value(bic),
+            verwendungszweckPrefix: Value(verwendungszweckPrefix),
             invoiceFooter: Value(invoiceFooter),
             githubRulesetPath: Value(githubRulesetPath),
             updatedAt: Value(DateTime.now()),

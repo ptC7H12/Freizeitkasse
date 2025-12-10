@@ -16,7 +16,7 @@ import '../../widgets/responsive_scaffold.dart';
 
 /// Einstellungen-Screen mit Tabs
 ///
-/// Tab 1: Allgemein (Organisation, Bankdaten, Betreff, Fußzeile)
+/// Tab 1: Allgemein (Organisation, Bankdaten, Verwendungszweck prefix, Fußzeile)
 /// Tab 2: Regelwerk (GitHub-Verzeichnis, Import, Dokumentation-Link)
 /// Tab 3: Kategorien (Ausgaben- und Einnahmen-Kategorien)
 /// Tab 4: App-Infos (Version, Lizenzen)
@@ -147,10 +147,11 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
       setState(() {
         _organizationController.text = settings.organizationName ?? '';
         _addressController.text = settings.organizationStreet ?? '';
-        // _contactController could map to a new field or be stored in city temporarily
+        // _contactController is not saved to DB (UI only field)
         _ibanController.text = settings.iban ?? '';
         _bicController.text = settings.bic ?? '';
         _accountHolderController.text = settings.bankName ?? '';
+        _subjectController.text = settings.verwendungszweckPrefix ?? '';
         _footerController.text = settings.invoiceFooter ?? '';
       });
     }
@@ -188,6 +189,9 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
         bankName: _accountHolderController.text.trim().isEmpty
             ? null
             : _accountHolderController.text.trim(),
+        verwendungszweckPrefix: _subjectController.text.trim().isEmpty
+            ? null
+            : _subjectController.text.trim(),
         invoiceFooter: _footerController.text.trim().isEmpty
             ? null
             : _footerController.text.trim(),
@@ -310,6 +314,16 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
                     prefixIcon: Icon(Icons.person),
                   ),
                 ),
+                const SizedBox(height: AppConstants.spacingS),
+                TextFormField(
+                  controller: _subjectController,
+                  decoration: const InputDecoration(
+                    labelText: 'Verwendungszweck prefix',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.subject),
+                    hintText: 'z.B. Sommerfreizeit 2024',
+                  ),
+                ),
               ],
             ),
           ),
@@ -317,7 +331,7 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
 
         const SizedBox(height: AppConstants.spacing),
 
-        // Dokumente Card
+        // Sonstiges Card
         Card(
           child: Padding(
             padding: AppConstants.paddingAll16,
@@ -329,26 +343,16 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
                     const Icon(Icons.description, color: Color(0xFFFF9800)),
                     const SizedBox(width: AppConstants.spacingS),
                     Text(
-                      'Dokumente',
+                      'Sonstiges',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ],
                 ),
                 const SizedBox(height: AppConstants.spacing),
                 TextFormField(
-                  controller: _subjectController,
-                  decoration: const InputDecoration(
-                    labelText: 'Betreff für Rechnungen',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.subject),
-                    hintText: 'z.B. Rechnung Sommerfreizeit 2024',
-                  ),
-                ),
-                const SizedBox(height: AppConstants.spacingS),
-                TextFormField(
                   controller: _footerController,
                   decoration: const InputDecoration(
-                    labelText: 'Fußzeile für Dokumente',
+                    labelText: 'Fußzeile',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.text_fields),
                     hintText: 'z.B. Mit freundlichen Grüßen...',
