@@ -36,9 +36,7 @@ class FamilyRepository {
     String? contactPerson,
     String? phone,
     String? email,
-    String? street,
-    String? postalCode,
-    String? city,
+    String? address,
   }) {
     return _db.into(_db.families).insert(
           FamiliesCompanion.insert(
@@ -47,9 +45,7 @@ class FamilyRepository {
             contactPerson: Value(contactPerson),
             phone: Value(phone),
             email: Value(email),
-            street: Value(street),
-            postalCode: Value(postalCode),
-            city: Value(city),
+            address: Value(address),
           ),
         );
   }
@@ -61,9 +57,7 @@ class FamilyRepository {
     String? contactPerson,
     String? phone,
     String? email,
-    String? street,
-    String? postalCode,
-    String? city,
+    String? address,
   }) {
     return _db.update(_db.families).replace(
           FamiliesCompanion(
@@ -74,10 +68,7 @@ class FamilyRepository {
                 contactPerson != null ? Value(contactPerson) : const Value.absent(),
             phone: phone != null ? Value(phone) : const Value.absent(),
             email: email != null ? Value(email) : const Value.absent(),
-            street: street != null ? Value(street) : const Value.absent(),
-            postalCode:
-                postalCode != null ? Value(postalCode) : const Value.absent(),
-            city: city != null ? Value(city) : const Value.absent(),
+            address: address != null ? Value(address) : const Value.absent(),
             updatedAt: Value(DateTime.now()),
           ),
         );

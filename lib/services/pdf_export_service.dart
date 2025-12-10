@@ -385,13 +385,8 @@ class PdfExportService {
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
-                    if (settings.organizationStreet != null)
-                      pw.Text(settings.organizationStreet!, style: const pw.TextStyle(fontSize: 10)),
-                    if (settings.organizationPostalCode != null && settings.organizationCity != null)
-                      pw.Text(
-                        '${settings.organizationPostalCode} ${settings.organizationCity}',
-                        style: const pw.TextStyle(fontSize: 10),
-                      ),
+                    if (settings.organizationAddress != null && settings.organizationAddress!.isNotEmpty)
+                      pw.Text(settings.organizationAddress!, style: const pw.TextStyle(fontSize: 10)),
                   ],
                 ),
               ],
@@ -700,13 +695,8 @@ class PdfExportService {
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
-                    if (settings.organizationStreet != null)
-                      pw.Text(settings.organizationStreet!, style: const pw.TextStyle(fontSize: 10)),
-                    if (settings.organizationPostalCode != null && settings.organizationCity != null)
-                      pw.Text(
-                        '${settings.organizationPostalCode} ${settings.organizationCity}',
-                        style: const pw.TextStyle(fontSize: 10),
-                      ),
+                    if (settings.organizationAddress != null && settings.organizationAddress!.isNotEmpty)
+                      pw.Text(settings.organizationAddress!, style: const pw.TextStyle(fontSize: 10)),
                   ],
                 ),
               ],

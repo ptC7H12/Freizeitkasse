@@ -398,9 +398,8 @@ class PdfInvoiceService {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text('${participant.firstName} ${participant.lastName}'),
-        if (participant.street != null) pw.Text(participant.street!),
-        if (participant.postalCode != null && participant.city != null)
-          pw.Text('${participant.postalCode} ${participant.city}'),
+        if (participant.address != null && participant.address!.isNotEmpty)
+          pw.Text(participant.address!),
       ],
     );
   }
@@ -411,9 +410,8 @@ class PdfInvoiceService {
       children: [
         pw.Text('Familie ${family.familyName}'),
         if (family.contactPerson != null) pw.Text('z.Hd. ${family.contactPerson}'),
-        if (family.street != null) pw.Text(family.street!),
-        if (family.postalCode != null && family.city != null)
-          pw.Text('${family.postalCode} ${family.city}'),
+        if (family.address != null && family.address!.isNotEmpty)
+          pw.Text(family.address!),
       ],
     );
   }

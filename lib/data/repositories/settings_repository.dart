@@ -29,9 +29,7 @@ class SettingsRepository {
         SettingsCompanion.insert(
           eventId: eventId,
           organizationName: const Value(null),
-          organizationStreet: const Value(null),
-          organizationPostalCode: const Value(null),
-          organizationCity: const Value(null),
+          organizationAddress: const Value(null),
           bankName: const Value(null),
           iban: const Value(null),
           bic: const Value(null),
@@ -53,9 +51,7 @@ class SettingsRepository {
   Future<bool> updateSettings({
     required int eventId,
     String? organizationName,
-    String? organizationStreet,
-    String? organizationPostalCode,
-    String? organizationCity,
+    String? organizationAddress,
     String? bankName,
     String? iban,
     String? bic,
@@ -73,9 +69,7 @@ class SettingsRepository {
           SettingsCompanion.insert(
             eventId: eventId,
             organizationName: Value(organizationName),
-            organizationStreet: Value(organizationStreet),
-            organizationPostalCode: Value(organizationPostalCode),
-            organizationCity: Value(organizationCity),
+            organizationAddress: Value(organizationAddress),
             bankName: Value(bankName),
             iban: Value(iban),
             bic: Value(bic),
@@ -91,9 +85,7 @@ class SettingsRepository {
             .write(
           SettingsCompanion(
             organizationName: Value(organizationName),
-            organizationStreet: Value(organizationStreet),
-            organizationPostalCode: Value(organizationPostalCode),
-            organizationCity: Value(organizationCity),
+            organizationAddress: Value(organizationAddress),
             bankName: Value(bankName),
             iban: Value(iban),
             bic: Value(bic),
