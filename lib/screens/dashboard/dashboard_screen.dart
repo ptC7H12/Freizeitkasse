@@ -5,7 +5,6 @@ import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/subsidy_provider.dart';
 import '../../data/database/app_database.dart';
-import '../participants/participants_families_screen.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
 
@@ -52,104 +51,7 @@ class DashboardScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ========== BEREICH 1: TEILNEHMER ==========
-          _buildSectionHeader(context, Icons.people, 'Teilnehmer'),
-          const SizedBox(height: AppConstants.spacing),
-
-          StreamBuilder<int>(
-            stream: (database.select(database.participants)
-                  ..where((tbl) => tbl.eventId.equals(eventId))
-                  ..where((tbl) => tbl.isActive.equals(true)))
-                .watch()
-                .map((list) => list.length),
-            builder: (context, snapshot) {
-              final participantCount = snapshot.data ?? 0;
-
-              return StreamBuilder<int>(
-                stream: (database.select(database.families)
-                      ..where((tbl) => tbl.eventId.equals(eventId)))
-                    .watch()
-                    .map((list) => list.length),
-                builder: (context, familySnapshot) {
-                  final familyCount = familySnapshot.data ?? 0;
-
-                  return Card(
-                    elevation: 2,
-                    child: Padding(
-                      padding: AppConstants.paddingAll16,
-                      child: isDesktop
-                          ? Row(
-                              children: [
-                                Expanded(
-                                  child: _buildParticipantStat(
-                                    context,
-                                    'Anzahl Teilnehmer',
-                                    participantCount.toString(),
-                                    Icons.people,
-                                    const Color(0xFF2196F3),
-                                    () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => const ParticipantsFamiliesScreen(),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const VerticalDivider(width: 32),
-                                Expanded(
-                                  child: _buildParticipantStat(
-                                    context,
-                                    'Anzahl Familien',
-                                    familyCount.toString(),
-                                    Icons.family_restroom,
-                                    const Color(0xFF4CAF50),
-                                    () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => const ParticipantsFamiliesScreen(),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                _buildParticipantStat(
-                                  context,
-                                  'Anzahl Teilnehmer',
-                                  participantCount.toString(),
-                                  Icons.people,
-                                  const Color(0xFF2196F3),
-                                  () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => const ParticipantsFamiliesScreen(),
-                                    ),
-                                  ),
-                                ),
-                                const Divider(height: 24),
-                                _buildParticipantStat(
-                                  context,
-                                  'Anzahl Familien',
-                                  familyCount.toString(),
-                                  Icons.family_restroom,
-                                  const Color(0xFF4CAF50),
-                                  () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => const ParticipantsFamiliesScreen(),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-
-          const SizedBox(height: AppConstants.spacingXL),
-
-          // ========== BEREICH 2: FINANZÜBERSICHT ==========
+          // ========== FINANZÜBERSICHT ==========
           _buildSectionHeader(context, Icons.account_balance_wallet, 'Finanzübersicht'),
           const SizedBox(height: AppConstants.spacing),
 
@@ -511,60 +413,6 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-
-  /// Participant/Family Stat Widget with Quicklink
-  Widget _buildParticipantStat(
-    BuildContext context,
-    String label,
-    String count,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppConstants.borderRadius8,
-      child: Padding(
-        padding: AppConstants.paddingAll8,
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: AppConstants.borderRadius8,
-              ),
-              child: Icon(icon, color: color, size: 32),
-            ),
-            const SizedBox(width: AppConstants.spacing),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    count,
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_ios, color: color, size: 20),
-          ],
-        ),
-      ),
     );
   }
 
