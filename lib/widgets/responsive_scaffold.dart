@@ -62,37 +62,36 @@ class ResponsiveScaffold extends ConsumerWidget {
   }
 
   Widget _buildDesktopLayout(BuildContext context, WidgetRef ref) {
-    final currentEvent = ref.watch(currentEventProvider);
-
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: currentEvent != null
-            ? Row(
-                children: [
-                  Container(
-                    padding: AppConstants.paddingAll8,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.event, size: 24),
-                  ),
-                  const SizedBox(width: AppConstants.spacingM),
-                  Text(
-                    currentEvent.name,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                ],
-              )
-            : null,
-        actions: actions,
-      ),
       body: Row(
         children: [
           _buildNavigationRail(context, ref),
           const VerticalDivider(thickness: 1, width: 1),
-          Expanded(child: body),
+          Expanded(
+            child: actions != null && actions!.isNotEmpty
+                ? Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Theme.of(context).dividerColor,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: actions!,
+                        ),
+                      ),
+                      Expanded(child: body),
+                    ],
+                  )
+                : body,
+          ),
         ],
       ),
       floatingActionButton: floatingActionButton,
