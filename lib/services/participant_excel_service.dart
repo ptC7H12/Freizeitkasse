@@ -374,7 +374,7 @@ class ParticipantExcelService {
             lastName: lastName,
             birthDate: birthDate,
             gender: gender,
-            street: address,  // Map "Adresse" to "street" DB field
+            address: address,
             email: email,
             phone: phone,
             emergencyContactName: emergencyContactName,

@@ -122,6 +122,33 @@ class ExcelImportService {
             }
           }
 
+          // Build address from either combined field or separate fields
+          String? address;
+          if (participantData.containsKey('address') && participantData['address'] != null) {
+            // Use combined address field if available
+            address = participantData['address'] as String?;
+          } else {
+            // Combine separate address fields if available
+            final street = participantData['street'] as String?;
+            final postalCode = participantData['postal_code'] as String?;
+            final city = participantData['city'] as String?;
+
+            if (street != null || postalCode != null || city != null) {
+              final parts = <String>[];
+              if (street != null && street.isNotEmpty) parts.add(street);
+              if (postalCode != null && postalCode.isNotEmpty) {
+                if (city != null && city.isNotEmpty) {
+                  parts.add('$postalCode $city');
+                } else {
+                  parts.add(postalCode);
+                }
+              } else if (city != null && city.isNotEmpty) {
+                parts.add(city);
+              }
+              address = parts.join(', ');
+            }
+          }
+
           // Create participant
           await _participantRepository.createParticipant(
             eventId: eventId,
@@ -129,9 +156,7 @@ class ExcelImportService {
             lastName: participantData['last_name'] as String,
             birthDate: participantData['birth_date'] as DateTime,
             gender: participantData['gender'] as String?,
-            street: participantData['street'] as String?,
-            postalCode: participantData['postal_code'] as String?,
-            city: participantData['city'] as String?,
+            address: address,
             email: participantData['email'] as String?,
             phone: participantData['phone'] as String?,
             emergencyContactName: participantData['emergency_contact_name'] as String?,
@@ -292,11 +317,17 @@ class ExcelImportService {
         mapping['email'] = i;
       } else if (headerName.contains('telefon') || headerName.contains('phone')) {
         mapping['phone'] = i;
-      } else if (headerName.contains('straße') || headerName.contains('strasse') || headerName.contains('adresse')) {
+      } else if (headerName.contains('adresse')) {
+        // Wenn "Adresse" gefunden wird, direkt als address mappen
+        mapping['address'] = i;
+      } else if (headerName.contains('straße') || headerName.contains('strasse')) {
+        // Separate Straße-Spalte
         mapping['street'] = i;
       } else if (headerName.contains('plz') || headerName.contains('postleitzahl')) {
+        // Separate PLZ-Spalte
         mapping['postal_code'] = i;
       } else if (headerName.contains('stadt') || headerName.contains('ort')) {
+        // Separate Ort-Spalte
         mapping['city'] = i;
       } else if (headerName.contains('notfall') && headerName.contains('name')) {
         mapping['emergency_contact_name'] = i;
