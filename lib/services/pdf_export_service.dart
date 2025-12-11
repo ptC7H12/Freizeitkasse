@@ -125,10 +125,8 @@ class PdfExportService {
             pw.SizedBox(height: 15),
 
             _buildSection('Adresse', [
-              if (participant.street != null)
-                _buildField('Straße', participant.street!),
-              if (participant.postalCode != null && participant.city != null)
-                _buildField('Ort', '${participant.postalCode} ${participant.city}'),
+              if (participant.address != null && participant.address!.isNotEmpty)
+                _buildField('Adresse', participant.address!),
             ]),
 
             pw.SizedBox(height: 15),
@@ -436,9 +434,8 @@ class PdfExportService {
           ),
           pw.SizedBox(height: 5),
           pw.Text('${participant.firstName} ${participant.lastName}'),
-          if (participant.street != null) pw.Text(participant.street!),
-          if (participant.postalCode != null && participant.city != null)
-            pw.Text('${participant.postalCode} ${participant.city}'),
+          if (participant.address != null && participant.address!.isNotEmpty)
+            pw.Text(participant.address!),
           pw.SizedBox(height: 20),
 
           // Subject
@@ -669,7 +666,7 @@ class PdfExportService {
     final outstanding = totalPrice - totalPaid;
 
     // Build Verwendungszweck
-    final familyName = family.lastName;
+    final familyName = family.familyName;
     final verwendungszweck = verwendungszweckPrefix != null && verwendungszweckPrefix.isNotEmpty
         ? '$verwendungszweckPrefix $familyName'
         : invoiceNumber;
@@ -752,9 +749,8 @@ class PdfExportService {
             style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
           ),
           if (family.contactPerson != null) pw.Text('Ansprechpartner: ${family.contactPerson}'),
-          if (family.street != null) pw.Text(family.street!),
-          if (family.postalCode != null && family.city != null)
-            pw.Text('${family.postalCode} ${family.city}'),
+          if (family.address != null && family.address!.isNotEmpty)
+            pw.Text(family.address!),
           pw.SizedBox(height: 20),
 
           // Family members table (if available)

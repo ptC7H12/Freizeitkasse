@@ -295,20 +295,15 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
             if (_family != null || _role != null) const SizedBox(height: AppConstants.spacing),
 
             // Adresse
-            if (_participant!.street != null || _participant!.city != null)
+            if (_participant!.address != null && _participant!.address!.isNotEmpty)
               _buildSectionCard(
                 'Adresse',
                 Icons.home,
                 [
-                  if (_participant!.street != null) _buildInfoRow('Straße', _participant!.street!),
-                  if (_participant!.postalCode != null || _participant!.city != null)
-                    _buildInfoRow(
-                      'Ort',
-                      '${_participant!.postalCode ?? ''} ${_participant!.city ?? ''}'.trim(),
-                    ),
+                  _buildInfoRow('Adresse', _participant!.address!),
                 ],
               ),
-            if (_participant!.street != null || _participant!.city != null)
+            if (_participant!.address != null && _participant!.address!.isNotEmpty)
               const SizedBox(height: AppConstants.spacing),
 
             // Kontakt
