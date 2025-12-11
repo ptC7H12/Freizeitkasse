@@ -106,8 +106,8 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
       filtered = filtered.where((p) {
         final fullName = '${p.firstName} ${p.lastName}'.toLowerCase();
         final email = p.email?.toLowerCase() ?? '';
-        final city = p.city?.toLowerCase() ?? '';
-        return fullName.contains(query) || email.contains(query) || city.contains(query);
+        final address = p.address?.toLowerCase() ?? '';
+        return fullName.contains(query) || email.contains(query) || address.contains(query);
       }).toList();
     }
 

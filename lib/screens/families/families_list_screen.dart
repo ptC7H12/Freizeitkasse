@@ -93,11 +93,11 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
         final familyName = f.familyName.toLowerCase();
         final contactPerson = (f.contactPerson ?? '').toLowerCase();
         final email = (f.email ?? '').toLowerCase();
-        final city = (f.city ?? '').toLowerCase();
+        final address = (f.address ?? '').toLowerCase();
         return familyName.contains(query) ||
             contactPerson.contains(query) ||
             email.contains(query) ||
-            city.contains(query);
+            address.contains(query);
       }).toList();
     }
 
