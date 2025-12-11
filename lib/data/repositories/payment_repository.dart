@@ -136,17 +136,18 @@ class PaymentRepository {
 
   /// Berechnet Gesamtzahlungen eines Teilnehmers inkl. anteiliger Familienzahlungen
   ///
-  /// Diese Methode implementiert die Logik aus den OLD Scripts:
+  /// Verteilungslogik (SEQUENTIELL nach Geburtsdatum):
   /// 1. Direkte Zahlungen des Teilnehmers
-  /// 2. Anteilige Verteilung von Familienzahlungen basierend auf offenen Beträgen
+  /// 2. Anteilige Verteilung von Familienzahlungen:
+  ///    - Sortiere Familienmitglieder nach Geburtsdatum (jüngste zuerst)
+  ///    - Verteile sequentiell: Fülle jeden vollständig auf, bevor zum nächsten übergegangen wird
   ///
   /// Beispiel:
-  /// - Familie mit 3 Personen: P1 (100€), P2 (150€), P3 (50€)
-  /// - P1 hat 100€ direkt bezahlt -> P1 ist vollständig bezahlt
-  /// - Familie zahlt 200€ -> wird auf P2 und P3 verteilt nach offenen Beträgen:
-  ///   - P2 offen: 150€, P3 offen: 50€, gesamt offen: 200€
-  ///   - P2 bekommt: 150/200 * 200€ = 150€
-  ///   - P3 bekommt: 50/200 * 200€ = 50€
+  /// - Familie mit 2 Personen: P1 (146,25€, jünger), P2 (112,50€, älter)
+  /// - Familie zahlt 200€ -> Sequentielle Verteilung nach Geburtsdatum:
+  ///   - P1 (jüngstes Kind): 146,25€ (vollständig bezahlt)
+  ///   - P2: 200€ - 146,25€ = 53,75€ (Rest)
+  ///   - Ergebnis: P1 bezahlt 146,25€, P2 bezahlt 53,75€
   Future<double> getTotalPaymentsWithFamilyShare(int participantId) async {
     final participant = await (_db.select(_db.participants)
           ..where((tbl) => tbl.id.equals(participantId)))
@@ -176,9 +177,11 @@ class PaymentRepository {
 
   /// Berechnet den Anteil eines Teilnehmers an Familienzahlungen
   ///
-  /// Verteilungslogik:
-  /// 1. Wenn offene Beträge existieren: Proportional zu offenen Beträgen
-  /// 2. Wenn alles bezahlt: Proportional zum Sollpreis
+  /// Verteilungslogik (SEQUENTIELL):
+  /// 1. Sortiere Familienmitglieder nach Geburtsdatum (jüngste zuerst)
+  /// 2. Verteile Familienzahlung sequentiell: Fülle jeden Teilnehmer vollständig auf,
+  ///    bevor zum nächsten übergegangen wird
+  /// 3. Fallback: Wenn alles bezahlt, verteile proportional zum Sollpreis
   Future<double> _calculateFamilyPaymentShare(Participant participant) async {
     if (participant.familyId == null) {
       return 0.0;
@@ -202,7 +205,10 @@ class PaymentRepository {
       return 0.0; // Keine Familienzahlungen vorhanden
     }
 
-    // Für jedes Mitglied: Preis und offenen Betrag berechnen
+    // Sortiere Mitglieder nach Geburtsdatum (jüngste zuerst)
+    familyMembers.sort((a, b) => b.birthDate.compareTo(a.birthDate));
+
+    // Berechne für jedes Mitglied den offenen Betrag
     final membersData = <Map<String, dynamic>>[];
     double totalOutstanding = 0.0;
     double totalPrice = 0.0;
@@ -214,6 +220,7 @@ class PaymentRepository {
 
       membersData.add({
         'id': member.id,
+        'participant': member,
         'price': memberPrice,
         'directPayments': directPayments,
         'outstanding': memberOutstanding,
@@ -223,34 +230,57 @@ class PaymentRepository {
       totalPrice += memberPrice;
     }
 
-    // Finde Daten des aktuellen Teilnehmers
-    final memberData = membersData.firstWhere(
-      (m) => m['id'] == participant.id,
-      orElse: () => {'id': participant.id, 'outstanding': 0.0, 'price': 0.0},
-    );
-
     double share = 0.0;
 
-    // Verteilungslogik
+    // FALL 1: Es gibt offene Beträge -> Sequentielle Verteilung
     if (totalOutstanding > 0) {
-      // Fall 1: Es gibt offene Beträge -> Verteile proportional zu offenen Beträgen
-      final memberOutstanding = memberData['outstanding'] as double;
-      share = (memberOutstanding / totalOutstanding) * familyPayments;
+      double remainingPayment = familyPayments;
 
-      AppLogger.debug('Family payment distribution (by outstanding)', {
-        'participantId': participant.id,
-        'memberOutstanding': memberOutstanding,
-        'totalOutstanding': totalOutstanding,
-        'familyPayments': familyPayments,
-        'share': share,
-      });
-    } else if (totalPrice > 0) {
-      // Fall 2: Alles bezahlt, aber noch Familienzahlungen vorhanden
-      // -> Verteile proportional zum Sollpreis
+      // Verteile sequentiell nach Geburtsdatum (jüngste zuerst)
+      for (final memberData in membersData) {
+        final memberId = memberData['id'] as int;
+        final memberOutstanding = memberData['outstanding'] as double;
+
+        // Berechne wie viel dieser Teilnehmer erhält
+        final allocation = min(memberOutstanding, remainingPayment);
+
+        if (memberId == participant.id) {
+          share = allocation;
+
+          AppLogger.debug('Family payment distribution (sequential)', {
+            'participantId': participant.id,
+            'memberOutstanding': memberOutstanding,
+            'totalOutstanding': totalOutstanding,
+            'familyPayments': familyPayments,
+            'remainingPayment': remainingPayment,
+            'allocation': allocation,
+          });
+
+          break;
+        }
+
+        // Reduziere verbleibendes Budget
+        remainingPayment -= allocation;
+
+        // Wenn nichts mehr übrig ist, können weitere Teilnehmer nichts mehr bekommen
+        if (remainingPayment <= 0) {
+          break;
+        }
+      }
+    }
+    // FALL 2: Alles bezahlt, aber noch Familienzahlungen vorhanden
+    // -> Verteile proportional zum Sollpreis
+    else if (totalPrice > 0) {
+      // Finde Daten des aktuellen Teilnehmers
+      final memberData = membersData.firstWhere(
+        (m) => m['id'] == participant.id,
+        orElse: () => {'id': participant.id, 'outstanding': 0.0, 'price': 0.0},
+      );
+
       final memberPrice = memberData['price'] as double;
       share = (memberPrice / totalPrice) * familyPayments;
 
-      AppLogger.debug('Family payment distribution (by price)', {
+      AppLogger.debug('Family payment distribution (proportional - all paid)', {
         'participantId': participant.id,
         'memberPrice': memberPrice,
         'totalPrice': totalPrice,
