@@ -139,13 +139,13 @@ class PaymentRepository {
   /// Verteilungslogik (SEQUENTIELL nach Geburtsdatum):
   /// 1. Direkte Zahlungen des Teilnehmers
   /// 2. Anteilige Verteilung von Familienzahlungen:
-  ///    - Sortiere Familienmitglieder nach Geburtsdatum (jüngste zuerst)
+  ///    - Sortiere Familienmitglieder nach Geburtsdatum (älteste zuerst)
   ///    - Verteile sequentiell: Fülle jeden vollständig auf, bevor zum nächsten übergegangen wird
   ///
   /// Beispiel:
-  /// - Familie mit 2 Personen: P1 (146,25€, jünger), P2 (112,50€, älter)
+  /// - Familie mit 2 Personen: P1 (146,25€, älter), P2 (112,50€, jünger)
   /// - Familie zahlt 200€ -> Sequentielle Verteilung nach Geburtsdatum:
-  ///   - P1 (jüngstes Kind): 146,25€ (vollständig bezahlt)
+  ///   - P1 (ältestes Kind): 146,25€ (vollständig bezahlt)
   ///   - P2: 200€ - 146,25€ = 53,75€ (Rest)
   ///   - Ergebnis: P1 bezahlt 146,25€, P2 bezahlt 53,75€
   Future<double> getTotalPaymentsWithFamilyShare(int participantId) async {
@@ -178,7 +178,7 @@ class PaymentRepository {
   /// Berechnet den Anteil eines Teilnehmers an Familienzahlungen
   ///
   /// Verteilungslogik (SEQUENTIELL):
-  /// 1. Sortiere Familienmitglieder nach Geburtsdatum (jüngste zuerst)
+  /// 1. Sortiere Familienmitglieder nach Geburtsdatum (älteste zuerst)
   /// 2. Verteile Familienzahlung sequentiell: Fülle jeden Teilnehmer vollständig auf,
   ///    bevor zum nächsten übergegangen wird
   /// 3. Fallback: Wenn alles bezahlt, verteile proportional zum Sollpreis
@@ -205,8 +205,8 @@ class PaymentRepository {
       return 0.0; // Keine Familienzahlungen vorhanden
     }
 
-    // Sortiere Mitglieder nach Geburtsdatum (jüngste zuerst)
-    familyMembers.sort((a, b) => b.birthDate.compareTo(a.birthDate));
+    // Sortiere Mitglieder nach Geburtsdatum (älteste zuerst)
+    familyMembers.sort((a, b) => a.birthDate.compareTo(b.birthDate));
 
     // Berechne für jedes Mitglied den offenen Betrag
     final membersData = <Map<String, dynamic>>[];
@@ -236,7 +236,7 @@ class PaymentRepository {
     if (totalOutstanding > 0) {
       double remainingPayment = familyPayments;
 
-      // Verteile sequentiell nach Geburtsdatum (jüngste zuerst)
+      // Verteile sequentiell nach Geburtsdatum (älteste zuerst)
       for (final memberData in membersData) {
         final memberId = memberData['id'] as int;
         final memberOutstanding = memberData['outstanding'] as double;
