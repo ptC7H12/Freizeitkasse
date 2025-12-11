@@ -1937,13 +1937,55 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
       if (context.mounted) {
         Navigator.of(context).pop(); // Schließe Loading-Dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${filePaths.length} PDF-Dateien erstellt'),
-            action: SnackBarAction(
-              label: 'OK',
-              onPressed: () {},
+
+        // Extrahiere Speicherort
+        final directory = filePaths.isNotEmpty
+            ? filePaths.first.substring(0, filePaths.first.lastIndexOf('/'))
+            : '';
+
+        // Zeige Erfolgs-Dialog mit Details
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green),
+                SizedBox(width: 8),
+                Text('PDF-Export erfolgreich'),
+              ],
             ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${filePaths.length} PDF-Dateien wurden erfolgreich erstellt:',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                ...filePaths.map((path) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text('• ${path.split('/').last}', style: const TextStyle(fontSize: 12)),
+                )),
+                const SizedBox(height: 12),
+                const Divider(),
+                const SizedBox(height: 8),
+                Text(
+                  'Speicherort:',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                ),
+                Text(
+                  directory,
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
         );
       }
@@ -2015,13 +2057,55 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
       if (context.mounted) {
         Navigator.of(context).pop(); // Schließe Loading-Dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${filePaths.length} Excel-Dateien erstellt'),
-            action: SnackBarAction(
-              label: 'OK',
-              onPressed: () {},
+
+        // Extrahiere Speicherort
+        final directory = filePaths.isNotEmpty
+            ? filePaths.first.substring(0, filePaths.first.lastIndexOf('/'))
+            : '';
+
+        // Zeige Erfolgs-Dialog mit Details
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green),
+                SizedBox(width: 8),
+                Text('Excel-Export erfolgreich'),
+              ],
             ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${filePaths.length} Excel-Dateien wurden erfolgreich erstellt:',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                ...filePaths.map((path) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text('• ${path.split('/').last}', style: const TextStyle(fontSize: 12)),
+                )),
+                const SizedBox(height: 12),
+                const Divider(),
+                const SizedBox(height: 8),
+                Text(
+                  'Speicherort:',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                ),
+                Text(
+                  directory,
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
         );
       }
