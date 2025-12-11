@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:excel/excel.dart';
@@ -15,6 +16,27 @@ import '../utils/logger.dart';
 /// - export_subsidy_excel() / _create_subsidy_excel()
 /// - export_subsidy_pdf() / _create_subsidy_pdf()
 class SubsidyExportService {
+  // Font-Caching für bessere Performance
+  static pw.Font? _cachedRegularFont;
+  static pw.Font? _cachedBoldFont;
+
+  /// Lädt die Roboto Regular Font
+  Future<pw.Font> _loadRegularFont() async {
+    if (_cachedRegularFont != null) return _cachedRegularFont!;
+
+    final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
+    _cachedRegularFont = pw.Font.ttf(fontData);
+    return _cachedRegularFont!;
+  }
+
+  /// Lädt die Roboto Bold Font
+  Future<pw.Font> _loadBoldFont() async {
+    if (_cachedBoldFont != null) return _cachedBoldFont!;
+
+    final fontData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
+    _cachedBoldFont = pw.Font.ttf(fontData);
+    return _cachedBoldFont!;
+  }
   /// Exportiert Zuschussliste als PDF
   ///
   /// Args:
@@ -31,6 +53,10 @@ class SubsidyExportService {
   }) async {
     try {
       AppLogger.info('[SubsidyExport] Erstelle PDF für: $subsidyType');
+
+      // Fonts laden
+      final regularFont = await _loadRegularFont();
+      final boldFont = await _loadBoldFont();
 
       final pdf = pw.Document();
 
@@ -58,13 +84,15 @@ class SubsidyExportService {
                   style: pw.TextStyle(
                     fontSize: 16,
                     fontWeight: pw.FontWeight.bold,
+                    font: boldFont,
                     color: PdfColor.fromHex('#1e40af'),
                   ),
                 ),
                 pw.Text(
                   'Beantragungsdatum: ${DateFormat('dd.MM.yyyy').format(DateTime.now())}',
-                  style: const pw.TextStyle(
+                  style: pw.TextStyle(
                     fontSize: 9,
+                    font: regularFont,
                     color: PdfColors.grey700,
                   ),
                 ),
@@ -75,8 +103,9 @@ class SubsidyExportService {
             // Zeitraum
             pw.Text(
               'Zeitraum: ${AppDateUtils.formatGerman(event.startDate)} - ${AppDateUtils.formatGerman(event.endDate)}',
-              style: const pw.TextStyle(
+              style: pw.TextStyle(
                 fontSize: 10,
+                font: regularFont,
                 color: PdfColors.grey600,
               ),
             ),
@@ -88,6 +117,7 @@ class SubsidyExportService {
               style: pw.TextStyle(
                 fontSize: 12,
                 fontWeight: pw.FontWeight.bold,
+                font: boldFont,
                 color: PdfColor.fromHex('#1e40af'),
               ),
             ),
@@ -107,13 +137,14 @@ class SubsidyExportService {
               }).toList(),
               headerStyle: pw.TextStyle(
                 fontWeight: pw.FontWeight.bold,
+                font: boldFont,
                 color: PdfColors.white,
                 fontSize: 10,
               ),
               headerDecoration: pw.BoxDecoration(
                 color: PdfColor.fromHex('#1e40af'),
               ),
-              cellStyle: const pw.TextStyle(fontSize: 9),
+              cellStyle: pw.TextStyle(fontSize: 9, font: regularFont),
               cellAlignment: pw.Alignment.centerLeft,
               cellHeight: 25,
               cellAlignments: {
@@ -143,6 +174,7 @@ class SubsidyExportService {
                     style: pw.TextStyle(
                       fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
+                      font: boldFont,
                       color: PdfColor.fromHex('#4CAF50'),
                     ),
                   ),
@@ -161,6 +193,7 @@ class SubsidyExportService {
                   style: pw.TextStyle(
                     fontSize: 10,
                     fontWeight: pw.FontWeight.bold,
+                    font: boldFont,
                   ),
                 ),
                 pw.SizedBox(height: 8),

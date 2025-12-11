@@ -173,6 +173,7 @@ class RulesetParserService {
         'discount_percent': (value['discount_percent'] as num?)?.toDouble() ?? 0.0,
         'max_count': value['max_count'] as int?,
         'description': value['description'] as String?,
+        'subsidy_eligible': value['subsidy_eligible'] as bool? ?? true,
       };
     }
 
@@ -347,6 +348,9 @@ class RulesetParserService {
       }
       if (value['description'] != null) {
         buffer.writeln('    description: "${value['description']}"');
+      }
+      if (value['subsidy_eligible'] != null) {
+        buffer.writeln('    subsidy_eligible: ${value['subsidy_eligible']}');
       }
     }
 

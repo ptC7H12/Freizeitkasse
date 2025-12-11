@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
@@ -8,12 +9,42 @@ import '../data/database/app_database.dart';
 import '../utils/date_utils.dart';
 
 class PdfExportService {
+  // Font-Caching für bessere Performance
+  static pw.Font? _cachedRegularFont;
+  static pw.Font? _cachedBoldFont;
+
+  /// Lädt die Roboto Regular Font
+  Future<pw.Font> _loadRegularFont() async {
+    if (_cachedRegularFont != null) return _cachedRegularFont!;
+
+    final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
+    _cachedRegularFont = pw.Font.ttf(fontData);
+    return _cachedRegularFont!;
+  }
+
+  /// Lädt die Roboto Bold Font
+  Future<pw.Font> _loadBoldFont() async {
+    if (_cachedBoldFont != null) return _cachedBoldFont!;
+
+    final fontData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
+    _cachedBoldFont = pw.Font.ttf(fontData);
+    return _cachedBoldFont!;
+  }
   /// Export participants list to PDF
   Future<String> exportParticipantsList({
     required List<Participant> participants,
     required String eventName,
   }) async {
-    final pdf = pw.Document();
+    // Fonts laden
+    final regularFont = await _loadRegularFont();
+    final boldFont = await _loadBoldFont();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: regularFont,
+        bold: boldFont,
+      ),
+    );
 
     pdf.addPage(
       pw.MultiPage(
@@ -96,7 +127,16 @@ class PdfExportService {
     required Participant participant,
     String? eventName,
   }) async {
-    final pdf = pw.Document();
+    // Fonts laden
+    final regularFont = await _loadRegularFont();
+    final boldFont = await _loadBoldFont();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: regularFont,
+        bold: boldFont,
+      ),
+    );
 
     pdf.addPage(
       pw.Page(
@@ -181,7 +221,16 @@ class PdfExportService {
     required Map<String, double> expensesByCategory,
     required Map<String, double> incomesBySource,
   }) async {
-    final pdf = pw.Document();
+    // Fonts laden
+    final regularFont = await _loadRegularFont();
+    final boldFont = await _loadBoldFont();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: regularFont,
+        bold: boldFont,
+      ),
+    );
     final balance = totalIncomes - totalExpenses;
 
     pdf.addPage(
@@ -345,7 +394,16 @@ class PdfExportService {
     double? totalPaidWithFamily,
     double? outstandingWithFamily,
   }) async {
-    final pdf = pw.Document();
+    // Fonts laden
+    final regularFont = await _loadRegularFont();
+    final boldFont = await _loadBoldFont();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: regularFont,
+        bold: boldFont,
+      ),
+    );
     final now = DateTime.now();
     final invoiceNumber = 'R-${participant.id.toString().padLeft(6, '0')}-${now.year}';
     final invoiceDate = DateFormat('dd.MM.yyyy', 'de_DE').format(now);
@@ -649,7 +707,16 @@ class PdfExportService {
     Setting? settings,
     String? verwendungszweckPrefix,
   }) async {
-    final pdf = pw.Document();
+    // Fonts laden
+    final regularFont = await _loadRegularFont();
+    final boldFont = await _loadBoldFont();
+
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(
+        base: regularFont,
+        bold: boldFont,
+      ),
+    );
     final now = DateTime.now();
     final invoiceNumber = 'RF-${family.id.toString().padLeft(6, '0')}-${now.year}';
     final invoiceDate = DateFormat('dd.MM.yyyy', 'de_DE').format(now);
