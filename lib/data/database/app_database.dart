@@ -408,7 +408,7 @@ class AppDatabase extends _$AppDatabase {
                 CASE WHEN organization_postal_code IS NOT NULL AND organization_city IS NOT NULL THEN ' ' ELSE '' END ||
                 COALESCE(organization_city, '')
               ),
-              bank_name, iban, bic, verwendungszweck_prefix, invoice_footer, github_ruleset_path,
+              bank_name, iban, bic, "verwendungszweckPrefix", invoice_footer, "githubRulesetPath",
               created_at, updated_at
             FROM settings_backup
           ''');
