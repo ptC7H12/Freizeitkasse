@@ -165,6 +165,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               ),
               items: const [
                 DropdownMenuItem(value: null, child: Text('Keine Angabe')),
+                DropdownMenuItem(value: 'Automatisch', child: Text('Automatisch')),
                 DropdownMenuItem(value: 'Bar', child: Text('Bar')),
                 DropdownMenuItem(value: 'Überweisung', child: Text('Überweisung')),
                 DropdownMenuItem(value: 'EC-Karte', child: Text('EC-Karte')),
