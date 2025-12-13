@@ -82,14 +82,16 @@ class RoleRepository {
     }
 
     final companion = RolesCompanion(
-      id: Value(id),
       name: name != null ? Value(name) : const Value.absent(),
       displayName: displayName != null ? Value(displayName) : const Value.absent(),
       description: description != null ? Value(description) : const Value.absent(),
       updatedAt: Value(DateTime.now()),
     );
 
-    return await _database.update(_database.roles).replace(companion);
+    return await (_database.update(_database.roles)
+          ..where((t) => t.id.equals(id)))
+        .write(companion) >
+        0;
   }
 
   /// Delete a role

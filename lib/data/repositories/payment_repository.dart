@@ -69,10 +69,11 @@ class PaymentRepository {
     String? paymentMethod,
     String? referenceNumber,
     String? notes,
-  }) {
-    return _db.update(_db.payments).replace(
+  }) async {
+    return await (_db.update(_db.payments)
+          ..where((t) => t.id.equals(id)))
+        .write(
           PaymentsCompanion(
-            id: Value(id),
             amount: amount != null ? Value(amount) : const Value.absent(),
             paymentDate: paymentDate != null ? Value(paymentDate) : const Value.absent(),
             paymentMethod: paymentMethod != null ? Value(paymentMethod) : const Value.absent(),
@@ -80,7 +81,8 @@ class PaymentRepository {
             notes: notes != null ? Value(notes) : const Value.absent(),
             updatedAt: Value(DateTime.now()),
           ),
-        );
+        ) >
+        0;
   }
 
   // DELETE
