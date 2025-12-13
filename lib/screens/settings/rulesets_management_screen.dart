@@ -596,7 +596,7 @@ class _RulesetsManagementScreenState
             const SizedBox(height: 12),
             ...ageGroups.map((group) {
               final groupMap = Map<String, dynamic>.from(group as Map);
-              final name = groupMap['name'] ?? 'Unbenannt';
+              final name = (groupMap['name'] ?? 'Unbenannt') as String;
               final minAge = groupMap['min_age'] ?? 0;
               final maxAge = groupMap['max_age'] ?? 999;
               final price = groupMap['base_price'] ?? 0.0;
@@ -671,7 +671,7 @@ class _RulesetsManagementScreenState
             const SizedBox(height: 12),
             ...roleDiscounts.map((discount) {
               final discountMap = Map<String, dynamic>.from(discount as Map);
-              final roleName = discountMap['role_name'] ?? 'Unbenannt';
+              final roleName = (discountMap['role_name'] ?? 'Unbenannt') as String;
               final discountPercent = discountMap['discount_percent'] ?? 0.0;
 
               return Padding(
