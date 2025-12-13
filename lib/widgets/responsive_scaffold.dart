@@ -5,7 +5,7 @@ import '../data/database/app_database.dart';
 import '../providers/current_event_provider.dart';
 import '../utils/constants.dart';
 import '../screens/dashboard/dashboard_screen.dart';
-import '../screens/participants/participants_list_screen.dart';
+import '../screens/participants/participants_and_families_screen.dart';
 import '../screens/payments/payments_list_screen.dart';
 import '../screens/expenses/expenses_list_screen.dart';
 import '../screens/incomes/incomes_list_screen.dart';
@@ -127,7 +127,7 @@ class ResponsiveScaffold extends ConsumerWidget {
             Icons.people,
             'Teilnehmer & Familien',
             selectedIndex == 1 ? null : () {
-              _navigateWithoutAnimation(context, const ParticipantsListScreen());
+              _navigateWithoutAnimation(context, const ParticipantsAndFamiliesScreen());
             },
             isSelected: selectedIndex == 1,
           ),
@@ -320,7 +320,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                 () {
                   Navigator.of(context).pop();
                   if (selectedIndex != 1) {
-                    _navigateWithoutAnimation(context, const ParticipantsListScreen());
+                    _navigateWithoutAnimation(context, const ParticipantsAndFamiliesScreen());
                   }
                 },
                 isSelected: selectedIndex == 1,
