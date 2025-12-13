@@ -53,7 +53,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           // TabBar
           TabBar(
             controller: _tabController,
-            isScrollable: true,
             tabs: const [
               Tab(
                 icon: Icon(Icons.business),
