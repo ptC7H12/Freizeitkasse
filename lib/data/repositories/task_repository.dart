@@ -142,8 +142,8 @@ class TaskRepository {
     return await _database.update(_database.tasks).replace(companion);
   }
 
-  /// Mark task as completed
-  Future<bool> completeTask(int id) async {
+  /// Mark manual task as completed (by ID)
+  Future<bool> markTaskAsCompleted(int id) async {
     return updateTask(id: id, status: 'completed');
   }
 

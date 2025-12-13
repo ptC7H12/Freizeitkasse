@@ -7,6 +7,7 @@ import '../../providers/task_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/payment_provider.dart';
 import '../../providers/participant_provider.dart';
+import '../../providers/current_event_provider.dart';
 import '../../services/auto_task_generator_service.dart';
 import '../../utils/constants.dart';
 import '../../utils/logger.dart';
@@ -313,7 +314,7 @@ class AutoTasksScreen extends ConsumerWidget {
 
       if (participant != null) {
         final finalPrice = participant.manualPriceOverride ?? participant.calculatedPrice;
-        final totalPaid = await paymentRepo.getTotalPaidByParticipant(participant.id);
+        final totalPaid = await paymentRepo.getTotalPaymentsForParticipant(participant.id);
         final outstanding = finalPrice - totalPaid;
 
         if (outstanding > 0.01) {

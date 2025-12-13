@@ -427,11 +427,11 @@ class AppDatabase extends _$AppDatabase {
 
         // Migration von Version 6 zu 7: Erweitere Tasks-Tabelle für automatische Task-Generierung
         if (from < 7) {
-          await m.addColumn(tasks, tasks.taskType);
-          await m.addColumn(tasks, tasks.referenceId);
-          await m.addColumn(tasks, tasks.isCompleted);
-          await m.addColumn(tasks, tasks.completedAt);
-          await m.addColumn(tasks, tasks.completionNote);
+          await customStatement('ALTER TABLE tasks ADD COLUMN task_type TEXT');
+          await customStatement('ALTER TABLE tasks ADD COLUMN reference_id INTEGER');
+          await customStatement('ALTER TABLE tasks ADD COLUMN is_completed INTEGER NOT NULL DEFAULT 0');
+          await customStatement('ALTER TABLE tasks ADD COLUMN completed_at INTEGER');
+          await customStatement('ALTER TABLE tasks ADD COLUMN completion_note TEXT');
         }
       },
     );
