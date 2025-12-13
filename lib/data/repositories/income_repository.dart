@@ -44,17 +44,17 @@ class IncomeRepository {
     return result.read<double>('total');
   }
 
-  /// Get incomes by source
-  Future<Map<String, double>> getIncomesBySource(int eventId) async {
+  /// Get incomes by category
+  Future<Map<String, double>> getIncomesByCategory(int eventId) async {
     final results = await _database.customSelect(
-      'SELECT source, SUM(amount) as total FROM incomes WHERE event_id = ? AND is_active = 1 GROUP BY source',
+      'SELECT category, SUM(amount) as total FROM incomes WHERE event_id = ? AND is_active = 1 GROUP BY category',
       variables: [Variable.withInt(eventId)],
       readsFrom: {_database.incomes},
     ).get();
 
     return {
       for (final row in results)
-        row.read<String>('source'): row.read<double>('total')
+        row.read<String>('category'): row.read<double>('total')
     };
   }
 
@@ -79,16 +79,18 @@ class IncomeRepository {
   /// Create a new income
   Future<int> createIncome({
     required int eventId,
-    required String source,
+    required String category,
     required double amount,
     required DateTime incomeDate,
     String? description,
+    String? source,
     String? paymentMethod,
     String? referenceNumber,
     String? notes,
   }) async {
     final companion = IncomesCompanion(
       eventId: Value(eventId),
+      category: Value(category),
       source: Value(source),
       amount: Value(amount),
       incomeDate: Value(incomeDate),
@@ -107,6 +109,7 @@ class IncomeRepository {
   /// Update an existing income
   Future<bool> updateIncome({
     required int id,
+    String? category,
     String? source,
     double? amount,
     DateTime? incomeDate,
@@ -122,6 +125,7 @@ class IncomeRepository {
 
     final companion = IncomesCompanion(
       id: Value(id),
+      category: category != null ? Value(category) : const Value.absent(),
       source: source != null ? Value(source) : const Value.absent(),
       amount: amount != null ? Value(amount) : const Value.absent(),
       incomeDate: incomeDate != null ? Value(incomeDate) : const Value.absent(),
@@ -165,29 +169,29 @@ class IncomeRepository {
   Future<Map<String, dynamic>> getIncomeStatistics(int eventId) async {
     final incomes = await getIncomesByEvent(eventId);
     final total = await getTotalIncomes(eventId);
-    final bySource = await getIncomesBySource(eventId);
+    final byCategory = await getIncomesByCategory(eventId);
 
-    // Find largest income source
-    String? largestSource;
-    double maxSourceAmount = 0;
-    bySource.forEach((source, amount) {
-      if (amount > maxSourceAmount) {
-        maxSourceAmount = amount;
-        largestSource = source;
+    // Find largest income category
+    String? largestCategory;
+    double maxCategoryAmount = 0;
+    byCategory.forEach((category, amount) {
+      if (amount > maxCategoryAmount) {
+        maxCategoryAmount = amount;
+        largestCategory = category;
       }
     });
 
     return {
       'total': total,
       'count': incomes.length,
-      'bySource': bySource,
-      'largestSource': largestSource,
-      'largestSourceAmount': maxSourceAmount,
+      'byCategory': byCategory,
+      'largestCategory': largestCategory,
+      'largestCategoryAmount': maxCategoryAmount,
       'averageIncome': incomes.isEmpty ? 0.0 : total / incomes.length,
     };
   }
 
-  /// Search incomes by description or notes
+  /// Search incomes by description, notes, or category
   Future<List<Income>> searchIncomes(int eventId, String query) async {
     final lowerQuery = query.toLowerCase();
 
@@ -197,7 +201,7 @@ class IncomeRepository {
               t.isActive.equals(true) &
               (t.description.lower().like('%$lowerQuery%') |
                t.notes.lower().like('%$lowerQuery%') |
-               t.source.lower().like('%$lowerQuery%'))))
+               t.category.lower().like('%$lowerQuery%'))))
         .get();
   }
 }
