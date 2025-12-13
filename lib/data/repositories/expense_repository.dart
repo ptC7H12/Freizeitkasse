@@ -136,7 +136,6 @@ class ExpenseRepository {
     }
 
     final companion = ExpensesCompanion(
-      id: Value(id),
       category: category != null ? Value(category) : const Value.absent(),
       amount: amount != null ? Value(amount) : const Value.absent(),
       expenseDate: expenseDate != null ? Value(expenseDate) : const Value.absent(),
@@ -152,7 +151,10 @@ class ExpenseRepository {
       updatedAt: Value(DateTime.now()),
     );
 
-    return await _database.update(_database.expenses).replace(companion);
+    return await (_database.update(_database.expenses)
+          ..where((t) => t.id.equals(id)))
+        .write(companion) >
+        0;
   }
 
   /// Soft delete an expense

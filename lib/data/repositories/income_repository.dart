@@ -124,7 +124,6 @@ class IncomeRepository {
     }
 
     final companion = IncomesCompanion(
-      id: Value(id),
       category: category != null ? Value(category) : const Value.absent(),
       source: source != null ? Value(source) : const Value.absent(),
       amount: amount != null ? Value(amount) : const Value.absent(),
@@ -136,7 +135,10 @@ class IncomeRepository {
       updatedAt: Value(DateTime.now()),
     );
 
-    return await _database.update(_database.incomes).replace(companion);
+    return await (_database.update(_database.incomes)
+          ..where((t) => t.id.equals(id)))
+        .write(companion) >
+        0;
   }
 
   /// Soft delete an income
