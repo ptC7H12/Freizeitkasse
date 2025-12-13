@@ -529,19 +529,19 @@ class _RulesetsManagementScreenState
               children: [
                 // Altersgruppen
                 if (parsedYaml?['age_groups'] != null)
-                  _buildPreviewAgeGroups(parsedYaml!['age_groups'] as List),
+                  _buildPreviewAgeGroups(parsedYaml!['age_groups']),
 
                 const SizedBox(height: AppConstants.spacing),
 
                 // Rollenrabatte
                 if (parsedYaml?['role_discounts'] != null)
-                  _buildPreviewRoleDiscounts(parsedYaml!['role_discounts'] as List),
+                  _buildPreviewRoleDiscounts(parsedYaml!['role_discounts']),
 
                 const SizedBox(height: AppConstants.spacing),
 
                 // Familienrabatte
                 if (parsedYaml?['family_discount'] != null)
-                  _buildPreviewFamilyDiscount(parsedYaml!['family_discount'] as Map),
+                  _buildPreviewFamilyDiscount(parsedYaml!['family_discount']),
               ],
             ),
           ),
@@ -570,7 +570,10 @@ class _RulesetsManagementScreenState
     );
   }
 
-  Widget _buildPreviewAgeGroups(List ageGroups) {
+  Widget _buildPreviewAgeGroups(dynamic ageGroups) {
+    // Handle both List and Map structures
+    final groupsList = ageGroups is List ? ageGroups : [];
+
     return Card(
       elevation: 0,
       color: Colors.green[50],
@@ -594,7 +597,7 @@ class _RulesetsManagementScreenState
               ],
             ),
             const SizedBox(height: 12),
-            ...ageGroups.map((group) {
+            ...groupsList.map((group) {
               final groupMap = Map<String, dynamic>.from(group as Map);
               final name = (groupMap['name'] ?? 'Unbenannt') as String;
               final minAge = groupMap['min_age'] ?? 0;
@@ -645,7 +648,24 @@ class _RulesetsManagementScreenState
     );
   }
 
-  Widget _buildPreviewRoleDiscounts(List roleDiscounts) {
+  Widget _buildPreviewRoleDiscounts(dynamic roleDiscounts) {
+    // Handle both List and Map structures
+    List<MapEntry<String, dynamic>> discountEntries = [];
+
+    if (roleDiscounts is Map) {
+      // Map structure: role_name -> {discount_percent, ...}
+      discountEntries = roleDiscounts.entries
+          .map((e) => MapEntry<String, dynamic>(e.key.toString(), e.value))
+          .toList();
+    } else if (roleDiscounts is List) {
+      // List structure: [{role_name: ..., discount_percent: ...}]
+      discountEntries = roleDiscounts.map((item) {
+        final itemMap = Map<String, dynamic>.from(item as Map);
+        final roleName = itemMap['role_name'] ?? 'Unbenannt';
+        return MapEntry<String, dynamic>(roleName.toString(), itemMap);
+      }).toList();
+    }
+
     return Card(
       elevation: 0,
       color: Colors.blue[50],
@@ -669,10 +689,12 @@ class _RulesetsManagementScreenState
               ],
             ),
             const SizedBox(height: 12),
-            ...roleDiscounts.map((discount) {
-              final discountMap = Map<String, dynamic>.from(discount as Map);
-              final roleName = (discountMap['role_name'] ?? 'Unbenannt') as String;
-              final discountPercent = discountMap['discount_percent'] ?? 0.0;
+            ...discountEntries.map((entry) {
+              final discountData = entry.value is Map
+                  ? Map<String, dynamic>.from(entry.value as Map)
+                  : <String, dynamic>{'discount_percent': entry.value};
+              final roleName = entry.key;
+              final discountPercent = discountData['discount_percent'] ?? 0.0;
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
@@ -716,10 +738,15 @@ class _RulesetsManagementScreenState
     );
   }
 
-  Widget _buildPreviewFamilyDiscount(Map familyDiscount) {
-    final discountMap = Map<String, dynamic>.from(familyDiscount);
-    final minChildren = discountMap['min_children'] ?? 0;
-    final discountPerChild = discountMap['discount_percent_per_child'] as List? ?? [];
+  Widget _buildPreviewFamilyDiscount(dynamic familyDiscount) {
+    if (familyDiscount is! Map) {
+      return const SizedBox.shrink();
+    }
+
+    final discountMap = Map<String, dynamic>.from(familyDiscount as Map);
+
+    // Check if it's the new structure with first_child_percent, etc.
+    final hasDirectPercentages = discountMap.containsKey('first_child_percent');
 
     return Card(
       elevation: 0,
@@ -743,55 +770,90 @@ class _RulesetsManagementScreenState
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Ab $minChildren Kindern',
-              style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-            ),
             const SizedBox(height: 12),
-            ...discountPerChild.map((item) {
-              final itemMap = Map<String, dynamic>.from(item as Map);
-              final childrenCount = itemMap['children_count'] ?? 0;
-              final discountPercent = itemMap['discount_percent'] ?? 0.0;
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '$childrenCount. Kind',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.pink[700],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.discount, size: 14, color: Colors.white),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${(discountPercent as num).toStringAsFixed(0)}%',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+            if (hasDirectPercentages) ...[
+              // New structure: first_child_percent, second_child_percent, etc.
+              if (discountMap['first_child_percent'] != null)
+                _buildFamilyDiscountItem(
+                  '1. Kind',
+                  discountMap['first_child_percent'] as num,
                 ),
-              );
-            }),
+              if (discountMap['second_child_percent'] != null)
+                _buildFamilyDiscountItem(
+                  '2. Kind',
+                  discountMap['second_child_percent'] as num,
+                ),
+              if (discountMap['third_plus_child_percent'] != null)
+                _buildFamilyDiscountItem(
+                  '3+ Kind',
+                  discountMap['third_plus_child_percent'] as num,
+                ),
+            ] else ...[
+              // Old structure: min_children + discount_percent_per_child list
+              final minChildren = discountMap['min_children'] ?? 0;
+              final discountPerChild = discountMap['discount_percent_per_child'];
+
+              if (minChildren > 0)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    'Ab $minChildren Kindern',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  ),
+                ),
+
+              if (discountPerChild is List)
+                ...discountPerChild.map((item) {
+                  final itemMap = Map<String, dynamic>.from(item as Map);
+                  final childrenCount = itemMap['children_count'] ?? 0;
+                  final discountPercent = itemMap['discount_percent'] ?? 0.0;
+                  return _buildFamilyDiscountItem(
+                    '$childrenCount. Kind',
+                    discountPercent as num,
+                  );
+                }),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFamilyDiscountItem(String label, num discountPercent) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.pink[700],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.discount, size: 14, color: Colors.white),
+                const SizedBox(width: 4),
+                Text(
+                  '${discountPercent.toStringAsFixed(0)}%',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
