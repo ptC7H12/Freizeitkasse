@@ -39,21 +39,18 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
       body: Column(
         children: [
           // Tab Bar
-          Container(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: TabBar(
-              controller: _tabController,
-              tabs: const [
-                Tab(
-                  icon: Icon(Icons.person),
-                  text: 'Teilnehmer',
-                ),
-                Tab(
-                  icon: Icon(Icons.family_restroom),
-                  text: 'Familien',
-                ),
-              ],
-            ),
+          TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(
+                icon: Icon(Icons.person),
+                text: 'Teilnehmer',
+              ),
+              Tab(
+                icon: Icon(Icons.family_restroom),
+                text: 'Familien',
+              ),
+            ],
           ),
           // Tab Bar View
           Expanded(
