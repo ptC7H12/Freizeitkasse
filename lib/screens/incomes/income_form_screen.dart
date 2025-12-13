@@ -106,7 +106,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
     final currentEvent = ref.read(currentEventProvider);
     if (currentEvent == null) {
       if (mounted) {
-        context.showSuccess('Keine Veranstaltung ausgewählt');
+        context.showError('Keine Veranstaltung ausgewählt');
       }
       return;
     }
