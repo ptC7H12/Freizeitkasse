@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/payment_provider.dart';
 import '../../providers/participant_provider.dart';
+import '../../providers/family_provider.dart';
 import '../../utils/date_utils.dart';
 import 'payment_form_screen.dart';
 import '../../utils/constants.dart';
@@ -16,6 +17,7 @@ class PaymentsListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final paymentsAsync = ref.watch(paymentsProvider);
     final participantsAsync = ref.watch(participantsProvider);
+    final familiesAsync = ref.watch(familiesProvider);
 
     return ResponsiveScaffold(
       title: 'Zahlungseingänge',
@@ -84,47 +86,105 @@ class PaymentsListScreen extends ConsumerWidget {
                           ],
                         ),
                       )
-                    : ListView.builder(
-                        padding: AppConstants.paddingAll16,
-                        itemCount: payments.length,
-                        itemBuilder: (context, index) {
-                          final payment = payments[index];
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: Colors.green.shade100,
-                                child: Icon(Icons.euro, color: Colors.green.shade700),
-                              ),
-                              title: Text(
-                                '${payment.amount.toStringAsFixed(2)} €',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 4),
-                                  Text(AppDateUtils.formatGerman(payment.paymentDate)),
-                                  if (payment.paymentMethod != null)
-                                    Text('Methode: ${payment.paymentMethod}'),
-                                ],
-                              ),
-                              trailing: const Icon(Icons.chevron_right),
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => PaymentFormScreen(
-                                      paymentId: payment.id,
+                    : participantsAsync.when(
+                        data: (participants) => familiesAsync.when(
+                          data: (families) => ListView.builder(
+                            padding: AppConstants.paddingAll16,
+                            itemCount: payments.length,
+                            itemBuilder: (context, index) {
+                              final payment = payments[index];
+
+                              // Bestimme, wer gezahlt hat (Teilnehmer oder Familie)
+                              String payerName = 'Unbekannt';
+                              IconData payerIcon = Icons.person;
+                              Color payerColor = Colors.grey;
+
+                              if (payment.participantId != null) {
+                                // Zahlung von Einzelperson
+                                try {
+                                  final participant = participants.firstWhere(
+                                    (p) => p.id == payment.participantId,
+                                  );
+                                  payerName = '${participant.firstName} ${participant.lastName}';
+                                  payerIcon = Icons.person;
+                                  payerColor = Colors.blue;
+                                } catch (e) {
+                                  payerName = 'Teilnehmer (ID: ${payment.participantId})';
+                                }
+                              } else if (payment.familyId != null) {
+                                // Zahlung von Familie
+                                try {
+                                  final family = families.firstWhere(
+                                    (f) => f.id == payment.familyId,
+                                  );
+                                  payerName = family.familyName;
+                                  payerIcon = Icons.family_restroom;
+                                  payerColor = Colors.purple;
+                                } catch (e) {
+                                  payerName = 'Familie (ID: ${payment.familyId})';
+                                  payerIcon = Icons.family_restroom;
+                                  payerColor = Colors.purple;
+                                }
+                              }
+
+                              return Card(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: Colors.green.shade100,
+                                    child: Icon(Icons.euro, color: Colors.green.shade700),
+                                  ),
+                                  title: Text(
+                                    '${payment.amount.toStringAsFixed(2)} €',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
                                     ),
                                   ),
-                                );
-                              },
-                            ),
-                          );
-                        },
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Icon(payerIcon, size: 14, color: payerColor),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              payerName,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                color: payerColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(AppDateUtils.formatGerman(payment.paymentDate)),
+                                      if (payment.paymentMethod != null)
+                                        Text('Methode: ${payment.paymentMethod}'),
+                                    ],
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right),
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => PaymentFormScreen(
+                                          paymentId: payment.id,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                          loading: () => const Center(child: CircularProgressIndicator()),
+                          error: (_, __) => const Center(child: Text('Fehler beim Laden der Familien')),
+                        ),
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (_, __) => const Center(child: Text('Fehler beim Laden der Teilnehmer')),
                       ),
               ),
             ],

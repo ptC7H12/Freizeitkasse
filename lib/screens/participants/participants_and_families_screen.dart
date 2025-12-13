@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-//import '../../utils/constants.dart';
+import '../../utils/constants.dart';
+import '../../widgets/responsive_scaffold.dart';
 import 'participants_list_screen.dart';
 import '../families/families_list_screen.dart';
 
@@ -32,31 +33,40 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Teilnehmer & Familien'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.person),
-              text: 'Teilnehmer',
+    return ResponsiveScaffold(
+      title: 'Teilnehmer & Familien',
+      selectedIndex: 1,
+      body: Column(
+        children: [
+          // Tab Bar
+          Container(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: TabBar(
+              controller: _tabController,
+              tabs: const [
+                Tab(
+                  icon: Icon(Icons.person),
+                  text: 'Teilnehmer',
+                ),
+                Tab(
+                  icon: Icon(Icons.family_restroom),
+                  text: 'Familien',
+                ),
+              ],
             ),
-            Tab(
-              icon: Icon(Icons.family_restroom),
-              text: 'Familien',
+          ),
+          // Tab Bar View
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: const [
+                // Tab 1: Teilnehmer
+                _ParticipantsTabContent(),
+                // Tab 2: Familien
+                _FamiliesTabContent(),
+              ],
             ),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          // Tab 1: Teilnehmer
-          _ParticipantsTabContent(),
-
-          // Tab 2: Familien
-          _FamiliesTabContent(),
+          ),
         ],
       ),
     );
