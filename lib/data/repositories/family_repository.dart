@@ -58,10 +58,11 @@ class FamilyRepository {
     String? phone,
     String? email,
     String? address,
-  }) {
-    return _db.update(_db.families).replace(
+  }) async {
+    return await (_db.update(_db.families)
+          ..where((t) => t.id.equals(id)))
+        .write(
           FamiliesCompanion(
-            id: Value(id),
             familyName:
                 familyName != null ? Value(familyName) : const Value.absent(),
             contactPerson:
@@ -71,7 +72,8 @@ class FamilyRepository {
             address: address != null ? Value(address) : const Value.absent(),
             updatedAt: Value(DateTime.now()),
           ),
-        );
+        ) >
+        0;
   }
 
   // DELETE

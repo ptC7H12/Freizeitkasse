@@ -127,7 +127,6 @@ class TaskRepository {
     }
 
     final companion = TasksCompanion(
-      id: Value(id),
       title: title != null ? Value(title) : const Value.absent(),
       description: description != null ? Value(description) : const Value.absent(),
       status: status != null ? Value(status) : const Value.absent(),
@@ -139,7 +138,10 @@ class TaskRepository {
       updatedAt: Value(DateTime.now()),
     );
 
-    return await _database.update(_database.tasks).replace(companion);
+    return await (_database.update(_database.tasks)
+          ..where((t) => t.id.equals(id)))
+        .write(companion) >
+        0;
   }
 
   /// Mark manual task as completed (by ID)
@@ -225,13 +227,15 @@ class TaskRepository {
     if (existing != null) {
       // Update existing task
       final companion = TasksCompanion(
-        id: Value(existing.id),
         isCompleted: const Value(true),
         completedAt: Value(DateTime.now()),
         completionNote: Value(completionNote),
         updatedAt: Value(DateTime.now()),
       );
-      return await _database.update(_database.tasks).replace(companion);
+      return await (_database.update(_database.tasks)
+            ..where((t) => t.id.equals(existing.id)))
+          .write(companion) >
+          0;
     } else {
       // Create new completed task
       final companion = TasksCompanion(
