@@ -40,8 +40,8 @@ final totalIncomesProvider = FutureProvider<double>((ref) async {
   return repository.getTotalIncomes(currentEvent.id);
 });
 
-/// Provider for incomes by source
-final incomesBySourceProvider = FutureProvider<Map<String, double>>((ref) async {
+/// Provider for incomes by category
+final incomesByCategoryProvider = FutureProvider<Map<String, double>>((ref) async {
   final repository = ref.watch(incomeRepositoryProvider);
   final currentEvent = ref.watch(currentEventProvider);
 
@@ -49,7 +49,7 @@ final incomesBySourceProvider = FutureProvider<Map<String, double>>((ref) async 
     return {};
   }
 
-  return repository.getIncomesBySource(currentEvent.id);
+  return repository.getIncomesByCategory(currentEvent.id);
 });
 
 /// Provider for income statistics
@@ -61,9 +61,9 @@ final incomeStatisticsProvider = FutureProvider<Map<String, dynamic>>((ref) asyn
     return <String, dynamic>{
       'total': 0.0,
       'count': 0,
-      'bySource': <String, dynamic>{},
-      'largestSource': null,
-      'largestSourceAmount': 0.0,
+      'byCategory': <String, dynamic>{},
+      'largestCategory': null,
+      'largestCategoryAmount': 0.0,
       'averageIncome': 0.0,
     };
   }

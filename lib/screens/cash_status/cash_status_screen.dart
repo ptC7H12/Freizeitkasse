@@ -112,7 +112,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                     final totalIncomes = await ref.read(totalIncomesProvider.future);
                     final totalExpenses = await ref.read(totalExpensesProvider.future);
                     final expensesByCategory = await ref.read(expensesByCategoryProvider.future);
-                    final incomesBySource = await ref.read(incomesBySourceProvider.future);
+                    final incomesBySource = await ref.read(incomesByCategoryProvider.future);
 
                     try {
                       final filePath = await pdfService.exportFinancialReport(
@@ -563,7 +563,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   }
 
   Widget _buildIncomeBySourceChart(BuildContext context, WidgetRef ref, int eventId) {
-    final incomesBySourceAsync = ref.watch(incomesBySourceProvider);
+    final incomesBySourceAsync = ref.watch(incomesByCategoryProvider);
 
     return Card(
       child: Padding(
@@ -685,7 +685,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
             const SizedBox(height: AppConstants.spacing),
             _buildDetailedSection(context, ref, 'Ausgaben nach Kategorie', expensesByCategoryProvider),
             const Divider(height: 32),
-            _buildDetailedSection(context, ref, 'Einnahmen nach Quelle', incomesBySourceProvider),
+            _buildDetailedSection(context, ref, 'Einnahmen nach Kategorie', incomesByCategoryProvider),
           ],
         ),
       ),

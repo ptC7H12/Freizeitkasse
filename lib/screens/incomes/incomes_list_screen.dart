@@ -82,7 +82,7 @@ class IncomesListScreen extends ConsumerWidget {
           double total = 0.0;
 
           for (final income in incomes) {
-            incomesBySource.putIfAbsent(income.source ?? 'Sonstige', () => []).add(income);
+            incomesBySource.putIfAbsent(income.category, () => []).add(income);
             total += income.amount;
           }
 
@@ -302,8 +302,8 @@ class _IncomeListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sourceColor = _getSourceColor(income.source ?? 'Sonstige');
-    final sourceIcon = _getSourceIcon(income.source ?? 'Sonstige');
+    final sourceColor = _getSourceColor(income.category);
+    final sourceIcon = _getSourceIcon(income.category);
     final dateFormat = DateFormat('dd.MM.yyyy', 'de_DE');
 
     return AdaptiveListItem(
@@ -322,7 +322,7 @@ class _IncomeListItem extends ConsumerWidget {
       title: Row(
         children: [
           Text(
-            income.source ?? 'Sonstige',
+            income.category,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const Spacer(),
@@ -382,7 +382,7 @@ class _IncomeListItem extends ConsumerWidget {
           context.showSuccess('Einnahme gelöscht');
         }
       },
-      deleteConfirmMessage: 'Einnahme "${income.source ?? 'Sonstige'}" (${NumberFormat.currency(locale: 'de_DE', symbol: '€').format(income.amount)}) wirklich löschen?',
+      deleteConfirmMessage: 'Einnahme "${income.category}" (${NumberFormat.currency(locale: 'de_DE', symbol: '€').format(income.amount)}) wirklich löschen?',
     );
   }
 }
