@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yaml/yaml.dart';
 import '../../providers/ruleset_provider.dart';
 import '../../data/database/app_database.dart';
 import '../../utils/constants.dart';
@@ -492,24 +493,56 @@ class _RulesetsManagementScreenState
   }
 
   void _showRulesetPreview(Ruleset ruleset) {
+    // Parse YAML
+    Map<String, dynamic>? parsedYaml;
+    try {
+      final yamlDoc = loadYaml(ruleset.yamlContent);
+      parsedYaml = Map<String, dynamic>.from(yamlDoc as Map);
+    } catch (e) {
+      // If parsing fails, show error
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Fehler'),
+          content: Text('YAML konnte nicht geparst werden: $e'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(ruleset.name),
-        content: SingleChildScrollView(
-          child: Container(
-            width: double.maxFinite,
-            padding: AppConstants.paddingAll12,
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              ruleset.yamlContent,
-              style: const TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 12,
-              ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Altersgruppen
+                if (parsedYaml?['age_groups'] != null)
+                  _buildPreviewAgeGroups(parsedYaml!['age_groups'] as List),
+
+                const SizedBox(height: AppConstants.spacing),
+
+                // Rollenrabatte
+                if (parsedYaml?['role_discounts'] != null)
+                  _buildPreviewRoleDiscounts(parsedYaml!['role_discounts'] as List),
+
+                const SizedBox(height: AppConstants.spacing),
+
+                // Familienrabatte
+                if (parsedYaml?['family_discount'] != null)
+                  _buildPreviewFamilyDiscount(parsedYaml!['family_discount'] as Map),
+              ],
             ),
           ),
         ),
@@ -533,6 +566,232 @@ class _RulesetsManagementScreenState
             label: const Text('Bearbeiten'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewAgeGroups(List ageGroups) {
+    return Card(
+      elevation: 0,
+      color: Colors.green[50],
+      child: Padding(
+        padding: AppConstants.paddingAll12,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.cake, color: Colors.green[700], size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Altersgruppen',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.green[900],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ...ageGroups.map((group) {
+              final groupMap = Map<String, dynamic>.from(group as Map);
+              final name = groupMap['name'] ?? 'Unbenannt';
+              final minAge = groupMap['min_age'] ?? 0;
+              final maxAge = groupMap['max_age'] ?? 999;
+              final price = groupMap['base_price'] ?? 0.0;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            '$minAge - $maxAge Jahre',
+                            style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green[700],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${(price as num).toStringAsFixed(2)} €',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPreviewRoleDiscounts(List roleDiscounts) {
+    return Card(
+      elevation: 0,
+      color: Colors.blue[50],
+      child: Padding(
+        padding: AppConstants.paddingAll12,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.groups, color: Colors.blue[700], size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Rollenrabatte',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.blue[900],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ...roleDiscounts.map((discount) {
+              final discountMap = Map<String, dynamic>.from(discount as Map);
+              final roleName = discountMap['role_name'] ?? 'Unbenannt';
+              final discountPercent = discountMap['discount_percent'] ?? 0.0;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        roleName,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.orange[700],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.discount, size: 14, color: Colors.white),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${(discountPercent as num).toStringAsFixed(0)}%',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPreviewFamilyDiscount(Map familyDiscount) {
+    final discountMap = Map<String, dynamic>.from(familyDiscount);
+    final minChildren = discountMap['min_children'] ?? 0;
+    final discountPerChild = discountMap['discount_percent_per_child'] as List? ?? [];
+
+    return Card(
+      elevation: 0,
+      color: Colors.pink[50],
+      child: Padding(
+        padding: AppConstants.paddingAll12,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.family_restroom, color: Colors.pink[700], size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Familienrabatte',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.pink[900],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Ab $minChildren Kindern',
+              style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 12),
+            ...discountPerChild.map((item) {
+              final itemMap = Map<String, dynamic>.from(item as Map);
+              final childrenCount = itemMap['children_count'] ?? 0;
+              final discountPercent = itemMap['discount_percent'] ?? 0.0;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '$childrenCount. Kind',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.pink[700],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.discount, size: 14, color: Colors.white),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${(discountPercent as num).toStringAsFixed(0)}%',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
