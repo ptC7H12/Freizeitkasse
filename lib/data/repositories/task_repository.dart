@@ -177,4 +177,132 @@ class TaskRepository {
       'completionRate': tasks.isEmpty ? 0.0 : (completed / tasks.length) * 100,
     };
   }
+
+  // ============================================================================
+  // AUTOMATIC TASK GENERATION METHODS
+  // ============================================================================
+
+  /// Get all completed tasks for an event as a Set of (taskType, referenceId) tuples
+  Future<Set<CompletedTaskKey>> getCompletedTasksByEvent(int eventId) async {
+    final completedTasks = await (_database.select(_database.tasks)
+          ..where((t) => t.eventId.equals(eventId) & t.isCompleted.equals(true)))
+        .get();
+
+    return completedTasks
+        .where((t) => t.taskType != null && t.referenceId != null)
+        .map((t) => CompletedTaskKey(t.taskType!, t.referenceId!))
+        .toSet();
+  }
+
+  /// Check if a task is already completed
+  Future<bool> isTaskCompleted(int eventId, String taskType, int referenceId) async {
+    final task = await (_database.select(_database.tasks)
+          ..where((t) =>
+              t.eventId.equals(eventId) &
+              t.taskType.equals(taskType) &
+              t.referenceId.equals(referenceId) &
+              t.isCompleted.equals(true)))
+        .getSingleOrNull();
+
+    return task != null;
+  }
+
+  /// Mark a task as completed (creates or updates task)
+  Future<bool> completeTask({
+    required int eventId,
+    required String taskType,
+    required int referenceId,
+    String? completionNote,
+  }) async {
+    // Check if task already exists
+    final existing = await (_database.select(_database.tasks)
+          ..where((t) =>
+              t.eventId.equals(eventId) &
+              t.taskType.equals(taskType) &
+              t.referenceId.equals(referenceId)))
+        .getSingleOrNull();
+
+    if (existing != null) {
+      // Update existing task
+      final companion = TasksCompanion(
+        id: Value(existing.id),
+        isCompleted: const Value(true),
+        completedAt: Value(DateTime.now()),
+        completionNote: Value(completionNote),
+        updatedAt: Value(DateTime.now()),
+      );
+      return await _database.update(_database.tasks).replace(companion);
+    } else {
+      // Create new completed task
+      final companion = TasksCompanion(
+        eventId: Value(eventId),
+        title: const Value('Auto-generated task'),
+        taskType: Value(taskType),
+        referenceId: Value(referenceId),
+        isCompleted: const Value(true),
+        completedAt: Value(DateTime.now()),
+        completionNote: Value(completionNote),
+        status: const Value('completed'),
+        createdAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      );
+      await _database.into(_database.tasks).insert(companion);
+      return true;
+    }
+  }
+
+  /// Mark a task as not completed (uncomplete)
+  Future<bool> uncompleteTask({
+    required int eventId,
+    required String taskType,
+    required int referenceId,
+  }) async {
+    final task = await (_database.select(_database.tasks)
+          ..where((t) =>
+              t.eventId.equals(eventId) &
+              t.taskType.equals(taskType) &
+              t.referenceId.equals(referenceId)))
+        .getSingleOrNull();
+
+    if (task != null) {
+      // Delete the task
+      return await (_database.delete(_database.tasks)
+            ..where((t) => t.id.equals(task.id)))
+          .go() >
+          0;
+    }
+    return false;
+  }
+
+  /// Get count of overdue auto-generated tasks
+  Future<int> getOverdueAutoTasksCount(int eventId) async {
+    final now = DateTime.now();
+    return await (_database.select(_database.tasks)
+          ..where((t) =>
+              t.eventId.equals(eventId) &
+              t.taskType.isNotNull() &
+              t.isCompleted.equals(false) &
+              t.dueDate.isSmallerThanValue(now)))
+        .get()
+        .then((tasks) => tasks.length);
+  }
+}
+
+/// Helper class for completed task lookup
+class CompletedTaskKey {
+  final String taskType;
+  final int referenceId;
+
+  CompletedTaskKey(this.taskType, this.referenceId);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CompletedTaskKey &&
+          runtimeType == other.runtimeType &&
+          taskType == other.taskType &&
+          referenceId == other.referenceId;
+
+  @override
+  int get hashCode => taskType.hashCode ^ referenceId.hashCode;
 }

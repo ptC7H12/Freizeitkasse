@@ -178,6 +178,14 @@ class Tasks extends Table {
   TextColumn get priority => text().withLength(max: 50).withDefault(const Constant('medium'))();
   IntColumn get assignedTo => integer().references(Participants, #id).nullable()();
   DateTimeColumn get dueDate => dateTime().nullable()();
+
+  // Felder für automatische Task-Generierung
+  TextColumn get taskType => text().withLength(max: 100).nullable()();
+  IntColumn get referenceId => integer().nullable()();
+  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get completedAt => dateTime().nullable()();
+  TextColumn get completionNote => text().nullable()();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -230,7 +238,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   // ============================================================================
   // MIGRATION LOGIC (entspricht Alembic-Migrationen)
@@ -415,6 +423,15 @@ class AppDatabase extends _$AppDatabase {
 
           // 5. Backup löschen
           await customStatement('DROP TABLE settings_backup');
+        }
+
+        // Migration von Version 6 zu 7: Erweitere Tasks-Tabelle für automatische Task-Generierung
+        if (from < 7) {
+          await m.addColumn(tasks, tasks.taskType);
+          await m.addColumn(tasks, tasks.referenceId);
+          await m.addColumn(tasks, tasks.isCompleted);
+          await m.addColumn(tasks, tasks.completedAt);
+          await m.addColumn(tasks, tasks.completionNote);
         }
       },
     );
