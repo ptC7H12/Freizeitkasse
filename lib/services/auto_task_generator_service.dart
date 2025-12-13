@@ -8,7 +8,6 @@ import '../data/repositories/family_repository.dart';
 import '../data/repositories/task_repository.dart';
 import '../data/repositories/ruleset_repository.dart';
 import '../utils/logger.dart';
-import 'price_calculator_service.dart';
 
 /// Model class for a generated task
 class GeneratedTask {
@@ -44,7 +43,6 @@ class AutoTaskGeneratorService {
   final FamilyRepository _familyRepo;
   final TaskRepository _taskRepo;
   final RulesetRepository _rulesetRepo;
-  final PriceCalculatorService _priceCalculator;
 
   AutoTaskGeneratorService({
     required AppDatabase database,
@@ -56,7 +54,6 @@ class AutoTaskGeneratorService {
     required FamilyRepository familyRepo,
     required TaskRepository taskRepo,
     required RulesetRepository rulesetRepo,
-    required PriceCalculatorService priceCalculator,
   })  : _database = database,
         _participantRepo = participantRepo,
         _expenseRepo = expenseRepo,
@@ -65,8 +62,7 @@ class AutoTaskGeneratorService {
         _roleRepo = roleRepo,
         _familyRepo = familyRepo,
         _taskRepo = taskRepo,
-        _rulesetRepo = rulesetRepo,
-        _priceCalculator = priceCalculator;
+        _rulesetRepo = rulesetRepo;
 
   /// Generate all automatic tasks for an event
   Future<Map<String, List<GeneratedTask>>> generateAllTasks(int eventId, Event event) async {
@@ -113,7 +109,8 @@ class AutoTaskGeneratorService {
     int eventId,
     Set<CompletedTaskKey> completedTasks,
   ) async {
-    final participants = await _participantRepo.getParticipantsByEvent(eventId);
+    // Get participants from stream (first value)
+    final participants = await _participantRepo.watchParticipantsByEvent(eventId).first;
     final tasks = <GeneratedTask>[];
 
     for (final participant in participants) {
@@ -164,14 +161,14 @@ class AutoTaskGeneratorService {
     int eventId,
     Set<CompletedTaskKey> completedTasks,
   ) async {
-    final participants = await _participantRepo.getParticipantsByEvent(eventId);
+    final participants = await _participantRepo.watchParticipantsByEvent(eventId).first;
     final tasks = <GeneratedTask>[];
 
     for (final participant in participants) {
       if (!participant.isActive) continue;
 
       final finalPrice = participant.manualPriceOverride ?? participant.calculatedPrice;
-      final totalPaid = await _paymentRepo.getTotalPaidByParticipant(participant.id);
+      final totalPaid = await _paymentRepo.getTotalPaymentsForParticipant(participant.id);
       final outstanding = finalPrice - totalPaid;
 
       if (outstanding > 0.01) {
@@ -196,7 +193,7 @@ class AutoTaskGeneratorService {
     int eventId,
     Set<CompletedTaskKey> completedTasks,
   ) async {
-    final participants = await _participantRepo.getParticipantsByEvent(eventId);
+    final participants = await _participantRepo.watchParticipantsByEvent(eventId).first;
     final tasks = <GeneratedTask>[];
 
     for (final participant in participants) {
@@ -256,7 +253,7 @@ class AutoTaskGeneratorService {
     final tasks = <GeneratedTask>[];
 
     // Get active ruleset
-    final ruleset = await _rulesetRepo.getActiveRulesetByEvent(eventId);
+    final ruleset = await _rulesetRepo.getActiveRuleset(eventId, DateTime.now());
     if (ruleset == null) return tasks;
 
     // Get all roles with incomes
@@ -271,7 +268,7 @@ class AutoTaskGeneratorService {
       if (totalSubsidy == 0) continue;
 
       // Calculate expected discounts
-      final participants = await _participantRepo.getParticipantsByEvent(eventId);
+      final participants = await _participantRepo.watchParticipantsByEvent(eventId).first;
       final roleParticipants = participants.where((p) => p.roleId == role.id && p.isActive);
 
       double expectedDiscounts = 0.0;
@@ -349,7 +346,7 @@ class AutoTaskGeneratorService {
     final tasks = <GeneratedTask>[];
 
     // Get active ruleset
-    final ruleset = await _rulesetRepo.getActiveRulesetByEvent(eventId);
+    final ruleset = await _rulesetRepo.getActiveRuleset(eventId, DateTime.now());
     if (ruleset == null) return tasks;
 
     // TODO: Parse ruleset and check role counts
@@ -365,7 +362,7 @@ class AutoTaskGeneratorService {
     Set<CompletedTaskKey> completedTasks,
   ) async {
     final tasks = <GeneratedTask>[];
-    final participants = await _participantRepo.getParticipantsByEvent(eventId);
+    final participants = await _participantRepo.watchParticipantsByEvent(eventId).first;
 
     final birthdayChildren = <Map<String, dynamic>>[];
 
@@ -428,7 +425,7 @@ class AutoTaskGeneratorService {
 
     if (kitchenRole.name.isEmpty) return tasks;
 
-    final participants = await _participantRepo.getParticipantsByEvent(eventId);
+    final participants = await _participantRepo.watchParticipantsByEvent(eventId).first;
     final kitchenParticipants = participants.where((p) => p.roleId == kitchenRole.id && p.isActive).toList();
 
     if (kitchenParticipants.isNotEmpty && !_isTaskCompleted(completedTasks, 'kitchen_team_gift', eventId)) {
