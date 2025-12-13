@@ -65,38 +65,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
             controller: _tabController,
             tabs: [
               Tab(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.auto_awesome),
-                    const SizedBox(width: 8),
-                    const Text('Automatisch'),
-                    if (totalAutoTasks > 0) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '$totalAutoTasks',
-                          style: const TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                icon: totalAutoTasks > 0
+                    ? Badge(
+                        label: Text('$totalAutoTasks'),
+                        child: const Icon(Icons.auto_awesome),
+                      )
+                    : const Icon(Icons.auto_awesome),
+                text: 'Automatisch',
               ),
               const Tab(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.edit_note),
-                    SizedBox(width: 8),
-                    Text('Manuell'),
-                  ],
-                ),
+                icon: Icon(Icons.edit_note),
+                text: 'Manuell',
               ),
             ],
           ),
