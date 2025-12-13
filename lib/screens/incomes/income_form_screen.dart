@@ -62,7 +62,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
     final income = await ref.read(incomeByIdProvider(widget.incomeId!).future);
     if (income != null && mounted) {
       setState(() {
-        _selectedSource = income.source ?? 'Teilnehmerbeitrag';
+        _selectedSource = income.category;
         _amountController.text = income.amount.toStringAsFixed(2);
         _selectedDate = income.incomeDate;
         _descriptionController.text = income.description ?? '';
@@ -123,10 +123,11 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
         // Create new income
         await repository.createIncome(
           eventId: currentEvent.id,
-          source: _selectedSource,
+          category: _selectedSource,
           amount: amount,
           incomeDate: _selectedDate,
           description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+          source: null,
           referenceNumber: _referenceNumberController.text.isEmpty ? null : _referenceNumberController.text,
           paymentMethod: _selectedPaymentMethod,
           notes: _notesController.text.isEmpty ? null : _notesController.text,
@@ -135,10 +136,11 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
         // Update existing income
         await repository.updateIncome(
           id: widget.incomeId!,
-          source: _selectedSource,
+          category: _selectedSource,
           amount: amount,
           incomeDate: _selectedDate,
           description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+          source: null,
           referenceNumber: _referenceNumberController.text.isEmpty ? null : _referenceNumberController.text,
           paymentMethod: _selectedPaymentMethod,
           notes: _notesController.text.isEmpty ? null : _notesController.text,
