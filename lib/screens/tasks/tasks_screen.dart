@@ -26,6 +26,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {}); // Rebuild when tab changes to show/hide FAB
+    });
   }
 
   @override
