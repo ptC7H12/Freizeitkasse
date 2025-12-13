@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/database/app_database.dart';
 import '../data/repositories/task_repository.dart';
 import '../services/auto_task_generator_service.dart';
-import '../services/price_calculator_service.dart';
 import 'database_provider.dart';
 import 'current_event_provider.dart';
 import 'participant_provider.dart';
@@ -95,7 +94,6 @@ final autoTaskGeneratorServiceProvider = Provider<AutoTaskGeneratorService>((ref
   final familyRepo = ref.watch(familyRepositoryProvider);
   final taskRepo = ref.watch(taskRepositoryProvider);
   final rulesetRepo = ref.watch(rulesetRepositoryProvider);
-  final priceCalculator = ref.watch(priceCalculatorServiceProvider);
 
   return AutoTaskGeneratorService(
     database: database,
@@ -107,7 +105,6 @@ final autoTaskGeneratorServiceProvider = Provider<AutoTaskGeneratorService>((ref
     familyRepo: familyRepo,
     taskRepo: taskRepo,
     rulesetRepo: rulesetRepo,
-    priceCalculator: priceCalculator,
   );
 });
 
