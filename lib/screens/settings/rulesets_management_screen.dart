@@ -748,6 +748,10 @@ class _RulesetsManagementScreenState
     // Check if it's the new structure with first_child_percent, etc.
     final hasDirectPercentages = discountMap.containsKey('first_child_percent');
 
+    // For old structure
+    final minChildren = discountMap['min_children'] ?? 0;
+    final discountPerChild = discountMap['discount_percent_per_child'];
+
     return Card(
       elevation: 0,
       color: Colors.pink[50],
@@ -791,9 +795,6 @@ class _RulesetsManagementScreenState
                 ),
             ] else ...[
               // Old structure: min_children + discount_percent_per_child list
-              final minChildren = discountMap['min_children'] ?? 0;
-              final discountPerChild = discountMap['discount_percent_per_child'];
-
               if (minChildren > 0)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
