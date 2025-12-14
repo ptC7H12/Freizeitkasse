@@ -749,7 +749,7 @@ class _RulesetsManagementScreenState
     final hasDirectPercentages = discountMap.containsKey('first_child_percent');
 
     // For old structure
-    final minChildren = discountMap['min_children'] ?? 0;
+    final minChildren = (discountMap['min_children'] ?? 0) as int;
     final discountPerChild = discountMap['discount_percent_per_child'];
 
     return Card(
