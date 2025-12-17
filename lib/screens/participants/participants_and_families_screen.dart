@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../utils/logger.dart';
+import '../../extensions/context_extensions.dart';
+import '../../providers/participant_provider.dart';
+import '../../providers/current_event_provider.dart';
+import '../../providers/pdf_export_provider.dart';
+import '../../providers/participant_excel_provider.dart';
 import 'participants_list_screen.dart';
+import 'participant_form_screen.dart';
 import '../families/families_list_screen.dart';
+import '../families/family_form_screen.dart';
 
 /// Participants and Families Screen with Tabs
 ///
@@ -18,17 +26,122 @@ class ParticipantsAndFamiliesScreen extends ConsumerStatefulWidget {
 class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndFamiliesScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int _currentTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_onTabChanged);
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging) {
+      setState(() {
+        _currentTabIndex = _tabController.index;
+      });
+    }
+  }
+
+  /// Exportiert Teilnehmerliste als PDF
+  Future<void> _exportParticipantsToPdf() async {
+    try {
+      final participantsValue = ref.read(participantsProvider).value;
+      final currentEvent = ref.read(currentEventProvider);
+
+      if (participantsValue == null || participantsValue.isEmpty) {
+        if (context.mounted) {
+          context.showError('Keine Teilnehmer zum Exportieren');
+        }
+        return;
+      }
+
+      final pdfService = ref.read(pdfExportServiceProvider);
+      final filePath = await pdfService.exportParticipantsList(
+        participants: participantsValue,
+        eventName: currentEvent?.name ?? 'Veranstaltung',
+      );
+
+      if (context.mounted) {
+        context.showSuccess('PDF gespeichert: $filePath');
+      }
+
+      AppLogger.info('Exported participants to PDF', {'path': filePath});
+    } catch (e, stack) {
+      AppLogger.error('Failed to export participants to PDF', error: e, stackTrace: stack);
+      if (context.mounted) {
+        context.showError('Fehler beim PDF-Export: $e');
+      }
+    }
+  }
+
+  /// Exportiert Teilnehmerliste als Excel
+  Future<void> _exportParticipantsToExcel() async {
+    try {
+      final participantsValue = ref.read(participantsProvider).value;
+      final currentEvent = ref.read(currentEventProvider);
+
+      if (participantsValue == null || participantsValue.isEmpty) {
+        if (context.mounted) {
+          context.showError('Keine Teilnehmer zum Exportieren');
+        }
+        return;
+      }
+
+      final excelService = ref.read(participantExcelServiceProvider);
+      final file = await excelService.exportParticipants(
+        participants: participantsValue,
+        eventName: currentEvent?.name ?? 'Veranstaltung',
+      );
+
+      if (context.mounted) {
+        context.showSuccess('Excel exportiert: ${file.path}');
+      }
+
+      AppLogger.info('Exported participants to Excel', {'path': file.path});
+    } catch (e, stack) {
+      AppLogger.error('Failed to export participants to Excel', error: e, stackTrace: stack);
+      if (context.mounted) {
+        context.showError('Fehler beim Excel-Export: $e');
+      }
+    }
+  }
+
+  /// Zeigt Export-Optionen Dialog
+  void _showExportOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf),
+              title: const Text('Als PDF exportieren'),
+              onTap: () {
+                Navigator.pop(context);
+                _exportParticipantsToPdf();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.table_chart),
+              title: const Text('Als Excel exportieren'),
+              onTap: () {
+                Navigator.pop(context);
+                _exportParticipantsToExcel();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -66,7 +179,61 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
           ),
         ],
       ),
+      floatingActionButton: _buildFloatingActionButtons(),
     );
+  }
+
+  /// Erstellt die FABs basierend auf dem aktiven Tab
+  Widget _buildFloatingActionButtons() {
+    // Tab 0: Teilnehmer - Haupt-FAB (Hinzufügen) + Mini-FAB (Export)
+    if (_currentTabIndex == 0) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // Mini-FAB für Export
+          FloatingActionButton(
+            heroTag: 'export_participants',
+            mini: true,
+            onPressed: _showExportOptions,
+            tooltip: 'Teilnehmer exportieren',
+            child: const Icon(Icons.download),
+          ),
+          SizedBox(height: AppConstants.spacingS),
+          // Haupt-FAB für Hinzufügen
+          FloatingActionButton.extended(
+            heroTag: 'add_participant',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ParticipantFormScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.person_add),
+            label: const Text('Teilnehmer'),
+            tooltip: 'Teilnehmer hinzufügen',
+          ),
+        ],
+      );
+    }
+
+    // Tab 1: Familien - Nur Haupt-FAB (Hinzufügen)
+    else {
+      return FloatingActionButton.extended(
+        heroTag: 'add_family',
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const FamilyFormScreen(),
+            ),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Familie'),
+        tooltip: 'Familie hinzufügen',
+      );
+    }
   }
 }
 
