@@ -92,51 +92,6 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
       selectedIndex: 6,
       body: Column(
         children: [
-          // PDF Export Button
-          Container(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.download),
-                  label: const Text('PDF Export'),
-                  onPressed: () async {
-                    final pdfService = ref.read(pdfExportServiceProvider);
-                    final payments = await (database.select(database.payments)
-                          ..where((t) => t.eventId.equals(currentEvent.id))
-                          ..where((t) => t.isActive.equals(true)))
-                        .get();
-                    final totalPayments = payments.fold<double>(0, (sum, p) => sum + p.amount);
-
-                    final totalIncomes = await ref.read(totalIncomesProvider.future);
-                    final totalExpenses = await ref.read(totalExpensesProvider.future);
-                    final expensesByCategory = await ref.read(expensesByCategoryProvider.future);
-                    final incomesBySource = await ref.read(incomesByCategoryProvider.future);
-
-                    try {
-                      final filePath = await pdfService.exportFinancialReport(
-                        eventName: currentEvent.name,
-                        totalIncomes: totalIncomes,
-                        totalExpenses: totalExpenses,
-                        totalPayments: totalPayments,
-                        expensesByCategory: expensesByCategory,
-                        incomesBySource: incomesBySource,
-                      );
-
-                      if (context.mounted) {
-                        context.showError('PDF gespeichert: $filePath');
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        context.showError('Fehler beim Export: $e');
-                      }
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
           // TabBar
           TabBar(
             controller: _tabController,
@@ -161,6 +116,11 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _exportFinancialReportPDF(context, ref, database, currentEvent),
+        icon: const Icon(Icons.picture_as_pdf),
+        label: const Text('PDF Export'),
       ),
     );
   }
@@ -1903,6 +1863,45 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
   // ========== EXPORT-METHODEN ==========
 
+  /// Exportiert den Finanzbericht als PDF
+  Future<void> _exportFinancialReportPDF(
+    BuildContext context,
+    WidgetRef ref,
+    db.AppDatabase database,
+    db.Event currentEvent,
+  ) async {
+    try {
+      final pdfService = ref.read(pdfExportServiceProvider);
+      final payments = await (database.select(database.payments)
+            ..where((t) => t.eventId.equals(currentEvent.id))
+            ..where((t) => t.isActive.equals(true)))
+          .get();
+      final totalPayments = payments.fold<double>(0, (sum, p) => sum + p.amount);
+
+      final totalIncomes = await ref.read(totalIncomesProvider.future);
+      final totalExpenses = await ref.read(totalExpensesProvider.future);
+      final expensesByCategory = await ref.read(expensesByCategoryProvider.future);
+      final incomesBySource = await ref.read(incomesByCategoryProvider.future);
+
+      final filePath = await pdfService.exportFinancialReport(
+        eventName: currentEvent.name,
+        totalIncomes: totalIncomes,
+        totalExpenses: totalExpenses,
+        totalPayments: totalPayments,
+        expensesByCategory: expensesByCategory,
+        incomesBySource: incomesBySource,
+      );
+
+      if (context.mounted) {
+        context.showSuccess('PDF gespeichert: $filePath');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        context.showError('Fehler beim Export: $e');
+      }
+    }
+  }
+
   /// Exportiert alle rollenbasierten Zuschüsse als PDF
   Future<void> _exportAllRoleSubsidiesPDF(BuildContext context, WidgetRef ref) async {
     try {
@@ -2508,7 +2507,12 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   }
 
   Widget _buildExpensesByCategorySection(BuildContext context, WidgetRef ref) {
-    final expensesByCategoryAsync = ref.watch(expensesByCategoryProvider);
+    final database = ref.watch(databaseProvider);
+    final currentEvent = ref.watch(currentEventProvider);
+
+    if (currentEvent == null) {
+      return const SizedBox.shrink();
+    }
 
     return Card(
       child: Padding(
@@ -2530,8 +2534,31 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
               ],
             ),
             const SizedBox(height: AppConstants.spacing),
-            expensesByCategoryAsync.when(
-              data: (byCategory) {
+            StreamBuilder<List<db.Expense>>(
+              stream: (database.select(database.expenses)
+                    ..where((tbl) => tbl.eventId.equals(currentEvent.id))
+                    ..where((tbl) => tbl.isActive.equals(true)))
+                  .watch(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
+
+                if (snapshot.hasError) {
+                  return const Text('Fehler beim Laden');
+                }
+
+                final expenses = snapshot.data ?? [];
+
+                // Berechne Ausgaben nach Kategorie
+                final Map<String, double> byCategory = {};
+                final Map<String, int> countByCategory = {};
+
+                for (final expense in expenses) {
+                  byCategory[expense.category] = (byCategory[expense.category] ?? 0.0) + expense.amount;
+                  countByCategory[expense.category] = (countByCategory[expense.category] ?? 0) + 1;
+                }
+
                 if (byCategory.isEmpty) {
                   return const Text(
                     'Keine Ausgaben vorhanden',
@@ -2554,7 +2581,6 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                         DataColumn(label: Text('Betrag', style: TextStyle(fontWeight: FontWeight.bold))),
                       ],
                       rows: byCategory.entries.map((entry) {
-                        // Count basierend auf dem Betrag / durchschnittlicher Ausgabe - vereinfacht
                         return DataRow(cells: [
                           DataCell(Row(
                             children: [
@@ -2570,7 +2596,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                               Text(entry.key),
                             ],
                           )),
-                          const DataCell(Text('-')), // Anzahl könnte aus einer anderen Query kommen
+                          DataCell(Text('${countByCategory[entry.key]}')),
                           DataCell(Text(
                             NumberFormat.currency(locale: 'de_DE', symbol: '€').format(entry.value),
                             style: const TextStyle(fontWeight: FontWeight.w600),
@@ -2581,8 +2607,6 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                   ),
                 );
               },
-              loading: () => const CircularProgressIndicator(),
-              error: (_, _) => const Text('Fehler beim Laden'),
             ),
           ],
         ),
