@@ -224,7 +224,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
 
         if (mounted) {
           context.showSuccess('Familie erstellt');
-          RouteHelpers.pop(context);
+          RouteHelpers.pop<void>(context);
         }
       } else {
         // Update
@@ -241,7 +241,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
 
         if (mounted) {
           context.showSuccess('Familie aktualisiert');
-          RouteHelpers.pop(context);
+          RouteHelpers.pop<void>(context);
         }
       }
     } catch (e) {
@@ -287,7 +287,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
 
       if (mounted) {
         context.showSuccess('Familie gelöscht');
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     }
   }

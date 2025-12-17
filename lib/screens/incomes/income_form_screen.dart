@@ -155,7 +155,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 : 'Einnahme erfolgreich aktualisiert'),
           ),
         );
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     } catch (e) {
       if (mounted) {
@@ -206,7 +206,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
 
       if (mounted) {
         context.showSuccess('Einnahme erfolgreich gelöscht');
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     } catch (e) {
       if (mounted) {

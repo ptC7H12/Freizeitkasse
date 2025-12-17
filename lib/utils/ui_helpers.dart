@@ -147,7 +147,7 @@ class UIHelpers {
     required String message,
     String buttonText = 'OK',
   }) async {
-    await showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(title),
@@ -169,7 +169,7 @@ class UIHelpers {
     required String message,
     String buttonText = 'OK',
   }) async {
-    await showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
@@ -197,7 +197,7 @@ class UIHelpers {
 
   /// Zeigt einen Loading-Dialog
   static void showLoadingDialog(BuildContext context, {String? message}) {
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => PopScope(

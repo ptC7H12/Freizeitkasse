@@ -692,7 +692,7 @@ class _ParticipantFormScreenState
 
         if (mounted) {
           context.showSuccess('Teilnehmer erstellt');
-          RouteHelpers.pop(context);
+          RouteHelpers.pop<void>(context);
         }
       } else {
         // Update
@@ -732,7 +732,7 @@ class _ParticipantFormScreenState
 
         if (mounted) {
           context.showSuccess('Teilnehmer aktualisiert');
-          RouteHelpers.pop(context);
+          RouteHelpers.pop<void>(context);
         }
       }
     } catch (e) {
@@ -774,7 +774,7 @@ class _ParticipantFormScreenState
 
       if (mounted) {
         context.showSuccess('Teilnehmer gelöscht');
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     }
   }

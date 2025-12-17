@@ -478,14 +478,14 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
 
     // Zum Dashboard navigieren
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
+      MaterialPageRoute<dynamic>(
         builder: (context) => const DashboardScreen(),
       ),
     );
   }
 
   void _showDeleteDialog(Event event) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Freizeit löschen?'),

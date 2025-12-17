@@ -122,7 +122,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
   }
 
   void _showFilterDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Filter'),
@@ -214,7 +214,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => const FamilyFormScreen(),
             ),
           );
@@ -338,7 +338,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () {
                               Navigator.of(context).push(
-                                MaterialPageRoute(
+                                MaterialPageRoute<dynamic>(
                                   builder: (context) => FamilyFormScreen(
                                     familyId: family.id,
                                   ),
