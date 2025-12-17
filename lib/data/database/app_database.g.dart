@@ -7528,6 +7528,18 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _contactInfoMeta = const VerificationMeta(
+    'contactInfo',
+  );
+  @override
+  late final GeneratedColumn<String> contactInfo = GeneratedColumn<String>(
+    'contact_info',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 300),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _bankNameMeta = const VerificationMeta(
     'bankName',
   );
@@ -7625,6 +7637,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     eventId,
     organizationName,
     organizationAddress,
+    contactInfo,
     bankName,
     iban,
     bic,
@@ -7672,6 +7685,15 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         organizationAddress.isAcceptableOrUnknown(
           data['organization_address']!,
           _organizationAddressMeta,
+        ),
+      );
+    }
+    if (data.containsKey('contact_info')) {
+      context.handle(
+        _contactInfoMeta,
+        contactInfo.isAcceptableOrUnknown(
+          data['contact_info']!,
+          _contactInfoMeta,
         ),
       );
     }
@@ -7757,6 +7779,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         DriftSqlType.string,
         data['${effectivePrefix}organization_address'],
       ),
+      contactInfo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contact_info'],
+      ),
       bankName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}bank_name'],
@@ -7803,6 +7829,7 @@ class Setting extends DataClass implements Insertable<Setting> {
   final int eventId;
   final String? organizationName;
   final String? organizationAddress;
+  final String? contactInfo;
   final String? bankName;
   final String? iban;
   final String? bic;
@@ -7816,6 +7843,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     required this.eventId,
     this.organizationName,
     this.organizationAddress,
+    this.contactInfo,
     this.bankName,
     this.iban,
     this.bic,
@@ -7835,6 +7863,9 @@ class Setting extends DataClass implements Insertable<Setting> {
     }
     if (!nullToAbsent || organizationAddress != null) {
       map['organization_address'] = Variable<String>(organizationAddress);
+    }
+    if (!nullToAbsent || contactInfo != null) {
+      map['contact_info'] = Variable<String>(contactInfo);
     }
     if (!nullToAbsent || bankName != null) {
       map['bank_name'] = Variable<String>(bankName);
@@ -7869,6 +7900,9 @@ class Setting extends DataClass implements Insertable<Setting> {
       organizationAddress: organizationAddress == null && nullToAbsent
           ? const Value.absent()
           : Value(organizationAddress),
+      contactInfo: contactInfo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contactInfo),
       bankName: bankName == null && nullToAbsent
           ? const Value.absent()
           : Value(bankName),
@@ -7900,6 +7934,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       organizationAddress: serializer.fromJson<String?>(
         json['organizationAddress'],
       ),
+      contactInfo: serializer.fromJson<String?>(json['contactInfo']),
       bankName: serializer.fromJson<String?>(json['bankName']),
       iban: serializer.fromJson<String?>(json['iban']),
       bic: serializer.fromJson<String?>(json['bic']),
@@ -7922,6 +7957,7 @@ class Setting extends DataClass implements Insertable<Setting> {
       'eventId': serializer.toJson<int>(eventId),
       'organizationName': serializer.toJson<String?>(organizationName),
       'organizationAddress': serializer.toJson<String?>(organizationAddress),
+      'contactInfo': serializer.toJson<String?>(contactInfo),
       'bankName': serializer.toJson<String?>(bankName),
       'iban': serializer.toJson<String?>(iban),
       'bic': serializer.toJson<String?>(bic),
@@ -7940,6 +7976,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     int? eventId,
     Value<String?> organizationName = const Value.absent(),
     Value<String?> organizationAddress = const Value.absent(),
+    Value<String?> contactInfo = const Value.absent(),
     Value<String?> bankName = const Value.absent(),
     Value<String?> iban = const Value.absent(),
     Value<String?> bic = const Value.absent(),
@@ -7957,6 +7994,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     organizationAddress: organizationAddress.present
         ? organizationAddress.value
         : this.organizationAddress,
+    contactInfo: contactInfo.present ? contactInfo.value : this.contactInfo,
     bankName: bankName.present ? bankName.value : this.bankName,
     iban: iban.present ? iban.value : this.iban,
     bic: bic.present ? bic.value : this.bic,
@@ -7982,6 +8020,9 @@ class Setting extends DataClass implements Insertable<Setting> {
       organizationAddress: data.organizationAddress.present
           ? data.organizationAddress.value
           : this.organizationAddress,
+      contactInfo: data.contactInfo.present
+          ? data.contactInfo.value
+          : this.contactInfo,
       bankName: data.bankName.present ? data.bankName.value : this.bankName,
       iban: data.iban.present ? data.iban.value : this.iban,
       bic: data.bic.present ? data.bic.value : this.bic,
@@ -8006,6 +8047,7 @@ class Setting extends DataClass implements Insertable<Setting> {
           ..write('eventId: $eventId, ')
           ..write('organizationName: $organizationName, ')
           ..write('organizationAddress: $organizationAddress, ')
+          ..write('contactInfo: $contactInfo, ')
           ..write('bankName: $bankName, ')
           ..write('iban: $iban, ')
           ..write('bic: $bic, ')
@@ -8024,6 +8066,7 @@ class Setting extends DataClass implements Insertable<Setting> {
     eventId,
     organizationName,
     organizationAddress,
+    contactInfo,
     bankName,
     iban,
     bic,
@@ -8041,6 +8084,7 @@ class Setting extends DataClass implements Insertable<Setting> {
           other.eventId == this.eventId &&
           other.organizationName == this.organizationName &&
           other.organizationAddress == this.organizationAddress &&
+          other.contactInfo == this.contactInfo &&
           other.bankName == this.bankName &&
           other.iban == this.iban &&
           other.bic == this.bic &&
@@ -8056,6 +8100,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<int> eventId;
   final Value<String?> organizationName;
   final Value<String?> organizationAddress;
+  final Value<String?> contactInfo;
   final Value<String?> bankName;
   final Value<String?> iban;
   final Value<String?> bic;
@@ -8069,6 +8114,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     this.eventId = const Value.absent(),
     this.organizationName = const Value.absent(),
     this.organizationAddress = const Value.absent(),
+    this.contactInfo = const Value.absent(),
     this.bankName = const Value.absent(),
     this.iban = const Value.absent(),
     this.bic = const Value.absent(),
@@ -8083,6 +8129,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     required int eventId,
     this.organizationName = const Value.absent(),
     this.organizationAddress = const Value.absent(),
+    this.contactInfo = const Value.absent(),
     this.bankName = const Value.absent(),
     this.iban = const Value.absent(),
     this.bic = const Value.absent(),
@@ -8097,6 +8144,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Expression<int>? eventId,
     Expression<String>? organizationName,
     Expression<String>? organizationAddress,
+    Expression<String>? contactInfo,
     Expression<String>? bankName,
     Expression<String>? iban,
     Expression<String>? bic,
@@ -8112,6 +8160,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       if (organizationName != null) 'organization_name': organizationName,
       if (organizationAddress != null)
         'organization_address': organizationAddress,
+      if (contactInfo != null) 'contact_info': contactInfo,
       if (bankName != null) 'bank_name': bankName,
       if (iban != null) 'iban': iban,
       if (bic != null) 'bic': bic,
@@ -8129,6 +8178,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Value<int>? eventId,
     Value<String?>? organizationName,
     Value<String?>? organizationAddress,
+    Value<String?>? contactInfo,
     Value<String?>? bankName,
     Value<String?>? iban,
     Value<String?>? bic,
@@ -8143,6 +8193,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       eventId: eventId ?? this.eventId,
       organizationName: organizationName ?? this.organizationName,
       organizationAddress: organizationAddress ?? this.organizationAddress,
+      contactInfo: contactInfo ?? this.contactInfo,
       bankName: bankName ?? this.bankName,
       iban: iban ?? this.iban,
       bic: bic ?? this.bic,
@@ -8169,6 +8220,9 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     }
     if (organizationAddress.present) {
       map['organization_address'] = Variable<String>(organizationAddress.value);
+    }
+    if (contactInfo.present) {
+      map['contact_info'] = Variable<String>(contactInfo.value);
     }
     if (bankName.present) {
       map['bank_name'] = Variable<String>(bankName.value);
@@ -8206,6 +8260,7 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
           ..write('eventId: $eventId, ')
           ..write('organizationName: $organizationName, ')
           ..write('organizationAddress: $organizationAddress, ')
+          ..write('contactInfo: $contactInfo, ')
           ..write('bankName: $bankName, ')
           ..write('iban: $iban, ')
           ..write('bic: $bic, ')
@@ -15510,6 +15565,7 @@ typedef $$SettingsTableCreateCompanionBuilder =
       required int eventId,
       Value<String?> organizationName,
       Value<String?> organizationAddress,
+      Value<String?> contactInfo,
       Value<String?> bankName,
       Value<String?> iban,
       Value<String?> bic,
@@ -15525,6 +15581,7 @@ typedef $$SettingsTableUpdateCompanionBuilder =
       Value<int> eventId,
       Value<String?> organizationName,
       Value<String?> organizationAddress,
+      Value<String?> contactInfo,
       Value<String?> bankName,
       Value<String?> iban,
       Value<String?> bic,
@@ -15579,6 +15636,11 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<String> get organizationAddress => $composableBuilder(
     column: $table.organizationAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contactInfo => $composableBuilder(
+    column: $table.contactInfo,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15670,6 +15732,11 @@ class $$SettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get contactInfo => $composableBuilder(
+    column: $table.contactInfo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get bankName => $composableBuilder(
     column: $table.bankName,
     builder: (column) => ColumnOrderings(column),
@@ -15753,6 +15820,11 @@ class $$SettingsTableAnnotationComposer
 
   GeneratedColumn<String> get organizationAddress => $composableBuilder(
     column: $table.organizationAddress,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contactInfo => $composableBuilder(
+    column: $table.contactInfo,
     builder: (column) => column,
   );
 
@@ -15842,6 +15914,7 @@ class $$SettingsTableTableManager
                 Value<int> eventId = const Value.absent(),
                 Value<String?> organizationName = const Value.absent(),
                 Value<String?> organizationAddress = const Value.absent(),
+                Value<String?> contactInfo = const Value.absent(),
                 Value<String?> bankName = const Value.absent(),
                 Value<String?> iban = const Value.absent(),
                 Value<String?> bic = const Value.absent(),
@@ -15855,6 +15928,7 @@ class $$SettingsTableTableManager
                 eventId: eventId,
                 organizationName: organizationName,
                 organizationAddress: organizationAddress,
+                contactInfo: contactInfo,
                 bankName: bankName,
                 iban: iban,
                 bic: bic,
@@ -15870,6 +15944,7 @@ class $$SettingsTableTableManager
                 required int eventId,
                 Value<String?> organizationName = const Value.absent(),
                 Value<String?> organizationAddress = const Value.absent(),
+                Value<String?> contactInfo = const Value.absent(),
                 Value<String?> bankName = const Value.absent(),
                 Value<String?> iban = const Value.absent(),
                 Value<String?> bic = const Value.absent(),
@@ -15883,6 +15958,7 @@ class $$SettingsTableTableManager
                 eventId: eventId,
                 organizationName: organizationName,
                 organizationAddress: organizationAddress,
+                contactInfo: contactInfo,
                 bankName: bankName,
                 iban: iban,
                 bic: bic,

@@ -265,7 +265,7 @@ class ExcelImportService {
       final lastName = names[0];
       final firstName = names[1];
       // Format like Python: "LastName FirstName" (Familie Mustermann Max)
-      final familyName = 'Familie $lastName';
+      final familyName = 'Familie $lastName $firstName';
       final memberCount = familyMemberCounts[familyNumber] ?? 0;
 
       try {
