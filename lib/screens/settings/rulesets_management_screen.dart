@@ -86,95 +86,150 @@ class _RulesetsManagementScreenState
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
               elevation: isActive ? 3 : 1,
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: isActive ? Colors.green : Colors.grey,
-                  child: Icon(
-                    isActive ? Icons.check_circle : Icons.rule,
-                    color: Colors.white,
-                  ),
-                ),
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        ruleset.name,
-                        style: TextStyle(
-                          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                    if (isActive)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Text(
-                          'AKTIV',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                subtitle: Column(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 4),
-                    Text(
-                      'Gültig ab: ${_formatDate(ruleset.validFrom)}',
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    if (ruleset.description != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        ruleset.description!,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[600],
+                    // Header mit Icon und Buttons
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: isActive ? Colors.green : Colors.grey,
+                          child: Icon(
+                            isActive ? Icons.check_circle : Icons.rule,
+                            color: Colors.white,
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ruleset.name,
+                                style: TextStyle(
+                                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Gültig ab: ${_formatDate(ruleset.validFrom)}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Action Buttons
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (!isActive)
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: IconButton(
+                                  icon: Icon(Icons.play_circle_outline, color: Colors.green.shade700),
+                                  onPressed: () => _activateRuleset(ruleset),
+                                  tooltip: 'Aktivieren',
+                                ),
+                              ),
+                            const SizedBox(width: 4),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: IconButton(
+                                icon: Icon(Icons.visibility, color: Colors.blue.shade700),
+                                onPressed: () => _showRulesetPreview(ruleset),
+                                tooltip: 'Vorschau',
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: IconButton(
+                                icon: Icon(Icons.edit, color: Colors.orange.shade700),
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<dynamic>(
+                                      builder: (context) => RulesetFormScreen(
+                                        rulesetId: ruleset.id,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                tooltip: 'Bearbeiten',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    // AKTIV Badge und Beschreibung
+                    if (isActive || ruleset.description != null) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          if (isActive)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.check_circle,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'AKTIV',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (isActive && ruleset.description != null)
+                            const SizedBox(width: 8),
+                          if (ruleset.description != null)
+                            Expanded(
+                              child: Text(
+                                ruleset.description!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
                       ),
                     ],
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!isActive)
-                      IconButton(
-                        icon: const Icon(Icons.play_circle_outline, size: 20),
-                        onPressed: () => _activateRuleset(ruleset),
-                        tooltip: 'Aktivieren',
-                        color: Colors.green,
-                      ),
-                    IconButton(
-                      icon: const Icon(Icons.visibility, size: 20),
-                      onPressed: () => _showRulesetPreview(ruleset),
-                      tooltip: 'Vorschau',
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.edit, size: 20),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<dynamic>(
-                            builder: (context) => RulesetFormScreen(
-                              rulesetId: ruleset.id,
-                            ),
-                          ),
-                        );
-                      },
-                      tooltip: 'Bearbeiten',
-                    ),
                   ],
                 ),
               ),
