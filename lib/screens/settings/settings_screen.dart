@@ -751,11 +751,7 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<dynamic>(
-                              builder: (context) => const RulesetsManagementScreen(),
-                            ),
-                          );
+                          context.pushScreen(const RulesetsManagementScreen());
                         },
                         icon: const Icon(Icons.rule),
                         label: const Text('Regelwerk-Verwaltung'),
@@ -912,11 +908,7 @@ class _CategoriesTab extends StatelessWidget {
                 const SizedBox(height: AppConstants.spacing),
                 ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<dynamic>(
-                        builder: (context) => const CategoriesManagementScreen(),
-                      ),
-                    );
+                    context.pushScreen(const CategoriesManagementScreen());
                   },
                   icon: const Icon(Icons.edit),
                   label: const Text('Kategorien bearbeiten'),

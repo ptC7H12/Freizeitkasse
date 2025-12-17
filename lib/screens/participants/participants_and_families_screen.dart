@@ -309,11 +309,7 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
           FloatingActionButton.extended(
             heroTag: 'add_participant',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<dynamic>(
-                  builder: (context) => const ParticipantFormScreen(),
-                ),
-              );
+              context.pushScreen(const ParticipantFormScreen());
             },
             icon: const Icon(Icons.person_add),
             label: const Text('Teilnehmer'),
@@ -328,11 +324,7 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
       return FloatingActionButton.extended(
         heroTag: 'add_family',
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<dynamic>(
-              builder: (context) => const FamilyFormScreen(),
-            ),
-          );
+          context.pushScreen(const FamilyFormScreen());
         },
         icon: const Icon(Icons.add),
         label: const Text('Familie'),

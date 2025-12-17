@@ -24,11 +24,7 @@ class PaymentsListScreen extends ConsumerWidget {
       selectedIndex: 3,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<dynamic>(
-              builder: (context) => const PaymentFormScreen(),
-            ),
-          );
+          context.pushScreen(const PaymentFormScreen());
         },
         icon: const Icon(Icons.add),
         label: const Text('Zahlung'),
@@ -168,11 +164,9 @@ class PaymentsListScreen extends ConsumerWidget {
                                   ),
                                   trailing: const Icon(Icons.chevron_right),
                                   onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute<dynamic>(
-                                        builder: (context) => PaymentFormScreen(
-                                          paymentId: payment.id,
-                                        ),
+                                    context.pushScreen(
+                                      PaymentFormScreen(
+                                        paymentId: payment.id,
                                       ),
                                     );
                                   },
