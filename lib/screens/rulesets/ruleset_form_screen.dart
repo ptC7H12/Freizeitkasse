@@ -12,6 +12,7 @@ import '../../widgets/responsive_form_container.dart';
 import '../../extensions/context_extensions.dart';
 import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
+import '../../utils/logger.dart';
 class RulesetFormScreen extends ConsumerStatefulWidget {
   final int? rulesetId;
 
@@ -121,7 +122,8 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
         _validateYaml();
         context.showSuccess('YAML-Datei importiert');
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Importieren der YAML-Datei', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Importieren: $e');
       }
@@ -177,7 +179,8 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       } else {
         throw Exception('HTTP ${response.statusCode}');
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Importieren von GitHub', error: e, stackTrace: stack);
       if (mounted) {
         setState(() => _isLoading = false);
         context.showError('Fehler beim Importieren: $e');
@@ -199,7 +202,8 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       if (mounted) {
         context.showSuccess('Exportiert nach: ${file.path}');
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Exportieren der YAML-Datei', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Exportieren: $e');
       }
@@ -268,7 +272,8 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
         );
         RouteHelpers.pop<void>(context);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Speichern des Regelwerks', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Speichern: $e');
       }
@@ -322,7 +327,8 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
         context.showSuccess('Regelwerk erfolgreich gelöscht');
         RouteHelpers.pop<void>(context);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Löschen des Regelwerks', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Löschen: $e');
       }

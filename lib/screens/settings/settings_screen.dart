@@ -204,7 +204,8 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
       if (mounted) {
         context.showSuccess('Einstellungen erfolgreich gespeichert');
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Speichern der allgemeinen Einstellungen', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Speichern: $e');
       }
@@ -454,7 +455,8 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
       if (mounted) {
         context.showSuccess('Einstellungen gespeichert');
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Speichern der Regelwerk-Einstellungen', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Speichern: $e');
       }
@@ -543,7 +545,8 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
           context.showError(result['message'] as String);
         }
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Import von GitHub', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Import: $e');
       }

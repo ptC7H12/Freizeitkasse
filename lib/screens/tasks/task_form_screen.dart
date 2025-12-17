@@ -8,6 +8,7 @@ import '../../utils/constants.dart';
 import '../../utils/route_helpers.dart';
 import '../../extensions/context_extensions.dart';
 import '../../widgets/responsive_form_container.dart';
+import '../../utils/logger.dart';
 
 /// Task Form Screen (Create/Edit)
 class TaskFormScreen extends ConsumerStatefulWidget {
@@ -127,7 +128,8 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         );
         RouteHelpers.pop<void>(context);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Speichern der Aufgabe', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler: $e');
       }
@@ -166,7 +168,8 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         context.showSuccess('Aufgabe gelöscht');
         RouteHelpers.pop<void>(context);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Löschen der Aufgabe', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Löschen: $e');
       }

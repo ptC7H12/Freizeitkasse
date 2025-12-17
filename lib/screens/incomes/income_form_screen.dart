@@ -8,6 +8,7 @@ import '../../widgets/responsive_form_container.dart';
 import '../../extensions/context_extensions.dart';
 import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
+import '../../utils/logger.dart';
 
 class IncomeFormScreen extends ConsumerStatefulWidget {
   final int? incomeId;
@@ -157,7 +158,8 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
         );
         RouteHelpers.pop<void>(context);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Speichern der Einnahme', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Speichern: $e');
       }
@@ -208,7 +210,8 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
         context.showSuccess('Einnahme erfolgreich gelöscht');
         RouteHelpers.pop<void>(context);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Löschen der Einnahme', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Löschen: $e');
       }
