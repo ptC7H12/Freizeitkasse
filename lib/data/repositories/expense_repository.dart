@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
+import '../../utils/logger.dart';
 
 class ExpenseRepository {
   final AppDatabase _database;
@@ -92,26 +93,41 @@ class ExpenseRepository {
     bool reimbursed = false,
     String? notes,
   }) async {
-    final companion = ExpensesCompanion(
-      eventId: Value(eventId),
-      category: Value(category),
-      amount: Value(amount),
-      expenseDate: Value(expenseDate),
-      description: Value(description),
-      paymentMethod: Value(paymentMethod),
-      receiptNumber: Value(receiptNumber),
-      vendor: Value(vendor),
-      referenceNumber: Value(referenceNumber),
-      paidBy: Value(paidBy),
-      receiptFile: Value(receiptFile),
-      reimbursed: Value(reimbursed),
-      notes: Value(notes),
-      isActive: const Value(true),
-      createdAt: Value(DateTime.now()),
-      updatedAt: Value(DateTime.now()),
-    );
+    try {
+      AppLogger.debug('Creating expense', {
+        'eventId': eventId,
+        'category': category,
+        'amount': amount,
+        'vendor': vendor,
+      });
 
-    return await _database.into(_database.expenses).insert(companion);
+      final companion = ExpensesCompanion(
+        eventId: Value(eventId),
+        category: Value(category),
+        amount: Value(amount),
+        expenseDate: Value(expenseDate),
+        description: Value(description),
+        paymentMethod: Value(paymentMethod),
+        receiptNumber: Value(receiptNumber),
+        vendor: Value(vendor),
+        referenceNumber: Value(referenceNumber),
+        paidBy: Value(paidBy),
+        receiptFile: Value(receiptFile),
+        reimbursed: Value(reimbursed),
+        notes: Value(notes),
+        isActive: const Value(true),
+        createdAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      );
+
+      final id = await _database.into(_database.expenses).insert(companion);
+
+      AppLogger.info('Expense created successfully', {'id': id, 'amount': amount});
+      return id;
+    } catch (e, stack) {
+      AppLogger.error('Failed to create expense', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Update an existing expense
@@ -130,49 +146,77 @@ class ExpenseRepository {
     bool? reimbursed,
     String? notes,
   }) async {
-    final existing = await getExpenseById(id);
-    if (existing == null) {
-      return false;
+    try {
+      AppLogger.debug('Updating expense', {'id': id});
+
+      final existing = await getExpenseById(id);
+      if (existing == null) {
+        AppLogger.warning('Expense not found for update', {'id': id});
+        return false;
+      }
+
+      final companion = ExpensesCompanion(
+        category: category != null ? Value(category) : const Value.absent(),
+        amount: amount != null ? Value(amount) : const Value.absent(),
+        expenseDate: expenseDate != null ? Value(expenseDate) : const Value.absent(),
+        description: description != null ? Value(description) : const Value.absent(),
+        paymentMethod: paymentMethod != null ? Value(paymentMethod) : const Value.absent(),
+        receiptNumber: receiptNumber != null ? Value(receiptNumber) : const Value.absent(),
+        vendor: vendor != null ? Value(vendor) : const Value.absent(),
+        referenceNumber: referenceNumber != null ? Value(referenceNumber) : const Value.absent(),
+        paidBy: paidBy != null ? Value(paidBy) : const Value.absent(),
+        receiptFile: receiptFile != null ? Value(receiptFile) : const Value.absent(),
+        reimbursed: reimbursed != null ? Value(reimbursed) : const Value.absent(),
+        notes: notes != null ? Value(notes) : const Value.absent(),
+        updatedAt: Value(DateTime.now()),
+      );
+
+      final success = await (_database.update(_database.expenses)
+            ..where((t) => t.id.equals(id)))
+          .write(companion) >
+          0;
+
+      if (success) {
+        AppLogger.info('Expense updated successfully', {'id': id});
+      }
+
+      return success;
+    } catch (e, stack) {
+      AppLogger.error('Failed to update expense', error: e, stackTrace: stack);
+      rethrow;
     }
-
-    final companion = ExpensesCompanion(
-      category: category != null ? Value(category) : const Value.absent(),
-      amount: amount != null ? Value(amount) : const Value.absent(),
-      expenseDate: expenseDate != null ? Value(expenseDate) : const Value.absent(),
-      description: description != null ? Value(description) : const Value.absent(),
-      paymentMethod: paymentMethod != null ? Value(paymentMethod) : const Value.absent(),
-      receiptNumber: receiptNumber != null ? Value(receiptNumber) : const Value.absent(),
-      vendor: vendor != null ? Value(vendor) : const Value.absent(),
-      referenceNumber: referenceNumber != null ? Value(referenceNumber) : const Value.absent(),
-      paidBy: paidBy != null ? Value(paidBy) : const Value.absent(),
-      receiptFile: receiptFile != null ? Value(receiptFile) : const Value.absent(),
-      reimbursed: reimbursed != null ? Value(reimbursed) : const Value.absent(),
-      notes: notes != null ? Value(notes) : const Value.absent(),
-      updatedAt: Value(DateTime.now()),
-    );
-
-    return await (_database.update(_database.expenses)
-          ..where((t) => t.id.equals(id)))
-        .write(companion) >
-        0;
   }
 
   /// Soft delete an expense
   Future<bool> deleteExpense(int id) async {
-    final existing = await getExpenseById(id);
-    if (existing == null) {
-      return false;
-    }
+    try {
+      AppLogger.debug('Soft deleting expense', {'id': id});
 
-    return await (_database.update(_database.expenses)
-          ..where((t) => t.id.equals(id)))
-        .write(
-      ExpensesCompanion(
-        isActive: const Value(false),
-        updatedAt: Value(DateTime.now()),
-      ),
-    ) >
-        0;
+      final existing = await getExpenseById(id);
+      if (existing == null) {
+        AppLogger.warning('Expense not found for deletion', {'id': id});
+        return false;
+      }
+
+      final success = await (_database.update(_database.expenses)
+            ..where((t) => t.id.equals(id)))
+          .write(
+        ExpensesCompanion(
+          isActive: const Value(false),
+          updatedAt: Value(DateTime.now()),
+        ),
+      ) >
+          0;
+
+      if (success) {
+        AppLogger.info('Expense soft deleted successfully', {'id': id});
+      }
+
+      return success;
+    } catch (e, stack) {
+      AppLogger.error('Failed to delete expense', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Permanently delete an expense (hard delete)
@@ -185,28 +229,43 @@ class ExpenseRepository {
 
   /// Get expense statistics for an event
   Future<Map<String, dynamic>> getExpenseStatistics(int eventId) async {
-    final expenses = await getExpensesByEvent(eventId);
-    final total = await getTotalExpenses(eventId);
-    final byCategory = await getExpensesByCategory(eventId);
+    try {
+      AppLogger.debug('Calculating expense statistics', {'eventId': eventId});
 
-    // Find most expensive category
-    String? mostExpensiveCategory;
-    double maxCategoryAmount = 0;
-    byCategory.forEach((category, amount) {
-      if (amount > maxCategoryAmount) {
-        maxCategoryAmount = amount;
-        mostExpensiveCategory = category;
-      }
-    });
+      final expenses = await getExpensesByEvent(eventId);
+      final total = await getTotalExpenses(eventId);
+      final byCategory = await getExpensesByCategory(eventId);
 
-    return {
-      'total': total,
-      'count': expenses.length,
-      'byCategory': byCategory,
-      'mostExpensiveCategory': mostExpensiveCategory,
-      'mostExpensiveCategoryAmount': maxCategoryAmount,
-      'averageExpense': expenses.isEmpty ? 0.0 : total / expenses.length,
-    };
+      // Find most expensive category
+      String? mostExpensiveCategory;
+      double maxCategoryAmount = 0;
+      byCategory.forEach((category, amount) {
+        if (amount > maxCategoryAmount) {
+          maxCategoryAmount = amount;
+          mostExpensiveCategory = category;
+        }
+      });
+
+      final stats = {
+        'total': total,
+        'count': expenses.length,
+        'byCategory': byCategory,
+        'mostExpensiveCategory': mostExpensiveCategory,
+        'mostExpensiveCategoryAmount': maxCategoryAmount,
+        'averageExpense': expenses.isEmpty ? 0.0 : total / expenses.length,
+      };
+
+      AppLogger.info('Expense statistics calculated', {
+        'eventId': eventId,
+        'total': total,
+        'count': expenses.length,
+      });
+
+      return stats;
+    } catch (e, stack) {
+      AppLogger.error('Failed to calculate expense statistics', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Search expenses by description, vendor, or notes
