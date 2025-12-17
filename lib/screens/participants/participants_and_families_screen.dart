@@ -114,30 +114,135 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
     }
   }
 
-  /// Zeigt Export-Optionen Dialog
-  void _showExportOptions() {
+  /// Importiert Teilnehmer aus Excel
+  Future<void> _importParticipantsFromExcel() async {
+    try {
+      final currentEvent = ref.read(currentEventProvider);
+      if (currentEvent == null) {
+        if (context.mounted) {
+          context.showError('Kein Event ausgewählt');
+        }
+        return;
+      }
+
+      final excelService = ref.read(participantExcelServiceProvider);
+      final result = await excelService.importParticipants(
+        eventId: currentEvent.id,
+      );
+
+      if (context.mounted) {
+        if (result.success) {
+          context.showSuccess(result.message);
+
+          // Zeige Fehler-Details falls vorhanden
+          if (result.errors.isNotEmpty) {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Import-Fehler'),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: result.errors.map((e) => Text('• $e')).toList(),
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          }
+        } else {
+          context.showError(result.message);
+        }
+      }
+
+      AppLogger.info('Imported participants from Excel', {'success': result.success});
+    } catch (e, stack) {
+      AppLogger.error('Failed to import participants from Excel', error: e, stackTrace: stack);
+      if (context.mounted) {
+        context.showError('Fehler beim Importieren: $e');
+      }
+    }
+  }
+
+  /// Lädt Excel-Import-Vorlage herunter
+  Future<void> _downloadImportTemplate() async {
+    try {
+      final excelService = ref.read(participantExcelServiceProvider);
+      final file = await excelService.createImportTemplate();
+
+      if (context.mounted) {
+        context.showSuccess('Vorlage erstellt: ${file.path}');
+      }
+
+      AppLogger.info('Created import template', {'path': file.path});
+    } catch (e, stack) {
+      AppLogger.error('Failed to create import template', error: e, stackTrace: stack);
+      if (context.mounted) {
+        context.showError('Fehler beim Erstellen der Vorlage: $e');
+      }
+    }
+  }
+
+  /// Zeigt Export/Import-Optionen Dialog
+  void _showExportImportOptions() {
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Padding(
+              padding: AppConstants.paddingAll16,
+              child: Text(
+                'Export & Import',
+                style: context.textTheme.titleLarge,
+              ),
+            ),
+            const Divider(),
             ListTile(
-              leading: const Icon(Icons.picture_as_pdf),
-              title: const Text('Als PDF exportieren'),
+              leading: const Icon(Icons.picture_as_pdf, color: Colors.red),
+              title: const Text('PDF exportieren'),
+              subtitle: const Text('Teilnehmerliste als PDF'),
               onTap: () {
                 Navigator.pop(context);
                 _exportParticipantsToPdf();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.table_chart),
-              title: const Text('Als Excel exportieren'),
+              leading: const Icon(Icons.table_chart, color: Colors.green),
+              title: const Text('Excel exportieren'),
+              subtitle: const Text('Teilnehmerliste als Excel'),
               onTap: () {
                 Navigator.pop(context);
                 _exportParticipantsToExcel();
               },
             ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.upload_file, color: Colors.blue),
+              title: const Text('Excel importieren'),
+              subtitle: const Text('Teilnehmer aus Excel-Datei importieren'),
+              onTap: () {
+                Navigator.pop(context);
+                _importParticipantsFromExcel();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.description, color: Colors.orange),
+              title: const Text('Import-Vorlage herunterladen'),
+              subtitle: const Text('Excel-Vorlage zum Ausfüllen'),
+              onTap: () {
+                Navigator.pop(context);
+                _downloadImportTemplate();
+              },
+            ),
+            SizedBox(height: AppConstants.spacingS),
           ],
         ),
       ),
@@ -185,19 +290,19 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
 
   /// Erstellt die FABs basierend auf dem aktiven Tab
   Widget _buildFloatingActionButtons() {
-    // Tab 0: Teilnehmer - Haupt-FAB (Hinzufügen) + Mini-FAB (Export)
+    // Tab 0: Teilnehmer - Haupt-FAB (Hinzufügen) + Extended FAB (Export/Import)
     if (_currentTabIndex == 0) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Mini-FAB für Export
-          FloatingActionButton(
-            heroTag: 'export_participants',
-            mini: true,
-            onPressed: _showExportOptions,
-            tooltip: 'Teilnehmer exportieren',
-            child: const Icon(Icons.download),
+          // Extended FAB für Export/Import
+          FloatingActionButton.extended(
+            heroTag: 'export_import_participants',
+            onPressed: _showExportImportOptions,
+            icon: const Icon(Icons.import_export),
+            label: const Text('Export/Import'),
+            tooltip: 'Teilnehmer exportieren oder importieren',
           ),
           SizedBox(height: AppConstants.spacingS),
           // Haupt-FAB für Hinzufügen
