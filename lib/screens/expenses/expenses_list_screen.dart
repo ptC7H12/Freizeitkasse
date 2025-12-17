@@ -11,6 +11,7 @@ import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
 import '../../widgets/adaptive_list_item.dart';
 import '../../extensions/context_extensions.dart';
+import '../../utils/logger.dart';
 
 class ExpensesListScreen extends ConsumerWidget {
   const ExpensesListScreen({super.key});
@@ -38,7 +39,7 @@ class ExpensesListScreen extends ConsumerWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => const ExpenseFormScreen(),
             ),
           );
@@ -98,7 +99,7 @@ class ExpensesListScreen extends ConsumerWidget {
               Container(
                 padding: AppConstants.paddingAll16,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE91E63).withOpacity(0.1),
+                  color: const Color(0xFFE91E63).withValues(alpha: 0.1),
                   border: Border(
                     bottom: BorderSide(color: Colors.grey.shade300),
                   ),
@@ -230,7 +231,7 @@ class ExpensesListScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: AppConstants.borderRadius8,
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,7 +326,7 @@ class _ExpenseListItem extends ConsumerWidget {
       );
     } catch (e) {
       // Fehlerbehandlung könnte hier verbessert werden
-      print('Fehler beim Aktualisieren des Status: $e');
+      AppLogger.debug('Fehler beim Aktualisieren des Status: $e');
     }
   }
 
@@ -340,7 +341,7 @@ class _ExpenseListItem extends ConsumerWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: categoryColor.withOpacity(0.1),
+          color: categoryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
@@ -398,8 +399,8 @@ class _ExpenseListItem extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: expense.reimbursed
-                      ? Colors.green.withOpacity(0.1)
-                      : Colors.orange.withOpacity(0.1),
+                      ? Colors.green.withValues(alpha: 0.1)
+                      : Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -418,7 +419,7 @@ class _ExpenseListItem extends ConsumerWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<dynamic>(
             builder: (context) => ExpenseFormScreen(expenseId: expense.id),
           ),
         );
@@ -426,7 +427,7 @@ class _ExpenseListItem extends ConsumerWidget {
       onEdit: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<dynamic>(
             builder: (context) => ExpenseFormScreen(expenseId: expense.id),
           ),
         );

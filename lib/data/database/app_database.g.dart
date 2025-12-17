@@ -1157,35 +1157,15 @@ class $FamiliesTable extends Families with TableInfo<$FamiliesTable, Family> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _streetMeta = const VerificationMeta('street');
-  @override
-  late final GeneratedColumn<String> street = GeneratedColumn<String>(
-    'street',
-    aliasedName,
-    true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _postalCodeMeta = const VerificationMeta(
-    'postalCode',
+  static const VerificationMeta _addressMeta = const VerificationMeta(
+    'address',
   );
   @override
-  late final GeneratedColumn<String> postalCode = GeneratedColumn<String>(
-    'postal_code',
+  late final GeneratedColumn<String> address = GeneratedColumn<String>(
+    'address',
     aliasedName,
     true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _cityMeta = const VerificationMeta('city');
-  @override
-  late final GeneratedColumn<String> city = GeneratedColumn<String>(
-    'city',
-    aliasedName,
-    true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
@@ -1221,9 +1201,7 @@ class $FamiliesTable extends Families with TableInfo<$FamiliesTable, Family> {
     contactPerson,
     phone,
     email,
-    street,
-    postalCode,
-    city,
+    address,
     createdAt,
     updatedAt,
   ];
@@ -1279,22 +1257,10 @@ class $FamiliesTable extends Families with TableInfo<$FamiliesTable, Family> {
         email.isAcceptableOrUnknown(data['email']!, _emailMeta),
       );
     }
-    if (data.containsKey('street')) {
+    if (data.containsKey('address')) {
       context.handle(
-        _streetMeta,
-        street.isAcceptableOrUnknown(data['street']!, _streetMeta),
-      );
-    }
-    if (data.containsKey('postal_code')) {
-      context.handle(
-        _postalCodeMeta,
-        postalCode.isAcceptableOrUnknown(data['postal_code']!, _postalCodeMeta),
-      );
-    }
-    if (data.containsKey('city')) {
-      context.handle(
-        _cityMeta,
-        city.isAcceptableOrUnknown(data['city']!, _cityMeta),
+        _addressMeta,
+        address.isAcceptableOrUnknown(data['address']!, _addressMeta),
       );
     }
     if (data.containsKey('created_at')) {
@@ -1342,17 +1308,9 @@ class $FamiliesTable extends Families with TableInfo<$FamiliesTable, Family> {
         DriftSqlType.string,
         data['${effectivePrefix}email'],
       ),
-      street: attachedDatabase.typeMapping.read(
+      address: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}street'],
-      ),
-      postalCode: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}postal_code'],
-      ),
-      city: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}city'],
+        data['${effectivePrefix}address'],
       ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -1378,9 +1336,7 @@ class Family extends DataClass implements Insertable<Family> {
   final String? contactPerson;
   final String? phone;
   final String? email;
-  final String? street;
-  final String? postalCode;
-  final String? city;
+  final String? address;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Family({
@@ -1390,9 +1346,7 @@ class Family extends DataClass implements Insertable<Family> {
     this.contactPerson,
     this.phone,
     this.email,
-    this.street,
-    this.postalCode,
-    this.city,
+    this.address,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -1411,14 +1365,8 @@ class Family extends DataClass implements Insertable<Family> {
     if (!nullToAbsent || email != null) {
       map['email'] = Variable<String>(email);
     }
-    if (!nullToAbsent || street != null) {
-      map['street'] = Variable<String>(street);
-    }
-    if (!nullToAbsent || postalCode != null) {
-      map['postal_code'] = Variable<String>(postalCode);
-    }
-    if (!nullToAbsent || city != null) {
-      map['city'] = Variable<String>(city);
+    if (!nullToAbsent || address != null) {
+      map['address'] = Variable<String>(address);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -1439,13 +1387,9 @@ class Family extends DataClass implements Insertable<Family> {
       email: email == null && nullToAbsent
           ? const Value.absent()
           : Value(email),
-      street: street == null && nullToAbsent
+      address: address == null && nullToAbsent
           ? const Value.absent()
-          : Value(street),
-      postalCode: postalCode == null && nullToAbsent
-          ? const Value.absent()
-          : Value(postalCode),
-      city: city == null && nullToAbsent ? const Value.absent() : Value(city),
+          : Value(address),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -1463,9 +1407,7 @@ class Family extends DataClass implements Insertable<Family> {
       contactPerson: serializer.fromJson<String?>(json['contactPerson']),
       phone: serializer.fromJson<String?>(json['phone']),
       email: serializer.fromJson<String?>(json['email']),
-      street: serializer.fromJson<String?>(json['street']),
-      postalCode: serializer.fromJson<String?>(json['postalCode']),
-      city: serializer.fromJson<String?>(json['city']),
+      address: serializer.fromJson<String?>(json['address']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -1480,9 +1422,7 @@ class Family extends DataClass implements Insertable<Family> {
       'contactPerson': serializer.toJson<String?>(contactPerson),
       'phone': serializer.toJson<String?>(phone),
       'email': serializer.toJson<String?>(email),
-      'street': serializer.toJson<String?>(street),
-      'postalCode': serializer.toJson<String?>(postalCode),
-      'city': serializer.toJson<String?>(city),
+      'address': serializer.toJson<String?>(address),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -1495,9 +1435,7 @@ class Family extends DataClass implements Insertable<Family> {
     Value<String?> contactPerson = const Value.absent(),
     Value<String?> phone = const Value.absent(),
     Value<String?> email = const Value.absent(),
-    Value<String?> street = const Value.absent(),
-    Value<String?> postalCode = const Value.absent(),
-    Value<String?> city = const Value.absent(),
+    Value<String?> address = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Family(
@@ -1509,9 +1447,7 @@ class Family extends DataClass implements Insertable<Family> {
         : this.contactPerson,
     phone: phone.present ? phone.value : this.phone,
     email: email.present ? email.value : this.email,
-    street: street.present ? street.value : this.street,
-    postalCode: postalCode.present ? postalCode.value : this.postalCode,
-    city: city.present ? city.value : this.city,
+    address: address.present ? address.value : this.address,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -1527,11 +1463,7 @@ class Family extends DataClass implements Insertable<Family> {
           : this.contactPerson,
       phone: data.phone.present ? data.phone.value : this.phone,
       email: data.email.present ? data.email.value : this.email,
-      street: data.street.present ? data.street.value : this.street,
-      postalCode: data.postalCode.present
-          ? data.postalCode.value
-          : this.postalCode,
-      city: data.city.present ? data.city.value : this.city,
+      address: data.address.present ? data.address.value : this.address,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -1546,9 +1478,7 @@ class Family extends DataClass implements Insertable<Family> {
           ..write('contactPerson: $contactPerson, ')
           ..write('phone: $phone, ')
           ..write('email: $email, ')
-          ..write('street: $street, ')
-          ..write('postalCode: $postalCode, ')
-          ..write('city: $city, ')
+          ..write('address: $address, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -1563,9 +1493,7 @@ class Family extends DataClass implements Insertable<Family> {
     contactPerson,
     phone,
     email,
-    street,
-    postalCode,
-    city,
+    address,
     createdAt,
     updatedAt,
   );
@@ -1579,9 +1507,7 @@ class Family extends DataClass implements Insertable<Family> {
           other.contactPerson == this.contactPerson &&
           other.phone == this.phone &&
           other.email == this.email &&
-          other.street == this.street &&
-          other.postalCode == this.postalCode &&
-          other.city == this.city &&
+          other.address == this.address &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -1593,9 +1519,7 @@ class FamiliesCompanion extends UpdateCompanion<Family> {
   final Value<String?> contactPerson;
   final Value<String?> phone;
   final Value<String?> email;
-  final Value<String?> street;
-  final Value<String?> postalCode;
-  final Value<String?> city;
+  final Value<String?> address;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const FamiliesCompanion({
@@ -1605,9 +1529,7 @@ class FamiliesCompanion extends UpdateCompanion<Family> {
     this.contactPerson = const Value.absent(),
     this.phone = const Value.absent(),
     this.email = const Value.absent(),
-    this.street = const Value.absent(),
-    this.postalCode = const Value.absent(),
-    this.city = const Value.absent(),
+    this.address = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -1618,9 +1540,7 @@ class FamiliesCompanion extends UpdateCompanion<Family> {
     this.contactPerson = const Value.absent(),
     this.phone = const Value.absent(),
     this.email = const Value.absent(),
-    this.street = const Value.absent(),
-    this.postalCode = const Value.absent(),
-    this.city = const Value.absent(),
+    this.address = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : eventId = Value(eventId),
@@ -1632,9 +1552,7 @@ class FamiliesCompanion extends UpdateCompanion<Family> {
     Expression<String>? contactPerson,
     Expression<String>? phone,
     Expression<String>? email,
-    Expression<String>? street,
-    Expression<String>? postalCode,
-    Expression<String>? city,
+    Expression<String>? address,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -1645,9 +1563,7 @@ class FamiliesCompanion extends UpdateCompanion<Family> {
       if (contactPerson != null) 'contact_person': contactPerson,
       if (phone != null) 'phone': phone,
       if (email != null) 'email': email,
-      if (street != null) 'street': street,
-      if (postalCode != null) 'postal_code': postalCode,
-      if (city != null) 'city': city,
+      if (address != null) 'address': address,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -1660,9 +1576,7 @@ class FamiliesCompanion extends UpdateCompanion<Family> {
     Value<String?>? contactPerson,
     Value<String?>? phone,
     Value<String?>? email,
-    Value<String?>? street,
-    Value<String?>? postalCode,
-    Value<String?>? city,
+    Value<String?>? address,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -1673,9 +1587,7 @@ class FamiliesCompanion extends UpdateCompanion<Family> {
       contactPerson: contactPerson ?? this.contactPerson,
       phone: phone ?? this.phone,
       email: email ?? this.email,
-      street: street ?? this.street,
-      postalCode: postalCode ?? this.postalCode,
-      city: city ?? this.city,
+      address: address ?? this.address,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -1702,14 +1614,8 @@ class FamiliesCompanion extends UpdateCompanion<Family> {
     if (email.present) {
       map['email'] = Variable<String>(email.value);
     }
-    if (street.present) {
-      map['street'] = Variable<String>(street.value);
-    }
-    if (postalCode.present) {
-      map['postal_code'] = Variable<String>(postalCode.value);
-    }
-    if (city.present) {
-      map['city'] = Variable<String>(city.value);
+    if (address.present) {
+      map['address'] = Variable<String>(address.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -1729,9 +1635,7 @@ class FamiliesCompanion extends UpdateCompanion<Family> {
           ..write('contactPerson: $contactPerson, ')
           ..write('phone: $phone, ')
           ..write('email: $email, ')
-          ..write('street: $street, ')
-          ..write('postalCode: $postalCode, ')
-          ..write('city: $city, ')
+          ..write('address: $address, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -1823,35 +1727,15 @@ class $ParticipantsTable extends Participants
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _streetMeta = const VerificationMeta('street');
-  @override
-  late final GeneratedColumn<String> street = GeneratedColumn<String>(
-    'street',
-    aliasedName,
-    true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _postalCodeMeta = const VerificationMeta(
-    'postalCode',
+  static const VerificationMeta _addressMeta = const VerificationMeta(
+    'address',
   );
   @override
-  late final GeneratedColumn<String> postalCode = GeneratedColumn<String>(
-    'postal_code',
+  late final GeneratedColumn<String> address = GeneratedColumn<String>(
+    'address',
     aliasedName,
     true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _cityMeta = const VerificationMeta('city');
-  @override
-  late final GeneratedColumn<String> city = GeneratedColumn<String>(
-    'city',
-    aliasedName,
-    true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
@@ -2085,9 +1969,7 @@ class $ParticipantsTable extends Participants
     lastName,
     birthDate,
     gender,
-    street,
-    postalCode,
-    city,
+    address,
     phone,
     email,
     emergencyContactName,
@@ -2161,22 +2043,10 @@ class $ParticipantsTable extends Participants
         gender.isAcceptableOrUnknown(data['gender']!, _genderMeta),
       );
     }
-    if (data.containsKey('street')) {
+    if (data.containsKey('address')) {
       context.handle(
-        _streetMeta,
-        street.isAcceptableOrUnknown(data['street']!, _streetMeta),
-      );
-    }
-    if (data.containsKey('postal_code')) {
-      context.handle(
-        _postalCodeMeta,
-        postalCode.isAcceptableOrUnknown(data['postal_code']!, _postalCodeMeta),
-      );
-    }
-    if (data.containsKey('city')) {
-      context.handle(
-        _cityMeta,
-        city.isAcceptableOrUnknown(data['city']!, _cityMeta),
+        _addressMeta,
+        address.isAcceptableOrUnknown(data['address']!, _addressMeta),
       );
     }
     if (data.containsKey('phone')) {
@@ -2353,17 +2223,9 @@ class $ParticipantsTable extends Participants
         DriftSqlType.string,
         data['${effectivePrefix}gender'],
       ),
-      street: attachedDatabase.typeMapping.read(
+      address: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}street'],
-      ),
-      postalCode: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}postal_code'],
-      ),
-      city: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}city'],
+        data['${effectivePrefix}address'],
       ),
       phone: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -2457,9 +2319,7 @@ class Participant extends DataClass implements Insertable<Participant> {
   final String lastName;
   final DateTime birthDate;
   final String? gender;
-  final String? street;
-  final String? postalCode;
-  final String? city;
+  final String? address;
   final String? phone;
   final String? email;
   final String? emergencyContactName;
@@ -2486,9 +2346,7 @@ class Participant extends DataClass implements Insertable<Participant> {
     required this.lastName,
     required this.birthDate,
     this.gender,
-    this.street,
-    this.postalCode,
-    this.city,
+    this.address,
     this.phone,
     this.email,
     this.emergencyContactName,
@@ -2520,14 +2378,8 @@ class Participant extends DataClass implements Insertable<Participant> {
     if (!nullToAbsent || gender != null) {
       map['gender'] = Variable<String>(gender);
     }
-    if (!nullToAbsent || street != null) {
-      map['street'] = Variable<String>(street);
-    }
-    if (!nullToAbsent || postalCode != null) {
-      map['postal_code'] = Variable<String>(postalCode);
-    }
-    if (!nullToAbsent || city != null) {
-      map['city'] = Variable<String>(city);
+    if (!nullToAbsent || address != null) {
+      map['address'] = Variable<String>(address);
     }
     if (!nullToAbsent || phone != null) {
       map['phone'] = Variable<String>(phone);
@@ -2587,13 +2439,9 @@ class Participant extends DataClass implements Insertable<Participant> {
       gender: gender == null && nullToAbsent
           ? const Value.absent()
           : Value(gender),
-      street: street == null && nullToAbsent
+      address: address == null && nullToAbsent
           ? const Value.absent()
-          : Value(street),
-      postalCode: postalCode == null && nullToAbsent
-          ? const Value.absent()
-          : Value(postalCode),
-      city: city == null && nullToAbsent ? const Value.absent() : Value(city),
+          : Value(address),
       phone: phone == null && nullToAbsent
           ? const Value.absent()
           : Value(phone),
@@ -2654,9 +2502,7 @@ class Participant extends DataClass implements Insertable<Participant> {
       lastName: serializer.fromJson<String>(json['lastName']),
       birthDate: serializer.fromJson<DateTime>(json['birthDate']),
       gender: serializer.fromJson<String?>(json['gender']),
-      street: serializer.fromJson<String?>(json['street']),
-      postalCode: serializer.fromJson<String?>(json['postalCode']),
-      city: serializer.fromJson<String?>(json['city']),
+      address: serializer.fromJson<String?>(json['address']),
       phone: serializer.fromJson<String?>(json['phone']),
       email: serializer.fromJson<String?>(json['email']),
       emergencyContactName: serializer.fromJson<String?>(
@@ -2696,9 +2542,7 @@ class Participant extends DataClass implements Insertable<Participant> {
       'lastName': serializer.toJson<String>(lastName),
       'birthDate': serializer.toJson<DateTime>(birthDate),
       'gender': serializer.toJson<String?>(gender),
-      'street': serializer.toJson<String?>(street),
-      'postalCode': serializer.toJson<String?>(postalCode),
-      'city': serializer.toJson<String?>(city),
+      'address': serializer.toJson<String?>(address),
       'phone': serializer.toJson<String?>(phone),
       'email': serializer.toJson<String?>(email),
       'emergencyContactName': serializer.toJson<String?>(emergencyContactName),
@@ -2730,9 +2574,7 @@ class Participant extends DataClass implements Insertable<Participant> {
     String? lastName,
     DateTime? birthDate,
     Value<String?> gender = const Value.absent(),
-    Value<String?> street = const Value.absent(),
-    Value<String?> postalCode = const Value.absent(),
-    Value<String?> city = const Value.absent(),
+    Value<String?> address = const Value.absent(),
     Value<String?> phone = const Value.absent(),
     Value<String?> email = const Value.absent(),
     Value<String?> emergencyContactName = const Value.absent(),
@@ -2759,9 +2601,7 @@ class Participant extends DataClass implements Insertable<Participant> {
     lastName: lastName ?? this.lastName,
     birthDate: birthDate ?? this.birthDate,
     gender: gender.present ? gender.value : this.gender,
-    street: street.present ? street.value : this.street,
-    postalCode: postalCode.present ? postalCode.value : this.postalCode,
-    city: city.present ? city.value : this.city,
+    address: address.present ? address.value : this.address,
     phone: phone.present ? phone.value : this.phone,
     email: email.present ? email.value : this.email,
     emergencyContactName: emergencyContactName.present
@@ -2800,11 +2640,7 @@ class Participant extends DataClass implements Insertable<Participant> {
       lastName: data.lastName.present ? data.lastName.value : this.lastName,
       birthDate: data.birthDate.present ? data.birthDate.value : this.birthDate,
       gender: data.gender.present ? data.gender.value : this.gender,
-      street: data.street.present ? data.street.value : this.street,
-      postalCode: data.postalCode.present
-          ? data.postalCode.value
-          : this.postalCode,
-      city: data.city.present ? data.city.value : this.city,
+      address: data.address.present ? data.address.value : this.address,
       phone: data.phone.present ? data.phone.value : this.phone,
       email: data.email.present ? data.email.value : this.email,
       emergencyContactName: data.emergencyContactName.present
@@ -2854,9 +2690,7 @@ class Participant extends DataClass implements Insertable<Participant> {
           ..write('lastName: $lastName, ')
           ..write('birthDate: $birthDate, ')
           ..write('gender: $gender, ')
-          ..write('street: $street, ')
-          ..write('postalCode: $postalCode, ')
-          ..write('city: $city, ')
+          ..write('address: $address, ')
           ..write('phone: $phone, ')
           ..write('email: $email, ')
           ..write('emergencyContactName: $emergencyContactName, ')
@@ -2888,9 +2722,7 @@ class Participant extends DataClass implements Insertable<Participant> {
     lastName,
     birthDate,
     gender,
-    street,
-    postalCode,
-    city,
+    address,
     phone,
     email,
     emergencyContactName,
@@ -2921,9 +2753,7 @@ class Participant extends DataClass implements Insertable<Participant> {
           other.lastName == this.lastName &&
           other.birthDate == this.birthDate &&
           other.gender == this.gender &&
-          other.street == this.street &&
-          other.postalCode == this.postalCode &&
-          other.city == this.city &&
+          other.address == this.address &&
           other.phone == this.phone &&
           other.email == this.email &&
           other.emergencyContactName == this.emergencyContactName &&
@@ -2952,9 +2782,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
   final Value<String> lastName;
   final Value<DateTime> birthDate;
   final Value<String?> gender;
-  final Value<String?> street;
-  final Value<String?> postalCode;
-  final Value<String?> city;
+  final Value<String?> address;
   final Value<String?> phone;
   final Value<String?> email;
   final Value<String?> emergencyContactName;
@@ -2981,9 +2809,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     this.lastName = const Value.absent(),
     this.birthDate = const Value.absent(),
     this.gender = const Value.absent(),
-    this.street = const Value.absent(),
-    this.postalCode = const Value.absent(),
-    this.city = const Value.absent(),
+    this.address = const Value.absent(),
     this.phone = const Value.absent(),
     this.email = const Value.absent(),
     this.emergencyContactName = const Value.absent(),
@@ -3011,9 +2837,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     required String lastName,
     required DateTime birthDate,
     this.gender = const Value.absent(),
-    this.street = const Value.absent(),
-    this.postalCode = const Value.absent(),
-    this.city = const Value.absent(),
+    this.address = const Value.absent(),
     this.phone = const Value.absent(),
     this.email = const Value.absent(),
     this.emergencyContactName = const Value.absent(),
@@ -3044,9 +2868,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     Expression<String>? lastName,
     Expression<DateTime>? birthDate,
     Expression<String>? gender,
-    Expression<String>? street,
-    Expression<String>? postalCode,
-    Expression<String>? city,
+    Expression<String>? address,
     Expression<String>? phone,
     Expression<String>? email,
     Expression<String>? emergencyContactName,
@@ -3074,9 +2896,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
       if (lastName != null) 'last_name': lastName,
       if (birthDate != null) 'birth_date': birthDate,
       if (gender != null) 'gender': gender,
-      if (street != null) 'street': street,
-      if (postalCode != null) 'postal_code': postalCode,
-      if (city != null) 'city': city,
+      if (address != null) 'address': address,
       if (phone != null) 'phone': phone,
       if (email != null) 'email': email,
       if (emergencyContactName != null)
@@ -3111,9 +2931,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     Value<String>? lastName,
     Value<DateTime>? birthDate,
     Value<String?>? gender,
-    Value<String?>? street,
-    Value<String?>? postalCode,
-    Value<String?>? city,
+    Value<String?>? address,
     Value<String?>? phone,
     Value<String?>? email,
     Value<String?>? emergencyContactName,
@@ -3141,9 +2959,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
       lastName: lastName ?? this.lastName,
       birthDate: birthDate ?? this.birthDate,
       gender: gender ?? this.gender,
-      street: street ?? this.street,
-      postalCode: postalCode ?? this.postalCode,
-      city: city ?? this.city,
+      address: address ?? this.address,
       phone: phone ?? this.phone,
       email: email ?? this.email,
       emergencyContactName: emergencyContactName ?? this.emergencyContactName,
@@ -3188,14 +3004,8 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     if (gender.present) {
       map['gender'] = Variable<String>(gender.value);
     }
-    if (street.present) {
-      map['street'] = Variable<String>(street.value);
-    }
-    if (postalCode.present) {
-      map['postal_code'] = Variable<String>(postalCode.value);
-    }
-    if (city.present) {
-      map['city'] = Variable<String>(city.value);
+    if (address.present) {
+      map['address'] = Variable<String>(address.value);
     }
     if (phone.present) {
       map['phone'] = Variable<String>(phone.value);
@@ -3272,9 +3082,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
           ..write('lastName: $lastName, ')
           ..write('birthDate: $birthDate, ')
           ..write('gender: $gender, ')
-          ..write('street: $street, ')
-          ..write('postalCode: $postalCode, ')
-          ..write('city: $city, ')
+          ..write('address: $address, ')
           ..write('phone: $phone, ')
           ..write('email: $email, ')
           ..write('emergencyContactName: $emergencyContactName, ')
@@ -7708,42 +7516,18 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _organizationStreetMeta =
-      const VerificationMeta('organizationStreet');
+  static const VerificationMeta _organizationAddressMeta =
+      const VerificationMeta('organizationAddress');
   @override
-  late final GeneratedColumn<String> organizationStreet =
+  late final GeneratedColumn<String> organizationAddress =
       GeneratedColumn<String>(
-        'organization_street',
+        'organization_address',
         aliasedName,
         true,
-        additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 200),
+        additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
-  static const VerificationMeta _organizationPostalCodeMeta =
-      const VerificationMeta('organizationPostalCode');
-  @override
-  late final GeneratedColumn<String> organizationPostalCode =
-      GeneratedColumn<String>(
-        'organization_postal_code',
-        aliasedName,
-        true,
-        additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      );
-  static const VerificationMeta _organizationCityMeta = const VerificationMeta(
-    'organizationCity',
-  );
-  @override
-  late final GeneratedColumn<String> organizationCity = GeneratedColumn<String>(
-    'organization_city',
-    aliasedName,
-    true,
-    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _bankNameMeta = const VerificationMeta(
     'bankName',
   );
@@ -7776,6 +7560,18 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _verwendungszweckPrefixMeta =
+      const VerificationMeta('verwendungszweckPrefix');
+  @override
+  late final GeneratedColumn<String> verwendungszweckPrefix =
+      GeneratedColumn<String>(
+        'verwendungszweck_prefix',
+        aliasedName,
+        true,
+        additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _invoiceFooterMeta = const VerificationMeta(
     'invoiceFooter',
   );
@@ -7828,12 +7624,11 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     id,
     eventId,
     organizationName,
-    organizationStreet,
-    organizationPostalCode,
-    organizationCity,
+    organizationAddress,
     bankName,
     iban,
     bic,
+    verwendungszweckPrefix,
     invoiceFooter,
     githubRulesetPath,
     createdAt,
@@ -7871,30 +7666,12 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         ),
       );
     }
-    if (data.containsKey('organization_street')) {
+    if (data.containsKey('organization_address')) {
       context.handle(
-        _organizationStreetMeta,
-        organizationStreet.isAcceptableOrUnknown(
-          data['organization_street']!,
-          _organizationStreetMeta,
-        ),
-      );
-    }
-    if (data.containsKey('organization_postal_code')) {
-      context.handle(
-        _organizationPostalCodeMeta,
-        organizationPostalCode.isAcceptableOrUnknown(
-          data['organization_postal_code']!,
-          _organizationPostalCodeMeta,
-        ),
-      );
-    }
-    if (data.containsKey('organization_city')) {
-      context.handle(
-        _organizationCityMeta,
-        organizationCity.isAcceptableOrUnknown(
-          data['organization_city']!,
-          _organizationCityMeta,
+        _organizationAddressMeta,
+        organizationAddress.isAcceptableOrUnknown(
+          data['organization_address']!,
+          _organizationAddressMeta,
         ),
       );
     }
@@ -7914,6 +7691,15 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
       context.handle(
         _bicMeta,
         bic.isAcceptableOrUnknown(data['bic']!, _bicMeta),
+      );
+    }
+    if (data.containsKey('verwendungszweck_prefix')) {
+      context.handle(
+        _verwendungszweckPrefixMeta,
+        verwendungszweckPrefix.isAcceptableOrUnknown(
+          data['verwendungszweck_prefix']!,
+          _verwendungszweckPrefixMeta,
+        ),
       );
     }
     if (data.containsKey('invoice_footer')) {
@@ -7967,17 +7753,9 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
         DriftSqlType.string,
         data['${effectivePrefix}organization_name'],
       ),
-      organizationStreet: attachedDatabase.typeMapping.read(
+      organizationAddress: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}organization_street'],
-      ),
-      organizationPostalCode: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}organization_postal_code'],
-      ),
-      organizationCity: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}organization_city'],
+        data['${effectivePrefix}organization_address'],
       ),
       bankName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -7990,6 +7768,10 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
       bic: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}bic'],
+      ),
+      verwendungszweckPrefix: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}verwendungszweck_prefix'],
       ),
       invoiceFooter: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -8020,12 +7802,11 @@ class Setting extends DataClass implements Insertable<Setting> {
   final int id;
   final int eventId;
   final String? organizationName;
-  final String? organizationStreet;
-  final String? organizationPostalCode;
-  final String? organizationCity;
+  final String? organizationAddress;
   final String? bankName;
   final String? iban;
   final String? bic;
+  final String? verwendungszweckPrefix;
   final String? invoiceFooter;
   final String? githubRulesetPath;
   final DateTime createdAt;
@@ -8034,12 +7815,11 @@ class Setting extends DataClass implements Insertable<Setting> {
     required this.id,
     required this.eventId,
     this.organizationName,
-    this.organizationStreet,
-    this.organizationPostalCode,
-    this.organizationCity,
+    this.organizationAddress,
     this.bankName,
     this.iban,
     this.bic,
+    this.verwendungszweckPrefix,
     this.invoiceFooter,
     this.githubRulesetPath,
     required this.createdAt,
@@ -8053,16 +7833,8 @@ class Setting extends DataClass implements Insertable<Setting> {
     if (!nullToAbsent || organizationName != null) {
       map['organization_name'] = Variable<String>(organizationName);
     }
-    if (!nullToAbsent || organizationStreet != null) {
-      map['organization_street'] = Variable<String>(organizationStreet);
-    }
-    if (!nullToAbsent || organizationPostalCode != null) {
-      map['organization_postal_code'] = Variable<String>(
-        organizationPostalCode,
-      );
-    }
-    if (!nullToAbsent || organizationCity != null) {
-      map['organization_city'] = Variable<String>(organizationCity);
+    if (!nullToAbsent || organizationAddress != null) {
+      map['organization_address'] = Variable<String>(organizationAddress);
     }
     if (!nullToAbsent || bankName != null) {
       map['bank_name'] = Variable<String>(bankName);
@@ -8072,6 +7844,9 @@ class Setting extends DataClass implements Insertable<Setting> {
     }
     if (!nullToAbsent || bic != null) {
       map['bic'] = Variable<String>(bic);
+    }
+    if (!nullToAbsent || verwendungszweckPrefix != null) {
+      map['verwendungszweck_prefix'] = Variable<String>(verwendungszweckPrefix);
     }
     if (!nullToAbsent || invoiceFooter != null) {
       map['invoice_footer'] = Variable<String>(invoiceFooter);
@@ -8091,20 +7866,17 @@ class Setting extends DataClass implements Insertable<Setting> {
       organizationName: organizationName == null && nullToAbsent
           ? const Value.absent()
           : Value(organizationName),
-      organizationStreet: organizationStreet == null && nullToAbsent
+      organizationAddress: organizationAddress == null && nullToAbsent
           ? const Value.absent()
-          : Value(organizationStreet),
-      organizationPostalCode: organizationPostalCode == null && nullToAbsent
-          ? const Value.absent()
-          : Value(organizationPostalCode),
-      organizationCity: organizationCity == null && nullToAbsent
-          ? const Value.absent()
-          : Value(organizationCity),
+          : Value(organizationAddress),
       bankName: bankName == null && nullToAbsent
           ? const Value.absent()
           : Value(bankName),
       iban: iban == null && nullToAbsent ? const Value.absent() : Value(iban),
       bic: bic == null && nullToAbsent ? const Value.absent() : Value(bic),
+      verwendungszweckPrefix: verwendungszweckPrefix == null && nullToAbsent
+          ? const Value.absent()
+          : Value(verwendungszweckPrefix),
       invoiceFooter: invoiceFooter == null && nullToAbsent
           ? const Value.absent()
           : Value(invoiceFooter),
@@ -8125,16 +7897,15 @@ class Setting extends DataClass implements Insertable<Setting> {
       id: serializer.fromJson<int>(json['id']),
       eventId: serializer.fromJson<int>(json['eventId']),
       organizationName: serializer.fromJson<String?>(json['organizationName']),
-      organizationStreet: serializer.fromJson<String?>(
-        json['organizationStreet'],
+      organizationAddress: serializer.fromJson<String?>(
+        json['organizationAddress'],
       ),
-      organizationPostalCode: serializer.fromJson<String?>(
-        json['organizationPostalCode'],
-      ),
-      organizationCity: serializer.fromJson<String?>(json['organizationCity']),
       bankName: serializer.fromJson<String?>(json['bankName']),
       iban: serializer.fromJson<String?>(json['iban']),
       bic: serializer.fromJson<String?>(json['bic']),
+      verwendungszweckPrefix: serializer.fromJson<String?>(
+        json['verwendungszweckPrefix'],
+      ),
       invoiceFooter: serializer.fromJson<String?>(json['invoiceFooter']),
       githubRulesetPath: serializer.fromJson<String?>(
         json['githubRulesetPath'],
@@ -8150,14 +7921,13 @@ class Setting extends DataClass implements Insertable<Setting> {
       'id': serializer.toJson<int>(id),
       'eventId': serializer.toJson<int>(eventId),
       'organizationName': serializer.toJson<String?>(organizationName),
-      'organizationStreet': serializer.toJson<String?>(organizationStreet),
-      'organizationPostalCode': serializer.toJson<String?>(
-        organizationPostalCode,
-      ),
-      'organizationCity': serializer.toJson<String?>(organizationCity),
+      'organizationAddress': serializer.toJson<String?>(organizationAddress),
       'bankName': serializer.toJson<String?>(bankName),
       'iban': serializer.toJson<String?>(iban),
       'bic': serializer.toJson<String?>(bic),
+      'verwendungszweckPrefix': serializer.toJson<String?>(
+        verwendungszweckPrefix,
+      ),
       'invoiceFooter': serializer.toJson<String?>(invoiceFooter),
       'githubRulesetPath': serializer.toJson<String?>(githubRulesetPath),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -8169,12 +7939,11 @@ class Setting extends DataClass implements Insertable<Setting> {
     int? id,
     int? eventId,
     Value<String?> organizationName = const Value.absent(),
-    Value<String?> organizationStreet = const Value.absent(),
-    Value<String?> organizationPostalCode = const Value.absent(),
-    Value<String?> organizationCity = const Value.absent(),
+    Value<String?> organizationAddress = const Value.absent(),
     Value<String?> bankName = const Value.absent(),
     Value<String?> iban = const Value.absent(),
     Value<String?> bic = const Value.absent(),
+    Value<String?> verwendungszweckPrefix = const Value.absent(),
     Value<String?> invoiceFooter = const Value.absent(),
     Value<String?> githubRulesetPath = const Value.absent(),
     DateTime? createdAt,
@@ -8185,18 +7954,15 @@ class Setting extends DataClass implements Insertable<Setting> {
     organizationName: organizationName.present
         ? organizationName.value
         : this.organizationName,
-    organizationStreet: organizationStreet.present
-        ? organizationStreet.value
-        : this.organizationStreet,
-    organizationPostalCode: organizationPostalCode.present
-        ? organizationPostalCode.value
-        : this.organizationPostalCode,
-    organizationCity: organizationCity.present
-        ? organizationCity.value
-        : this.organizationCity,
+    organizationAddress: organizationAddress.present
+        ? organizationAddress.value
+        : this.organizationAddress,
     bankName: bankName.present ? bankName.value : this.bankName,
     iban: iban.present ? iban.value : this.iban,
     bic: bic.present ? bic.value : this.bic,
+    verwendungszweckPrefix: verwendungszweckPrefix.present
+        ? verwendungszweckPrefix.value
+        : this.verwendungszweckPrefix,
     invoiceFooter: invoiceFooter.present
         ? invoiceFooter.value
         : this.invoiceFooter,
@@ -8213,18 +7979,15 @@ class Setting extends DataClass implements Insertable<Setting> {
       organizationName: data.organizationName.present
           ? data.organizationName.value
           : this.organizationName,
-      organizationStreet: data.organizationStreet.present
-          ? data.organizationStreet.value
-          : this.organizationStreet,
-      organizationPostalCode: data.organizationPostalCode.present
-          ? data.organizationPostalCode.value
-          : this.organizationPostalCode,
-      organizationCity: data.organizationCity.present
-          ? data.organizationCity.value
-          : this.organizationCity,
+      organizationAddress: data.organizationAddress.present
+          ? data.organizationAddress.value
+          : this.organizationAddress,
       bankName: data.bankName.present ? data.bankName.value : this.bankName,
       iban: data.iban.present ? data.iban.value : this.iban,
       bic: data.bic.present ? data.bic.value : this.bic,
+      verwendungszweckPrefix: data.verwendungszweckPrefix.present
+          ? data.verwendungszweckPrefix.value
+          : this.verwendungszweckPrefix,
       invoiceFooter: data.invoiceFooter.present
           ? data.invoiceFooter.value
           : this.invoiceFooter,
@@ -8242,12 +8005,11 @@ class Setting extends DataClass implements Insertable<Setting> {
           ..write('id: $id, ')
           ..write('eventId: $eventId, ')
           ..write('organizationName: $organizationName, ')
-          ..write('organizationStreet: $organizationStreet, ')
-          ..write('organizationPostalCode: $organizationPostalCode, ')
-          ..write('organizationCity: $organizationCity, ')
+          ..write('organizationAddress: $organizationAddress, ')
           ..write('bankName: $bankName, ')
           ..write('iban: $iban, ')
           ..write('bic: $bic, ')
+          ..write('verwendungszweckPrefix: $verwendungszweckPrefix, ')
           ..write('invoiceFooter: $invoiceFooter, ')
           ..write('githubRulesetPath: $githubRulesetPath, ')
           ..write('createdAt: $createdAt, ')
@@ -8261,12 +8023,11 @@ class Setting extends DataClass implements Insertable<Setting> {
     id,
     eventId,
     organizationName,
-    organizationStreet,
-    organizationPostalCode,
-    organizationCity,
+    organizationAddress,
     bankName,
     iban,
     bic,
+    verwendungszweckPrefix,
     invoiceFooter,
     githubRulesetPath,
     createdAt,
@@ -8279,12 +8040,11 @@ class Setting extends DataClass implements Insertable<Setting> {
           other.id == this.id &&
           other.eventId == this.eventId &&
           other.organizationName == this.organizationName &&
-          other.organizationStreet == this.organizationStreet &&
-          other.organizationPostalCode == this.organizationPostalCode &&
-          other.organizationCity == this.organizationCity &&
+          other.organizationAddress == this.organizationAddress &&
           other.bankName == this.bankName &&
           other.iban == this.iban &&
           other.bic == this.bic &&
+          other.verwendungszweckPrefix == this.verwendungszweckPrefix &&
           other.invoiceFooter == this.invoiceFooter &&
           other.githubRulesetPath == this.githubRulesetPath &&
           other.createdAt == this.createdAt &&
@@ -8295,12 +8055,11 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   final Value<int> id;
   final Value<int> eventId;
   final Value<String?> organizationName;
-  final Value<String?> organizationStreet;
-  final Value<String?> organizationPostalCode;
-  final Value<String?> organizationCity;
+  final Value<String?> organizationAddress;
   final Value<String?> bankName;
   final Value<String?> iban;
   final Value<String?> bic;
+  final Value<String?> verwendungszweckPrefix;
   final Value<String?> invoiceFooter;
   final Value<String?> githubRulesetPath;
   final Value<DateTime> createdAt;
@@ -8309,12 +8068,11 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     this.id = const Value.absent(),
     this.eventId = const Value.absent(),
     this.organizationName = const Value.absent(),
-    this.organizationStreet = const Value.absent(),
-    this.organizationPostalCode = const Value.absent(),
-    this.organizationCity = const Value.absent(),
+    this.organizationAddress = const Value.absent(),
     this.bankName = const Value.absent(),
     this.iban = const Value.absent(),
     this.bic = const Value.absent(),
+    this.verwendungszweckPrefix = const Value.absent(),
     this.invoiceFooter = const Value.absent(),
     this.githubRulesetPath = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -8324,12 +8082,11 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     this.id = const Value.absent(),
     required int eventId,
     this.organizationName = const Value.absent(),
-    this.organizationStreet = const Value.absent(),
-    this.organizationPostalCode = const Value.absent(),
-    this.organizationCity = const Value.absent(),
+    this.organizationAddress = const Value.absent(),
     this.bankName = const Value.absent(),
     this.iban = const Value.absent(),
     this.bic = const Value.absent(),
+    this.verwendungszweckPrefix = const Value.absent(),
     this.invoiceFooter = const Value.absent(),
     this.githubRulesetPath = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -8339,12 +8096,11 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Expression<int>? id,
     Expression<int>? eventId,
     Expression<String>? organizationName,
-    Expression<String>? organizationStreet,
-    Expression<String>? organizationPostalCode,
-    Expression<String>? organizationCity,
+    Expression<String>? organizationAddress,
     Expression<String>? bankName,
     Expression<String>? iban,
     Expression<String>? bic,
+    Expression<String>? verwendungszweckPrefix,
     Expression<String>? invoiceFooter,
     Expression<String>? githubRulesetPath,
     Expression<DateTime>? createdAt,
@@ -8354,13 +8110,13 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       if (id != null) 'id': id,
       if (eventId != null) 'event_id': eventId,
       if (organizationName != null) 'organization_name': organizationName,
-      if (organizationStreet != null) 'organization_street': organizationStreet,
-      if (organizationPostalCode != null)
-        'organization_postal_code': organizationPostalCode,
-      if (organizationCity != null) 'organization_city': organizationCity,
+      if (organizationAddress != null)
+        'organization_address': organizationAddress,
       if (bankName != null) 'bank_name': bankName,
       if (iban != null) 'iban': iban,
       if (bic != null) 'bic': bic,
+      if (verwendungszweckPrefix != null)
+        'verwendungszweck_prefix': verwendungszweckPrefix,
       if (invoiceFooter != null) 'invoice_footer': invoiceFooter,
       if (githubRulesetPath != null) 'github_ruleset_path': githubRulesetPath,
       if (createdAt != null) 'created_at': createdAt,
@@ -8372,12 +8128,11 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     Value<int>? id,
     Value<int>? eventId,
     Value<String?>? organizationName,
-    Value<String?>? organizationStreet,
-    Value<String?>? organizationPostalCode,
-    Value<String?>? organizationCity,
+    Value<String?>? organizationAddress,
     Value<String?>? bankName,
     Value<String?>? iban,
     Value<String?>? bic,
+    Value<String?>? verwendungszweckPrefix,
     Value<String?>? invoiceFooter,
     Value<String?>? githubRulesetPath,
     Value<DateTime>? createdAt,
@@ -8387,13 +8142,12 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
       id: id ?? this.id,
       eventId: eventId ?? this.eventId,
       organizationName: organizationName ?? this.organizationName,
-      organizationStreet: organizationStreet ?? this.organizationStreet,
-      organizationPostalCode:
-          organizationPostalCode ?? this.organizationPostalCode,
-      organizationCity: organizationCity ?? this.organizationCity,
+      organizationAddress: organizationAddress ?? this.organizationAddress,
       bankName: bankName ?? this.bankName,
       iban: iban ?? this.iban,
       bic: bic ?? this.bic,
+      verwendungszweckPrefix:
+          verwendungszweckPrefix ?? this.verwendungszweckPrefix,
       invoiceFooter: invoiceFooter ?? this.invoiceFooter,
       githubRulesetPath: githubRulesetPath ?? this.githubRulesetPath,
       createdAt: createdAt ?? this.createdAt,
@@ -8413,16 +8167,8 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     if (organizationName.present) {
       map['organization_name'] = Variable<String>(organizationName.value);
     }
-    if (organizationStreet.present) {
-      map['organization_street'] = Variable<String>(organizationStreet.value);
-    }
-    if (organizationPostalCode.present) {
-      map['organization_postal_code'] = Variable<String>(
-        organizationPostalCode.value,
-      );
-    }
-    if (organizationCity.present) {
-      map['organization_city'] = Variable<String>(organizationCity.value);
+    if (organizationAddress.present) {
+      map['organization_address'] = Variable<String>(organizationAddress.value);
     }
     if (bankName.present) {
       map['bank_name'] = Variable<String>(bankName.value);
@@ -8432,6 +8178,11 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
     }
     if (bic.present) {
       map['bic'] = Variable<String>(bic.value);
+    }
+    if (verwendungszweckPrefix.present) {
+      map['verwendungszweck_prefix'] = Variable<String>(
+        verwendungszweckPrefix.value,
+      );
     }
     if (invoiceFooter.present) {
       map['invoice_footer'] = Variable<String>(invoiceFooter.value);
@@ -8454,12 +8205,11 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
           ..write('id: $id, ')
           ..write('eventId: $eventId, ')
           ..write('organizationName: $organizationName, ')
-          ..write('organizationStreet: $organizationStreet, ')
-          ..write('organizationPostalCode: $organizationPostalCode, ')
-          ..write('organizationCity: $organizationCity, ')
+          ..write('organizationAddress: $organizationAddress, ')
           ..write('bankName: $bankName, ')
           ..write('iban: $iban, ')
           ..write('bic: $bic, ')
+          ..write('verwendungszweckPrefix: $verwendungszweckPrefix, ')
           ..write('invoiceFooter: $invoiceFooter, ')
           ..write('githubRulesetPath: $githubRulesetPath, ')
           ..write('createdAt: $createdAt, ')
@@ -8574,6 +8324,66 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _taskTypeMeta = const VerificationMeta(
+    'taskType',
+  );
+  @override
+  late final GeneratedColumn<String> taskType = GeneratedColumn<String>(
+    'task_type',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _referenceIdMeta = const VerificationMeta(
+    'referenceId',
+  );
+  @override
+  late final GeneratedColumn<int> referenceId = GeneratedColumn<int>(
+    'reference_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isCompletedMeta = const VerificationMeta(
+    'isCompleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
+    'is_completed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_completed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> completedAt = GeneratedColumn<DateTime>(
+    'completed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _completionNoteMeta = const VerificationMeta(
+    'completionNote',
+  );
+  @override
+  late final GeneratedColumn<String> completionNote = GeneratedColumn<String>(
+    'completion_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -8608,6 +8418,11 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     priority,
     assignedTo,
     dueDate,
+    taskType,
+    referenceId,
+    isCompleted,
+    completedAt,
+    completionNote,
     createdAt,
     updatedAt,
   ];
@@ -8675,6 +8490,48 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta),
       );
     }
+    if (data.containsKey('task_type')) {
+      context.handle(
+        _taskTypeMeta,
+        taskType.isAcceptableOrUnknown(data['task_type']!, _taskTypeMeta),
+      );
+    }
+    if (data.containsKey('reference_id')) {
+      context.handle(
+        _referenceIdMeta,
+        referenceId.isAcceptableOrUnknown(
+          data['reference_id']!,
+          _referenceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_completed')) {
+      context.handle(
+        _isCompletedMeta,
+        isCompleted.isAcceptableOrUnknown(
+          data['is_completed']!,
+          _isCompletedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('completion_note')) {
+      context.handle(
+        _completionNoteMeta,
+        completionNote.isAcceptableOrUnknown(
+          data['completion_note']!,
+          _completionNoteMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -8728,6 +8585,26 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}due_date'],
       ),
+      taskType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}task_type'],
+      ),
+      referenceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reference_id'],
+      ),
+      isCompleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_completed'],
+      )!,
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}completed_at'],
+      ),
+      completionNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}completion_note'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -8754,6 +8631,11 @@ class Task extends DataClass implements Insertable<Task> {
   final String priority;
   final int? assignedTo;
   final DateTime? dueDate;
+  final String? taskType;
+  final int? referenceId;
+  final bool isCompleted;
+  final DateTime? completedAt;
+  final String? completionNote;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Task({
@@ -8765,6 +8647,11 @@ class Task extends DataClass implements Insertable<Task> {
     required this.priority,
     this.assignedTo,
     this.dueDate,
+    this.taskType,
+    this.referenceId,
+    required this.isCompleted,
+    this.completedAt,
+    this.completionNote,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -8784,6 +8671,19 @@ class Task extends DataClass implements Insertable<Task> {
     }
     if (!nullToAbsent || dueDate != null) {
       map['due_date'] = Variable<DateTime>(dueDate);
+    }
+    if (!nullToAbsent || taskType != null) {
+      map['task_type'] = Variable<String>(taskType);
+    }
+    if (!nullToAbsent || referenceId != null) {
+      map['reference_id'] = Variable<int>(referenceId);
+    }
+    map['is_completed'] = Variable<bool>(isCompleted);
+    if (!nullToAbsent || completedAt != null) {
+      map['completed_at'] = Variable<DateTime>(completedAt);
+    }
+    if (!nullToAbsent || completionNote != null) {
+      map['completion_note'] = Variable<String>(completionNote);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -8806,6 +8706,19 @@ class Task extends DataClass implements Insertable<Task> {
       dueDate: dueDate == null && nullToAbsent
           ? const Value.absent()
           : Value(dueDate),
+      taskType: taskType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(taskType),
+      referenceId: referenceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(referenceId),
+      isCompleted: Value(isCompleted),
+      completedAt: completedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAt),
+      completionNote: completionNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completionNote),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -8825,6 +8738,11 @@ class Task extends DataClass implements Insertable<Task> {
       priority: serializer.fromJson<String>(json['priority']),
       assignedTo: serializer.fromJson<int?>(json['assignedTo']),
       dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
+      taskType: serializer.fromJson<String?>(json['taskType']),
+      referenceId: serializer.fromJson<int?>(json['referenceId']),
+      isCompleted: serializer.fromJson<bool>(json['isCompleted']),
+      completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
+      completionNote: serializer.fromJson<String?>(json['completionNote']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -8841,6 +8759,11 @@ class Task extends DataClass implements Insertable<Task> {
       'priority': serializer.toJson<String>(priority),
       'assignedTo': serializer.toJson<int?>(assignedTo),
       'dueDate': serializer.toJson<DateTime?>(dueDate),
+      'taskType': serializer.toJson<String?>(taskType),
+      'referenceId': serializer.toJson<int?>(referenceId),
+      'isCompleted': serializer.toJson<bool>(isCompleted),
+      'completedAt': serializer.toJson<DateTime?>(completedAt),
+      'completionNote': serializer.toJson<String?>(completionNote),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -8855,6 +8778,11 @@ class Task extends DataClass implements Insertable<Task> {
     String? priority,
     Value<int?> assignedTo = const Value.absent(),
     Value<DateTime?> dueDate = const Value.absent(),
+    Value<String?> taskType = const Value.absent(),
+    Value<int?> referenceId = const Value.absent(),
+    bool? isCompleted,
+    Value<DateTime?> completedAt = const Value.absent(),
+    Value<String?> completionNote = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Task(
@@ -8866,6 +8794,13 @@ class Task extends DataClass implements Insertable<Task> {
     priority: priority ?? this.priority,
     assignedTo: assignedTo.present ? assignedTo.value : this.assignedTo,
     dueDate: dueDate.present ? dueDate.value : this.dueDate,
+    taskType: taskType.present ? taskType.value : this.taskType,
+    referenceId: referenceId.present ? referenceId.value : this.referenceId,
+    isCompleted: isCompleted ?? this.isCompleted,
+    completedAt: completedAt.present ? completedAt.value : this.completedAt,
+    completionNote: completionNote.present
+        ? completionNote.value
+        : this.completionNote,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -8883,6 +8818,19 @@ class Task extends DataClass implements Insertable<Task> {
           ? data.assignedTo.value
           : this.assignedTo,
       dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
+      taskType: data.taskType.present ? data.taskType.value : this.taskType,
+      referenceId: data.referenceId.present
+          ? data.referenceId.value
+          : this.referenceId,
+      isCompleted: data.isCompleted.present
+          ? data.isCompleted.value
+          : this.isCompleted,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+      completionNote: data.completionNote.present
+          ? data.completionNote.value
+          : this.completionNote,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -8899,6 +8847,11 @@ class Task extends DataClass implements Insertable<Task> {
           ..write('priority: $priority, ')
           ..write('assignedTo: $assignedTo, ')
           ..write('dueDate: $dueDate, ')
+          ..write('taskType: $taskType, ')
+          ..write('referenceId: $referenceId, ')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('completionNote: $completionNote, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -8915,6 +8868,11 @@ class Task extends DataClass implements Insertable<Task> {
     priority,
     assignedTo,
     dueDate,
+    taskType,
+    referenceId,
+    isCompleted,
+    completedAt,
+    completionNote,
     createdAt,
     updatedAt,
   );
@@ -8930,6 +8888,11 @@ class Task extends DataClass implements Insertable<Task> {
           other.priority == this.priority &&
           other.assignedTo == this.assignedTo &&
           other.dueDate == this.dueDate &&
+          other.taskType == this.taskType &&
+          other.referenceId == this.referenceId &&
+          other.isCompleted == this.isCompleted &&
+          other.completedAt == this.completedAt &&
+          other.completionNote == this.completionNote &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -8943,6 +8906,11 @@ class TasksCompanion extends UpdateCompanion<Task> {
   final Value<String> priority;
   final Value<int?> assignedTo;
   final Value<DateTime?> dueDate;
+  final Value<String?> taskType;
+  final Value<int?> referenceId;
+  final Value<bool> isCompleted;
+  final Value<DateTime?> completedAt;
+  final Value<String?> completionNote;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const TasksCompanion({
@@ -8954,6 +8922,11 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.priority = const Value.absent(),
     this.assignedTo = const Value.absent(),
     this.dueDate = const Value.absent(),
+    this.taskType = const Value.absent(),
+    this.referenceId = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.completionNote = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -8966,6 +8939,11 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.priority = const Value.absent(),
     this.assignedTo = const Value.absent(),
     this.dueDate = const Value.absent(),
+    this.taskType = const Value.absent(),
+    this.referenceId = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.completionNote = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : eventId = Value(eventId),
@@ -8979,6 +8957,11 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Expression<String>? priority,
     Expression<int>? assignedTo,
     Expression<DateTime>? dueDate,
+    Expression<String>? taskType,
+    Expression<int>? referenceId,
+    Expression<bool>? isCompleted,
+    Expression<DateTime>? completedAt,
+    Expression<String>? completionNote,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -8991,6 +8974,11 @@ class TasksCompanion extends UpdateCompanion<Task> {
       if (priority != null) 'priority': priority,
       if (assignedTo != null) 'assigned_to': assignedTo,
       if (dueDate != null) 'due_date': dueDate,
+      if (taskType != null) 'task_type': taskType,
+      if (referenceId != null) 'reference_id': referenceId,
+      if (isCompleted != null) 'is_completed': isCompleted,
+      if (completedAt != null) 'completed_at': completedAt,
+      if (completionNote != null) 'completion_note': completionNote,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -9005,6 +8993,11 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Value<String>? priority,
     Value<int?>? assignedTo,
     Value<DateTime?>? dueDate,
+    Value<String?>? taskType,
+    Value<int?>? referenceId,
+    Value<bool>? isCompleted,
+    Value<DateTime?>? completedAt,
+    Value<String?>? completionNote,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -9017,6 +9010,11 @@ class TasksCompanion extends UpdateCompanion<Task> {
       priority: priority ?? this.priority,
       assignedTo: assignedTo ?? this.assignedTo,
       dueDate: dueDate ?? this.dueDate,
+      taskType: taskType ?? this.taskType,
+      referenceId: referenceId ?? this.referenceId,
+      isCompleted: isCompleted ?? this.isCompleted,
+      completedAt: completedAt ?? this.completedAt,
+      completionNote: completionNote ?? this.completionNote,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -9049,6 +9047,21 @@ class TasksCompanion extends UpdateCompanion<Task> {
     if (dueDate.present) {
       map['due_date'] = Variable<DateTime>(dueDate.value);
     }
+    if (taskType.present) {
+      map['task_type'] = Variable<String>(taskType.value);
+    }
+    if (referenceId.present) {
+      map['reference_id'] = Variable<int>(referenceId.value);
+    }
+    if (isCompleted.present) {
+      map['is_completed'] = Variable<bool>(isCompleted.value);
+    }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<DateTime>(completedAt.value);
+    }
+    if (completionNote.present) {
+      map['completion_note'] = Variable<String>(completionNote.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -9069,6 +9082,11 @@ class TasksCompanion extends UpdateCompanion<Task> {
           ..write('priority: $priority, ')
           ..write('assignedTo: $assignedTo, ')
           ..write('dueDate: $dueDate, ')
+          ..write('taskType: $taskType, ')
+          ..write('referenceId: $referenceId, ')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('completionNote: $completionNote, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -10860,9 +10878,7 @@ typedef $$FamiliesTableCreateCompanionBuilder =
       Value<String?> contactPerson,
       Value<String?> phone,
       Value<String?> email,
-      Value<String?> street,
-      Value<String?> postalCode,
-      Value<String?> city,
+      Value<String?> address,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -10874,9 +10890,7 @@ typedef $$FamiliesTableUpdateCompanionBuilder =
       Value<String?> contactPerson,
       Value<String?> phone,
       Value<String?> email,
-      Value<String?> street,
-      Value<String?> postalCode,
-      Value<String?> city,
+      Value<String?> address,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -10975,18 +10989,8 @@ class $$FamiliesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get street => $composableBuilder(
-    column: $table.street,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get postalCode => $composableBuilder(
-    column: $table.postalCode,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get city => $composableBuilder(
-    column: $table.city,
+  ColumnFilters<String> get address => $composableBuilder(
+    column: $table.address,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11108,18 +11112,8 @@ class $$FamiliesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get street => $composableBuilder(
-    column: $table.street,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get postalCode => $composableBuilder(
-    column: $table.postalCode,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get city => $composableBuilder(
-    column: $table.city,
+  ColumnOrderings<String> get address => $composableBuilder(
+    column: $table.address,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -11185,16 +11179,8 @@ class $$FamiliesTableAnnotationComposer
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
 
-  GeneratedColumn<String> get street =>
-      $composableBuilder(column: $table.street, builder: (column) => column);
-
-  GeneratedColumn<String> get postalCode => $composableBuilder(
-    column: $table.postalCode,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get city =>
-      $composableBuilder(column: $table.city, builder: (column) => column);
+  GeneratedColumn<String> get address =>
+      $composableBuilder(column: $table.address, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -11314,9 +11300,7 @@ class $$FamiliesTableTableManager
                 Value<String?> contactPerson = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
                 Value<String?> email = const Value.absent(),
-                Value<String?> street = const Value.absent(),
-                Value<String?> postalCode = const Value.absent(),
-                Value<String?> city = const Value.absent(),
+                Value<String?> address = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => FamiliesCompanion(
@@ -11326,9 +11310,7 @@ class $$FamiliesTableTableManager
                 contactPerson: contactPerson,
                 phone: phone,
                 email: email,
-                street: street,
-                postalCode: postalCode,
-                city: city,
+                address: address,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -11340,9 +11322,7 @@ class $$FamiliesTableTableManager
                 Value<String?> contactPerson = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
                 Value<String?> email = const Value.absent(),
-                Value<String?> street = const Value.absent(),
-                Value<String?> postalCode = const Value.absent(),
-                Value<String?> city = const Value.absent(),
+                Value<String?> address = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => FamiliesCompanion.insert(
@@ -11352,9 +11332,7 @@ class $$FamiliesTableTableManager
                 contactPerson: contactPerson,
                 phone: phone,
                 email: email,
-                street: street,
-                postalCode: postalCode,
-                city: city,
+                address: address,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -11488,9 +11466,7 @@ typedef $$ParticipantsTableCreateCompanionBuilder =
       required String lastName,
       required DateTime birthDate,
       Value<String?> gender,
-      Value<String?> street,
-      Value<String?> postalCode,
-      Value<String?> city,
+      Value<String?> address,
       Value<String?> phone,
       Value<String?> email,
       Value<String?> emergencyContactName,
@@ -11519,9 +11495,7 @@ typedef $$ParticipantsTableUpdateCompanionBuilder =
       Value<String> lastName,
       Value<DateTime> birthDate,
       Value<String?> gender,
-      Value<String?> street,
-      Value<String?> postalCode,
-      Value<String?> city,
+      Value<String?> address,
       Value<String?> phone,
       Value<String?> email,
       Value<String?> emergencyContactName,
@@ -11678,18 +11652,8 @@ class $$ParticipantsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get street => $composableBuilder(
-    column: $table.street,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get postalCode => $composableBuilder(
-    column: $table.postalCode,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get city => $composableBuilder(
-    column: $table.city,
+  ColumnFilters<String> get address => $composableBuilder(
+    column: $table.address,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11932,18 +11896,8 @@ class $$ParticipantsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get street => $composableBuilder(
-    column: $table.street,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get postalCode => $composableBuilder(
-    column: $table.postalCode,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get city => $composableBuilder(
-    column: $table.city,
+  ColumnOrderings<String> get address => $composableBuilder(
+    column: $table.address,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -12126,16 +12080,8 @@ class $$ParticipantsTableAnnotationComposer
   GeneratedColumn<String> get gender =>
       $composableBuilder(column: $table.gender, builder: (column) => column);
 
-  GeneratedColumn<String> get street =>
-      $composableBuilder(column: $table.street, builder: (column) => column);
-
-  GeneratedColumn<String> get postalCode => $composableBuilder(
-    column: $table.postalCode,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get city =>
-      $composableBuilder(column: $table.city, builder: (column) => column);
+  GeneratedColumn<String> get address =>
+      $composableBuilder(column: $table.address, builder: (column) => column);
 
   GeneratedColumn<String> get phone =>
       $composableBuilder(column: $table.phone, builder: (column) => column);
@@ -12366,9 +12312,7 @@ class $$ParticipantsTableTableManager
                 Value<String> lastName = const Value.absent(),
                 Value<DateTime> birthDate = const Value.absent(),
                 Value<String?> gender = const Value.absent(),
-                Value<String?> street = const Value.absent(),
-                Value<String?> postalCode = const Value.absent(),
-                Value<String?> city = const Value.absent(),
+                Value<String?> address = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> emergencyContactName = const Value.absent(),
@@ -12395,9 +12339,7 @@ class $$ParticipantsTableTableManager
                 lastName: lastName,
                 birthDate: birthDate,
                 gender: gender,
-                street: street,
-                postalCode: postalCode,
-                city: city,
+                address: address,
                 phone: phone,
                 email: email,
                 emergencyContactName: emergencyContactName,
@@ -12426,9 +12368,7 @@ class $$ParticipantsTableTableManager
                 required String lastName,
                 required DateTime birthDate,
                 Value<String?> gender = const Value.absent(),
-                Value<String?> street = const Value.absent(),
-                Value<String?> postalCode = const Value.absent(),
-                Value<String?> city = const Value.absent(),
+                Value<String?> address = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> emergencyContactName = const Value.absent(),
@@ -12455,9 +12395,7 @@ class $$ParticipantsTableTableManager
                 lastName: lastName,
                 birthDate: birthDate,
                 gender: gender,
-                street: street,
-                postalCode: postalCode,
-                city: city,
+                address: address,
                 phone: phone,
                 email: email,
                 emergencyContactName: emergencyContactName,
@@ -15571,12 +15509,11 @@ typedef $$SettingsTableCreateCompanionBuilder =
       Value<int> id,
       required int eventId,
       Value<String?> organizationName,
-      Value<String?> organizationStreet,
-      Value<String?> organizationPostalCode,
-      Value<String?> organizationCity,
+      Value<String?> organizationAddress,
       Value<String?> bankName,
       Value<String?> iban,
       Value<String?> bic,
+      Value<String?> verwendungszweckPrefix,
       Value<String?> invoiceFooter,
       Value<String?> githubRulesetPath,
       Value<DateTime> createdAt,
@@ -15587,12 +15524,11 @@ typedef $$SettingsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<int> eventId,
       Value<String?> organizationName,
-      Value<String?> organizationStreet,
-      Value<String?> organizationPostalCode,
-      Value<String?> organizationCity,
+      Value<String?> organizationAddress,
       Value<String?> bankName,
       Value<String?> iban,
       Value<String?> bic,
+      Value<String?> verwendungszweckPrefix,
       Value<String?> invoiceFooter,
       Value<String?> githubRulesetPath,
       Value<DateTime> createdAt,
@@ -15641,18 +15577,8 @@ class $$SettingsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get organizationStreet => $composableBuilder(
-    column: $table.organizationStreet,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get organizationPostalCode => $composableBuilder(
-    column: $table.organizationPostalCode,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get organizationCity => $composableBuilder(
-    column: $table.organizationCity,
+  ColumnFilters<String> get organizationAddress => $composableBuilder(
+    column: $table.organizationAddress,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15668,6 +15594,11 @@ class $$SettingsTableFilterComposer
 
   ColumnFilters<String> get bic => $composableBuilder(
     column: $table.bic,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get verwendungszweckPrefix => $composableBuilder(
+    column: $table.verwendungszweckPrefix,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15734,18 +15665,8 @@ class $$SettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get organizationStreet => $composableBuilder(
-    column: $table.organizationStreet,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get organizationPostalCode => $composableBuilder(
-    column: $table.organizationPostalCode,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get organizationCity => $composableBuilder(
-    column: $table.organizationCity,
+  ColumnOrderings<String> get organizationAddress => $composableBuilder(
+    column: $table.organizationAddress,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -15761,6 +15682,11 @@ class $$SettingsTableOrderingComposer
 
   ColumnOrderings<String> get bic => $composableBuilder(
     column: $table.bic,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get verwendungszweckPrefix => $composableBuilder(
+    column: $table.verwendungszweckPrefix,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -15825,18 +15751,8 @@ class $$SettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get organizationStreet => $composableBuilder(
-    column: $table.organizationStreet,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get organizationPostalCode => $composableBuilder(
-    column: $table.organizationPostalCode,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get organizationCity => $composableBuilder(
-    column: $table.organizationCity,
+  GeneratedColumn<String> get organizationAddress => $composableBuilder(
+    column: $table.organizationAddress,
     builder: (column) => column,
   );
 
@@ -15848,6 +15764,11 @@ class $$SettingsTableAnnotationComposer
 
   GeneratedColumn<String> get bic =>
       $composableBuilder(column: $table.bic, builder: (column) => column);
+
+  GeneratedColumn<String> get verwendungszweckPrefix => $composableBuilder(
+    column: $table.verwendungszweckPrefix,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get invoiceFooter => $composableBuilder(
     column: $table.invoiceFooter,
@@ -15920,12 +15841,11 @@ class $$SettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> eventId = const Value.absent(),
                 Value<String?> organizationName = const Value.absent(),
-                Value<String?> organizationStreet = const Value.absent(),
-                Value<String?> organizationPostalCode = const Value.absent(),
-                Value<String?> organizationCity = const Value.absent(),
+                Value<String?> organizationAddress = const Value.absent(),
                 Value<String?> bankName = const Value.absent(),
                 Value<String?> iban = const Value.absent(),
                 Value<String?> bic = const Value.absent(),
+                Value<String?> verwendungszweckPrefix = const Value.absent(),
                 Value<String?> invoiceFooter = const Value.absent(),
                 Value<String?> githubRulesetPath = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -15934,12 +15854,11 @@ class $$SettingsTableTableManager
                 id: id,
                 eventId: eventId,
                 organizationName: organizationName,
-                organizationStreet: organizationStreet,
-                organizationPostalCode: organizationPostalCode,
-                organizationCity: organizationCity,
+                organizationAddress: organizationAddress,
                 bankName: bankName,
                 iban: iban,
                 bic: bic,
+                verwendungszweckPrefix: verwendungszweckPrefix,
                 invoiceFooter: invoiceFooter,
                 githubRulesetPath: githubRulesetPath,
                 createdAt: createdAt,
@@ -15950,12 +15869,11 @@ class $$SettingsTableTableManager
                 Value<int> id = const Value.absent(),
                 required int eventId,
                 Value<String?> organizationName = const Value.absent(),
-                Value<String?> organizationStreet = const Value.absent(),
-                Value<String?> organizationPostalCode = const Value.absent(),
-                Value<String?> organizationCity = const Value.absent(),
+                Value<String?> organizationAddress = const Value.absent(),
                 Value<String?> bankName = const Value.absent(),
                 Value<String?> iban = const Value.absent(),
                 Value<String?> bic = const Value.absent(),
+                Value<String?> verwendungszweckPrefix = const Value.absent(),
                 Value<String?> invoiceFooter = const Value.absent(),
                 Value<String?> githubRulesetPath = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -15964,12 +15882,11 @@ class $$SettingsTableTableManager
                 id: id,
                 eventId: eventId,
                 organizationName: organizationName,
-                organizationStreet: organizationStreet,
-                organizationPostalCode: organizationPostalCode,
-                organizationCity: organizationCity,
+                organizationAddress: organizationAddress,
                 bankName: bankName,
                 iban: iban,
                 bic: bic,
+                verwendungszweckPrefix: verwendungszweckPrefix,
                 invoiceFooter: invoiceFooter,
                 githubRulesetPath: githubRulesetPath,
                 createdAt: createdAt,
@@ -16052,6 +15969,11 @@ typedef $$TasksTableCreateCompanionBuilder =
       Value<String> priority,
       Value<int?> assignedTo,
       Value<DateTime?> dueDate,
+      Value<String?> taskType,
+      Value<int?> referenceId,
+      Value<bool> isCompleted,
+      Value<DateTime?> completedAt,
+      Value<String?> completionNote,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -16065,6 +15987,11 @@ typedef $$TasksTableUpdateCompanionBuilder =
       Value<String> priority,
       Value<int?> assignedTo,
       Value<DateTime?> dueDate,
+      Value<String?> taskType,
+      Value<int?> referenceId,
+      Value<bool> isCompleted,
+      Value<DateTime?> completedAt,
+      Value<String?> completionNote,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -16146,6 +16073,31 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
 
   ColumnFilters<DateTime> get dueDate => $composableBuilder(
     column: $table.dueDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get taskType => $composableBuilder(
+    column: $table.taskType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get referenceId => $composableBuilder(
+    column: $table.referenceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get completionNote => $composableBuilder(
+    column: $table.completionNote,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16245,6 +16197,31 @@ class $$TasksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get taskType => $composableBuilder(
+    column: $table.taskType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get referenceId => $composableBuilder(
+    column: $table.referenceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get completionNote => $composableBuilder(
+    column: $table.completionNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -16330,6 +16307,29 @@ class $$TasksTableAnnotationComposer
 
   GeneratedColumn<DateTime> get dueDate =>
       $composableBuilder(column: $table.dueDate, builder: (column) => column);
+
+  GeneratedColumn<String> get taskType =>
+      $composableBuilder(column: $table.taskType, builder: (column) => column);
+
+  GeneratedColumn<int> get referenceId => $composableBuilder(
+    column: $table.referenceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get completionNote => $composableBuilder(
+    column: $table.completionNote,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -16420,6 +16420,11 @@ class $$TasksTableTableManager
                 Value<String> priority = const Value.absent(),
                 Value<int?> assignedTo = const Value.absent(),
                 Value<DateTime?> dueDate = const Value.absent(),
+                Value<String?> taskType = const Value.absent(),
+                Value<int?> referenceId = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<String?> completionNote = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => TasksCompanion(
@@ -16431,6 +16436,11 @@ class $$TasksTableTableManager
                 priority: priority,
                 assignedTo: assignedTo,
                 dueDate: dueDate,
+                taskType: taskType,
+                referenceId: referenceId,
+                isCompleted: isCompleted,
+                completedAt: completedAt,
+                completionNote: completionNote,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -16444,6 +16454,11 @@ class $$TasksTableTableManager
                 Value<String> priority = const Value.absent(),
                 Value<int?> assignedTo = const Value.absent(),
                 Value<DateTime?> dueDate = const Value.absent(),
+                Value<String?> taskType = const Value.absent(),
+                Value<int?> referenceId = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<String?> completionNote = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => TasksCompanion.insert(
@@ -16455,6 +16470,11 @@ class $$TasksTableTableManager
                 priority: priority,
                 assignedTo: assignedTo,
                 dueDate: dueDate,
+                taskType: taskType,
+                referenceId: referenceId,
+                isCompleted: isCompleted,
+                completedAt: completedAt,
+                completionNote: completionNote,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),

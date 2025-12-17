@@ -25,7 +25,7 @@ class PaymentsListScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => const PaymentFormScreen(),
             ),
           );
@@ -62,7 +62,7 @@ class PaymentsListScreen extends ConsumerWidget {
                   );
                 },
                 loading: () => _buildStatsHeaderLoading(context, zahlungGesamt, gesamtbetrag),
-                error: (_, __) => _buildStatsHeaderLoading(context, zahlungGesamt, gesamtbetrag),
+                error: (_, _) => _buildStatsHeaderLoading(context, zahlungGesamt, gesamtbetrag),
               ),
 
               // Zahlungsliste
@@ -169,7 +169,7 @@ class PaymentsListScreen extends ConsumerWidget {
                                   trailing: const Icon(Icons.chevron_right),
                                   onTap: () {
                                     Navigator.of(context).push(
-                                      MaterialPageRoute(
+                                      MaterialPageRoute<dynamic>(
                                         builder: (context) => PaymentFormScreen(
                                           paymentId: payment.id,
                                         ),
@@ -181,10 +181,10 @@ class PaymentsListScreen extends ConsumerWidget {
                             },
                           ),
                           loading: () => const Center(child: CircularProgressIndicator()),
-                          error: (_, __) => const Center(child: Text('Fehler beim Laden der Familien')),
+                          error: (_, _) => const Center(child: Text('Fehler beim Laden der Familien')),
                         ),
                         loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (_, __) => const Center(child: Text('Fehler beim Laden der Teilnehmer')),
+                        error: (_, _) => const Center(child: Text('Fehler beim Laden der Teilnehmer')),
                       ),
               ),
             ],
@@ -209,7 +209,7 @@ class PaymentsListScreen extends ConsumerWidget {
     return Container(
       padding: AppConstants.paddingAll16,
       decoration: BoxDecoration(
-        color: const Color(0xFF2196F3).withOpacity(0.1),
+        color: const Color(0xFF2196F3).withValues(alpha: 0.1),
         border: Border(
           bottom: BorderSide(color: Colors.grey.shade300),
         ),
@@ -279,7 +279,7 @@ class PaymentsListScreen extends ConsumerWidget {
     return Container(
       padding: AppConstants.paddingAll16,
       decoration: BoxDecoration(
-        color: const Color(0xFF2196F3).withOpacity(0.1),
+        color: const Color(0xFF2196F3).withValues(alpha: 0.1),
         border: Border(
           bottom: BorderSide(color: Colors.grey.shade300),
         ),
@@ -342,7 +342,7 @@ class PaymentsListScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: AppConstants.borderRadius8,
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,8 +392,8 @@ class PaymentsListScreen extends ConsumerWidget {
         borderRadius: AppConstants.borderRadius8,
         border: Border.all(
           color: isComplete
-              ? const Color(0xFF4CAF50).withOpacity(0.3)
-              : const Color(0xFFFF9800).withOpacity(0.3),
+              ? const Color(0xFF4CAF50).withValues(alpha: 0.3)
+              : const Color(0xFFFF9800).withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -437,8 +437,8 @@ class PaymentsListScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: isComplete
-                  ? const Color(0xFF4CAF50).withOpacity(0.1)
-                  : const Color(0xFFFF9800).withOpacity(0.1),
+                  ? const Color(0xFF4CAF50).withValues(alpha: 0.1)
+                  : const Color(0xFFFF9800).withValues(alpha: 0.1),
               borderRadius: AppConstants.borderRadius8,
             ),
             child: Column(

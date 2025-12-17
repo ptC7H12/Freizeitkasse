@@ -118,7 +118,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
       children: [
         // Header Card
         Card(
-          color: const Color(0xFF2196F3).withOpacity(0.1),
+          color: const Color(0xFF2196F3).withValues(alpha: 0.1),
           child: Padding(
             padding: AppConstants.paddingAll16,
             child: Column(
@@ -233,7 +233,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: const Color(0xFF4CAF50).withOpacity(0.2),
+                      backgroundColor: const Color(0xFF4CAF50).withValues(alpha: 0.2),
                       child: Text(
                         '$minAge-$maxAge',
                         style: const TextStyle(
@@ -251,7 +251,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF4CAF50).withOpacity(0.2),
+                        color: const Color(0xFF4CAF50).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Text(
@@ -313,7 +313,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: const Color(0xFF2196F3).withOpacity(0.2),
+                      backgroundColor: const Color(0xFF2196F3).withValues(alpha: 0.2),
                       child: const Icon(
                         Icons.person,
                         color: Color(0xFF2196F3),
@@ -326,7 +326,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF9800).withOpacity(0.2),
+                        color: const Color(0xFFFF9800).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
@@ -462,7 +462,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
       ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: const Color(0xFFE91E63).withOpacity(0.2),
+          backgroundColor: const Color(0xFFE91E63).withValues(alpha: 0.2),
           child: Icon(
             icon,
             color: const Color(0xFFE91E63),
@@ -475,7 +475,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFFE91E63).withOpacity(0.2),
+            color: const Color(0xFFE91E63).withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(

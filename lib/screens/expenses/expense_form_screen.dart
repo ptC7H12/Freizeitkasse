@@ -116,7 +116,9 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
 
   Future<void> _uploadReceipt() async {
     final currentEvent = ref.read(currentEventProvider);
-    if (currentEvent == null) return;
+    if (currentEvent == null) {
+      return;
+    }
 
     final fileStorage = ref.read(fileStorageServiceProvider);
     final expenseId = widget.expenseId ?? 0; // Temporäre ID für neue Ausgaben
@@ -135,7 +137,9 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   }
 
   Future<void> _deleteReceipt() async {
-    if (_receiptFilePath == null) return;
+    if (_receiptFilePath == null) {
+      return;
+    }
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -230,7 +234,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         context.showSuccess(widget.expenseId == null
             ? 'Ausgabe erfolgreich erstellt'
             : 'Ausgabe erfolgreich aktualisiert');
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     } catch (e) {
       if (mounted) {
@@ -281,7 +285,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
 
       if (mounted) {
         context.showSuccess('Ausgabe erfolgreich gelöscht');
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     } catch (e) {
       if (mounted) {

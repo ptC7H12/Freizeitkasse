@@ -128,7 +128,9 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
   }
 
   Future<void> _downloadInvoice() async {
-    if (_participant == null) return;
+    if (_participant == null) {
+      return;
+    }
 
     try {
       final pdfService = ref.read(pdfExportServiceProvider);
@@ -238,7 +240,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
             icon: const Icon(Icons.edit),
             onPressed: () async {
               final result = await Navigator.of(context).push(
-                MaterialPageRoute(
+                MaterialPageRoute<dynamic>(
                   builder: (context) => ParticipantFormScreen(
                     participantId: widget.participantId,
                   ),
@@ -359,7 +361,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
               child: FilledButton.icon(
                 onPressed: () async {
                   final result = await Navigator.of(context).push(
-                    MaterialPageRoute(
+                    MaterialPageRoute<dynamic>(
                       builder: (context) => PaymentFormScreen(
                         preselectedParticipantId: widget.participantId,
                       ),
@@ -414,7 +416,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
 
     return Card(
       elevation: 2,
-      color: statusColor.withOpacity(0.1),
+      color: statusColor.withValues(alpha: 0.1),
       child: Padding(
         padding: AppConstants.paddingAll16,
         child: Column(
@@ -569,11 +571,11 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               children: [
                 Icon(Icons.euro, color: AppConstants.primaryColor),
-                const SizedBox(width: AppConstants.spacingS),
-                const Text(
+                SizedBox(width: AppConstants.spacingS),
+                Text(
                   'Preisinformationen',
                   style: TextStyle(
                     fontSize: 18,
@@ -596,7 +598,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
@@ -630,11 +632,11 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               children: [
                 Icon(Icons.receipt_long, color: AppConstants.primaryColor),
-                const SizedBox(width: AppConstants.spacingS),
-                const Text(
+                SizedBox(width: AppConstants.spacingS),
+                Text(
                   'Zahlungen',
                   style: TextStyle(
                     fontSize: 18,
@@ -668,7 +670,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(
-                      backgroundColor: Colors.green.withOpacity(0.2),
+                      backgroundColor: Colors.green.withValues(alpha: 0.2),
                       child: const Icon(Icons.check, color: Colors.green, size: 20),
                     ),
                     title: Text(

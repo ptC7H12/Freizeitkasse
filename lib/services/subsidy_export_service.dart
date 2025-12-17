@@ -22,7 +22,9 @@ class SubsidyExportService {
 
   /// Lädt die Roboto Regular Font
   Future<pw.Font> _loadRegularFont() async {
-    if (_cachedRegularFont != null) return _cachedRegularFont!;
+    if (_cachedRegularFont != null) {
+      return _cachedRegularFont!;
+    }
 
     final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
     _cachedRegularFont = pw.Font.ttf(fontData);
@@ -31,7 +33,9 @@ class SubsidyExportService {
 
   /// Lädt die Roboto Bold Font
   Future<pw.Font> _loadBoldFont() async {
-    if (_cachedBoldFont != null) return _cachedBoldFont!;
+    if (_cachedBoldFont != null) {
+      return _cachedBoldFont!;
+    }
 
     final fontData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
     _cachedBoldFont = pw.Font.ttf(fontData);
@@ -124,7 +128,7 @@ class SubsidyExportService {
             pw.SizedBox(height: 16),
 
             // === TEILNEHMER-TABELLE ===
-            pw.Table.fromTextArray(
+            pw.TableHelper.fromTextArray(
               context: context,
               headers: ['Name', 'Geburtsdatum', 'Regulärer Preis', 'Zuschuss'],
               data: participants.map((p) {

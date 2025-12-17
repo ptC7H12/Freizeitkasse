@@ -125,7 +125,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         context.showSuccess(
           widget.taskId == null ? 'Aufgabe erstellt' : 'Aufgabe aktualisiert',
         );
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     } catch (e) {
       if (mounted) {
@@ -141,14 +141,18 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   }
 
   Future<void> _deleteTask() async {
-    if (widget.taskId == null) return;
+    if (widget.taskId == null) {
+      return;
+    }
 
     final confirmed = await context.showConfirm(
       title: 'Aufgabe löschen?',
       message: 'Diese Aktion kann nicht rückgängig gemacht werden.',
     );
 
-    if (confirmed != true) return;
+    if (confirmed != true) {
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -160,7 +164,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
 
       if (mounted) {
         context.showSuccess('Aufgabe gelöscht');
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     } catch (e) {
       if (mounted) {
@@ -334,7 +338,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                   },
                 ),
                 loading: () => const LinearProgressIndicator(),
-                error: (_, __) => const Text('Fehler beim Laden der Teilnehmer'),
+                error: (_, _) => const Text('Fehler beim Laden der Teilnehmer'),
               ),
 
               const SizedBox(height: AppConstants.spacingXL),
@@ -360,7 +364,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                   Row(
                     children: [
                       OutlinedButton(
-                        onPressed: _isLoading ? null : () => RouteHelpers.pop(context),
+                        onPressed: _isLoading ? null : () => RouteHelpers.pop<void>(context),
                         child: const Text('Abbrechen'),
                       ),
                       const SizedBox(width: 12),

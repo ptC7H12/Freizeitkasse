@@ -137,7 +137,9 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
 
   Future<void> _loadSettings() async {
     final currentEvent = ref.read(currentEventProvider);
-    if (currentEvent == null) return;
+    if (currentEvent == null) {
+      return;
+    }
 
     final repository = ref.read(settingsRepositoryProvider);
     final settings = await repository.getOrCreateSettings(currentEvent.id);
@@ -410,7 +412,9 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
 
   Future<void> _loadSettings() async {
     final currentEvent = ref.read(currentEventProvider);
-    if (currentEvent == null) return;
+    if (currentEvent == null) {
+      return;
+    }
 
     final repository = ref.read(settingsRepositoryProvider);
     final settings = await repository.getOrCreateSettings(currentEvent.id);
@@ -550,7 +554,7 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
   }
 
   void _showImportResultDialog(Map<String, dynamic> result) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Import-Ergebnis'),
@@ -742,7 +746,7 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                       child: ElevatedButton.icon(
                         onPressed: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(
+                            MaterialPageRoute<dynamic>(
                               builder: (context) => const RulesetsManagementScreen(),
                             ),
                           );
@@ -903,7 +907,7 @@ class _CategoriesTab extends StatelessWidget {
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
+                      MaterialPageRoute<dynamic>(
                         builder: (context) => const CategoriesManagementScreen(),
                       ),
                     );

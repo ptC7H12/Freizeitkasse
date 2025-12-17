@@ -57,7 +57,7 @@ class MGBFreizeitplanerApp extends StatelessWidget {
         // Cards with subtle elevation and color
         cardTheme: CardThemeData(
           elevation: AppConstants.elevationMedium,
-          shadowColor: Colors.black.withOpacity(0.1),
+          shadowColor: Colors.black.withValues(alpha: 0.1),
           shape: RoundedRectangleBorder(
             borderRadius: AppConstants.borderRadius16,
           ),
@@ -130,7 +130,7 @@ class MGBFreizeitplanerApp extends StatelessWidget {
         drawerTheme: DrawerThemeData(
           backgroundColor: Colors.white,
           elevation: 16,
-          shadowColor: Colors.black.withOpacity(0.2),
+          shadowColor: Colors.black.withValues(alpha: 0.2),
         ),
       ),
 

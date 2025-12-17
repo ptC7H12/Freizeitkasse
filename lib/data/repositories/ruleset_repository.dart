@@ -344,7 +344,9 @@ family_discount:
 
   /// Recalculate prices for all participants in an event
   Future<void> _recalculateAllParticipantPrices(int eventId) async {
-    if (_participantRepository == null) return;
+    if (_participantRepository == null) {
+      return;
+    }
 
     AppLogger.info('[RulesetRepository] Recalculating all participant prices for event $eventId');
 

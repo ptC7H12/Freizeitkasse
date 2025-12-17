@@ -302,7 +302,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
         );
       },
       loading: () => const LinearProgressIndicator(),
-      error: (_, __) => const Text('Fehler beim Laden der Teilnehmer'),
+      error: (_, _) => const Text('Fehler beim Laden der Teilnehmer'),
     );
   }
 
@@ -337,7 +337,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
         );
       },
       loading: () => const LinearProgressIndicator(),
-      error: (_, __) => const Text('Fehler beim Laden der Familien'),
+      error: (_, _) => const Text('Fehler beim Laden der Familien'),
     );
   }
 
@@ -394,7 +394,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
 
         if (mounted) {
           context.showSuccess('Zahlung erstellt');
-          RouteHelpers.pop(context);
+          RouteHelpers.pop<void>(context);
         }
       } else {
         // Update
@@ -411,7 +411,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
 
         if (mounted) {
           context.showSuccess('Zahlung aktualisiert');
-          RouteHelpers.pop(context);
+          RouteHelpers.pop<void>(context);
         }
       }
     } catch (e) {
@@ -453,7 +453,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
 
       if (mounted) {
         context.showSuccess('Zahlung gelöscht');
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     }
   }

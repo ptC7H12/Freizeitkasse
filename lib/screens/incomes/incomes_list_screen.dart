@@ -79,7 +79,7 @@ class IncomesListScreen extends ConsumerWidget {
               Container(
                 padding: AppConstants.paddingAll16,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50).withOpacity(0.1),
+                  color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
                   border: Border(
                     bottom: BorderSide(color: Colors.grey.shade300),
                   ),
@@ -110,7 +110,7 @@ class IncomesListScreen extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: AppConstants.borderRadius8,
-                              border: Border.all(color: const Color(0xFF4CAF50).withOpacity(0.3)),
+                              border: Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.3)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,7 +149,7 @@ class IncomesListScreen extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: AppConstants.borderRadius8,
-                              border: Border.all(color: const Color(0xFF2196F3).withOpacity(0.3)),
+                              border: Border.all(color: const Color(0xFF2196F3).withValues(alpha: 0.3)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +231,7 @@ class IncomesListScreen extends ConsumerWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => const IncomeFormScreen(),
             ),
           );
@@ -298,7 +298,7 @@ class _IncomeListItem extends ConsumerWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: sourceColor.withOpacity(0.1),
+          color: sourceColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
@@ -348,7 +348,7 @@ class _IncomeListItem extends ConsumerWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<dynamic>(
             builder: (context) => IncomeFormScreen(incomeId: income.id),
           ),
         );
@@ -356,7 +356,7 @@ class _IncomeListItem extends ConsumerWidget {
       onEdit: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<dynamic>(
             builder: (context) => IncomeFormScreen(incomeId: income.id),
           ),
         );

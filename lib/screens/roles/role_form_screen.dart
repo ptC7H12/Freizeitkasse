@@ -93,7 +93,7 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
                 : 'Rolle erfolgreich aktualisiert'),
           ),
         );
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     } catch (e) {
       if (mounted) {
@@ -147,7 +147,7 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
 
       if (mounted) {
         context.showSuccess('Rolle erfolgreich gelöscht');
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     } catch (e) {
       if (mounted) {

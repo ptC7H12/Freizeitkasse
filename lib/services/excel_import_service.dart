@@ -135,7 +135,9 @@ class ExcelImportService {
 
             if (street != null || postalCode != null || city != null) {
               final parts = <String>[];
-              if (street != null && street.isNotEmpty) parts.add(street);
+              if (street != null && street.isNotEmpty) {
+                parts.add(street);
+              }
               if (postalCode != null && postalCode.isNotEmpty) {
                 if (city != null && city.isNotEmpty) {
                   parts.add('$postalCode $city');

@@ -154,7 +154,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
   }
 
   void _showFilterDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Filter'),
@@ -174,7 +174,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = null;
                     });
-                    RouteHelpers.pop(context);
+                    RouteHelpers.pop<void>(context);
                   },
                 ),
                 FilterChip(
@@ -184,7 +184,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = selected ? 'children' : null;
                     });
-                    RouteHelpers.pop(context);
+                    RouteHelpers.pop<void>(context);
                   },
                 ),
                 FilterChip(
@@ -194,7 +194,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = selected ? 'youth' : null;
                     });
-                    RouteHelpers.pop(context);
+                    RouteHelpers.pop<void>(context);
                   },
                 ),
                 FilterChip(
@@ -204,7 +204,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _ageFilter = selected ? 'adults' : null;
                     });
-                    RouteHelpers.pop(context);
+                    RouteHelpers.pop<void>(context);
                   },
                 ),
               ],
@@ -222,7 +222,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = null;
                     });
-                    RouteHelpers.pop(context);
+                    RouteHelpers.pop<void>(context);
                   },
                 ),
                 FilterChip(
@@ -232,7 +232,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = selected ? 'Männlich' : null;
                     });
-                    RouteHelpers.pop(context);
+                    RouteHelpers.pop<void>(context);
                   },
                 ),
                 FilterChip(
@@ -242,7 +242,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = selected ? 'Weiblich' : null;
                     });
-                    RouteHelpers.pop(context);
+                    RouteHelpers.pop<void>(context);
                   },
                 ),
                 FilterChip(
@@ -252,7 +252,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _genderFilter = selected ? 'Divers' : null;
                     });
-                    RouteHelpers.pop(context);
+                    RouteHelpers.pop<void>(context);
                   },
                 ),
               ],
@@ -270,7 +270,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _paymentFilter = null;
                     });
-                    RouteHelpers.pop(context);
+                    RouteHelpers.pop<void>(context);
                   },
                 ),
                 FilterChip(
@@ -280,7 +280,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _paymentFilter = selected ? 'open' : null;
                     });
-                    RouteHelpers.pop(context);
+                    RouteHelpers.pop<void>(context);
                   },
                 ),
                 FilterChip(
@@ -290,7 +290,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                     setState(() {
                       _paymentFilter = selected ? 'paid' : null;
                     });
-                    RouteHelpers.pop(context);
+                    RouteHelpers.pop<void>(context);
                   },
                 ),
               ],
@@ -305,12 +305,12 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                 _genderFilter = null;
                 _paymentFilter = null;
               });
-              RouteHelpers.pop(context);
+              RouteHelpers.pop<void>(context);
             },
             child: const Text('Zurücksetzen'),
           ),
           TextButton(
-            onPressed: () => RouteHelpers.pop(context),
+            onPressed: () => RouteHelpers.pop<void>(context),
             child: const Text('Schließen'),
           ),
         ],
@@ -322,7 +322,9 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
   Future<void> _exportToExcel(List<Participant> participants) async {
     try {
       final currentEvent = ref.read(currentEventProvider);
-      if (currentEvent == null) return;
+      if (currentEvent == null) {
+        return;
+      }
 
       final excelService = ref.read(participantExcelServiceProvider);
       final file = await excelService.exportParticipants(
@@ -362,7 +364,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
 
           // Zeige Fehler-Details falls vorhanden
           if (result.errors.isNotEmpty) {
-            showDialog(
+            showDialog<void>(
               context: context,
               builder: (context) => AlertDialog(
                 title: const Text('Import-Fehler'),
@@ -506,7 +508,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => const ParticipantFormScreen(),
             ),
           );
@@ -691,7 +693,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () {
                               Navigator.of(context).push(
-                                MaterialPageRoute(
+                                MaterialPageRoute<dynamic>(
                                   builder: (context) => ParticipantDetailScreen(
                                     participantId: participant.id,
                                   ),

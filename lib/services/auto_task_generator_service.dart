@@ -165,7 +165,9 @@ class AutoTaskGeneratorService {
     final tasks = <GeneratedTask>[];
 
     for (final participant in participants) {
-      if (!participant.isActive) continue;
+      if (!participant.isActive) {
+        continue;
+      }
 
       final finalPrice = participant.manualPriceOverride ?? participant.calculatedPrice;
       final totalPaid = await _paymentRepo.getTotalPaymentsForParticipant(participant.id);
@@ -254,7 +256,9 @@ class AutoTaskGeneratorService {
 
     // Get active ruleset
     final ruleset = await _rulesetRepo.getActiveRuleset(eventId, DateTime.now());
-    if (ruleset == null) return tasks;
+    if (ruleset == null) {
+      return tasks;
+    }
 
     // Get all roles with incomes
     final roles = await _roleRepo.getRolesByEvent(eventId);
@@ -265,7 +269,9 @@ class AutoTaskGeneratorService {
       final roleIncomes = incomes.where((i) => i.description?.contains(role.displayName) ?? false);
       final totalSubsidy = roleIncomes.fold<double>(0, (sum, income) => sum + income.amount);
 
-      if (totalSubsidy == 0) continue;
+      if (totalSubsidy == 0) {
+        continue;
+      }
 
       // Calculate expected discounts
       final participants = await _participantRepo.watchParticipantsByEvent(eventId).first;
@@ -311,10 +317,12 @@ class AutoTaskGeneratorService {
         .where((i) => i.description?.toLowerCase().contains('kinderzuschuss') ?? false)
         .fold<double>(0, (sum, income) => sum + income.amount);
 
-    if (familySubsidyIncome == 0) return tasks;
+    if (familySubsidyIncome == 0) {
+      return tasks;
+    }
 
     // TODO: Calculate expected family discounts
-    final expectedFamilyDiscounts = 0.0;
+    const expectedFamilyDiscounts = 0.0;
 
     final difference = familySubsidyIncome - expectedFamilyDiscounts;
     if (difference.abs() > 1.0) {
@@ -347,7 +355,9 @@ class AutoTaskGeneratorService {
 
     // Get active ruleset
     final ruleset = await _rulesetRepo.getActiveRuleset(eventId, DateTime.now());
-    if (ruleset == null) return tasks;
+    if (ruleset == null) {
+      return tasks;
+    }
 
     // TODO: Parse ruleset and check role counts
     // This requires parsing the YAML ruleset and checking max_count per role
@@ -367,7 +377,9 @@ class AutoTaskGeneratorService {
     final birthdayChildren = <Map<String, dynamic>>[];
 
     for (final participant in participants) {
-      if (!participant.isActive) continue;
+      if (!participant.isActive) {
+        continue;
+      }
 
       final birthMonth = participant.birthDate.month;
       final birthDay = participant.birthDate.day;
@@ -423,7 +435,9 @@ class AutoTaskGeneratorService {
       orElse: () => roles.first, // dummy value, check below
     );
 
-    if (kitchenRole.name.isEmpty) return tasks;
+    if (kitchenRole.name.isEmpty) {
+      return tasks;
+    }
 
     final participants = await _participantRepo.watchParticipantsByEvent(eventId).first;
     final kitchenParticipants = participants.where((p) => p.roleId == kitchenRole.id && p.isActive).toList();

@@ -399,7 +399,7 @@ class DashboardScreen extends ConsumerWidget {
         Container(
           padding: AppConstants.paddingAll8,
           decoration: BoxDecoration(
-            color: AppConstants.primaryColor.withOpacity(0.1),
+            color: AppConstants.primaryColor.withValues(alpha: 0.1),
             borderRadius: AppConstants.borderRadius8,
           ),
           child: Icon(icon, color: AppConstants.primaryColor, size: 24),
@@ -428,7 +428,7 @@ class DashboardScreen extends ConsumerWidget {
     return Container(
       padding: AppConstants.paddingAll16,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: AppConstants.borderRadius8,
         border: isBold ? Border.all(color: color, width: 2) : null,
       ),
@@ -439,7 +439,7 @@ class DashboardScreen extends ConsumerWidget {
             label,
             style: TextStyle(
               fontSize: 12,
-              color: color.withOpacity(0.8),
+              color: color.withValues(alpha: 0.8),
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -479,7 +479,7 @@ class DashboardScreen extends ConsumerWidget {
     return Container(
       padding: AppConstants.paddingAll16,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: AppConstants.borderRadius12,
         border: Border.all(color: color, width: 3),
       ),

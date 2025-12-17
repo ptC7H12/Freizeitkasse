@@ -296,21 +296,29 @@ class SubsidyCalculatorService {
 
       // Nur zuschussberechtigte Rollen
       final subsidyEligible = roleConfig['subsidy_eligible'] as bool? ?? true;
-      if (!subsidyEligible) continue;
+      if (!subsidyEligible) {
+        continue;
+      }
 
       final discountPercent = (roleConfig['discount_percent'] as num?)?.toDouble() ?? 0.0;
-      if (discountPercent <= 0) continue;
+      if (discountPercent <= 0) {
+        continue;
+      }
 
       // Finde die Rolle
       final role = roles.where((r) => r.name.toLowerCase() == roleName.toLowerCase()).firstOrNull;
-      if (role == null) continue;
+      if (role == null) {
+        continue;
+      }
 
       // Finde Teilnehmer mit dieser Rolle
       final roleParticipants = participants.where((p) =>
           p.roleId == role.id &&
           p.manualPriceOverride == null).toList();
 
-      if (roleParticipants.isEmpty) continue;
+      if (roleParticipants.isEmpty) {
+        continue;
+      }
 
       // Berechne Zuschüsse
       double totalSubsidy = 0.0;

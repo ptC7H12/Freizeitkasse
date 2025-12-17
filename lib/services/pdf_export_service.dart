@@ -15,7 +15,9 @@ class PdfExportService {
 
   /// Lädt die Roboto Regular Font
   Future<pw.Font> _loadRegularFont() async {
-    if (_cachedRegularFont != null) return _cachedRegularFont!;
+    if (_cachedRegularFont != null) {
+      return _cachedRegularFont!;
+    }
 
     final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
     _cachedRegularFont = pw.Font.ttf(fontData);
@@ -24,7 +26,9 @@ class PdfExportService {
 
   /// Lädt die Roboto Bold Font
   Future<pw.Font> _loadBoldFont() async {
-    if (_cachedBoldFont != null) return _cachedBoldFont!;
+    if (_cachedBoldFont != null) {
+      return _cachedBoldFont!;
+    }
 
     final fontData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
     _cachedBoldFont = pw.Font.ttf(fontData);
@@ -73,7 +77,7 @@ class PdfExportService {
           pw.SizedBox(height: 20),
 
           // Participants Table
-          pw.Table.fromTextArray(
+          pw.TableHelper.fromTextArray(
             context: context,
             headers: ['Nr', 'Name', 'Geburtsdatum', 'Alter', 'Preis (EUR)'],
             data: participants.asMap().entries.map((entry) {
@@ -374,7 +378,7 @@ class PdfExportService {
 
   pw.Widget _buildCategoryTable(Map<String, double> data) {
     final formatter = NumberFormat.currency(locale: 'de_DE', symbol: 'EUR');
-    return pw.Table.fromTextArray(
+    return pw.TableHelper.fromTextArray(
       headers: ['Kategorie', 'Betrag'],
       data: data.entries.map((e) => [e.key, formatter.format(e.value)]).toList(),
       headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
@@ -504,7 +508,7 @@ class PdfExportService {
           pw.SizedBox(height: 20),
 
           // Positions Table
-          pw.Table.fromTextArray(
+          pw.TableHelper.fromTextArray(
             context: context,
             headers: ['Pos.', 'Beschreibung', 'Betrag'],
             data: [
@@ -647,9 +651,9 @@ class PdfExportService {
           ] else ...[
             pw.Container(
               padding: const pw.EdgeInsets.all(10),
-              decoration: pw.BoxDecoration(
+              decoration: const pw.BoxDecoration(
                 color: PdfColors.green100,
-                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+                borderRadius: pw.BorderRadius.all(pw.Radius.circular(5)),
               ),
               child: pw.Text(
                 'Status: Vollständig bezahlt',
@@ -827,7 +831,7 @@ class PdfExportService {
               style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 10),
-            pw.Table.fromTextArray(
+            pw.TableHelper.fromTextArray(
               context: context,
               headers: ['Pos.', 'Name', 'Details', 'Betrag'],
               data: familyMembers.asMap().entries.map((entry) {
@@ -854,9 +858,9 @@ class PdfExportService {
             // Note about family members if not provided
             pw.Container(
               padding: const pw.EdgeInsets.all(10),
-              decoration: pw.BoxDecoration(
+              decoration: const pw.BoxDecoration(
                 color: PdfColors.blue50,
-                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+                borderRadius: pw.BorderRadius.all(pw.Radius.circular(5)),
               ),
               child: pw.Text(
                 'Diese Rechnung umfasst alle Familienmitglieder für die Veranstaltung "$eventName".',
@@ -967,9 +971,9 @@ class PdfExportService {
           ] else ...[
             pw.Container(
               padding: const pw.EdgeInsets.all(10),
-              decoration: pw.BoxDecoration(
+              decoration: const pw.BoxDecoration(
                 color: PdfColors.green100,
-                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+                borderRadius: pw.BorderRadius.all(pw.Radius.circular(5)),
               ),
               child: pw.Text(
                 'Status: Vollständig bezahlt',

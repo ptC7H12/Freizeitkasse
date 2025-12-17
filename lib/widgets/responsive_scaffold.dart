@@ -215,9 +215,9 @@ class ResponsiveScaffold extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
               ),
               child: _buildNavigationItem(
                 context,
@@ -262,7 +262,7 @@ class ResponsiveScaffold extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent,
+        color: isSelected ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
       child: ListTile(
@@ -297,7 +297,7 @@ class ResponsiveScaffold extends ConsumerWidget {
           ],
         ),
         onTap: onTap,
-        hoverColor: Colors.white.withOpacity(0.1),
+        hoverColor: Colors.white.withValues(alpha: 0.1),
         dense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
@@ -307,7 +307,7 @@ class ResponsiveScaffold extends ConsumerWidget {
   /// Navigate without animation (für bessere UX beim Menü-Wechsel)
   void _navigateWithoutAnimation(BuildContext context, Widget screen) {
     Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
+      PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) => screen,
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
@@ -455,9 +455,9 @@ class ResponsiveScaffold extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
                   ),
                   child: _buildDrawerItem(
                     context,
@@ -485,7 +485,7 @@ class ResponsiveScaffold extends ConsumerWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Colors.white.withOpacity(0.2), width: 1),
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1),
         ),
       ),
       child: Column(
@@ -515,7 +515,7 @@ class ResponsiveScaffold extends ConsumerWidget {
             Text(
               currentEvent.eventType!,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 fontSize: 14,
               ),
             ),
@@ -524,7 +524,7 @@ class ResponsiveScaffold extends ConsumerWidget {
           Text(
             '${dateFormat.format(currentEvent.startDate)} - ${dateFormat.format(currentEvent.endDate)}',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 13,
             ),
           ),
@@ -539,7 +539,7 @@ class ResponsiveScaffold extends ConsumerWidget {
       child: Text(
         title,
         style: TextStyle(
-          color: Colors.white.withOpacity(0.6),
+          color: Colors.white.withValues(alpha: 0.6),
           fontSize: 12,
           fontWeight: FontWeight.w600,
           letterSpacing: 1.2,
@@ -588,9 +588,9 @@ class ResponsiveScaffold extends ConsumerWidget {
         ],
       ),
       selected: isSelected,
-      selectedTileColor: Colors.white.withOpacity(0.2),
+      selectedTileColor: Colors.white.withValues(alpha: 0.2),
       onTap: onTap,
-      hoverColor: Colors.white.withOpacity(0.1),
+      hoverColor: Colors.white.withValues(alpha: 0.1),
       dense: true,
     );
   }

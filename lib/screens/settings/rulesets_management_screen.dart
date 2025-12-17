@@ -166,7 +166,7 @@ class _RulesetsManagementScreenState
                       icon: const Icon(Icons.edit, size: 20),
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(
+                          MaterialPageRoute<dynamic>(
                             builder: (context) => RulesetFormScreen(
                               rulesetId: ruleset.id,
                             ),
@@ -377,7 +377,7 @@ class _RulesetsManagementScreenState
           FilledButton.icon(
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
+                MaterialPageRoute<dynamic>(
                   builder: (context) => const RulesetFormScreen(),
                 ),
               );
@@ -429,14 +429,16 @@ class _RulesetsManagementScreenState
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed != true) {
+      return;
+    }
 
     try {
       final repository = ref.read(rulesetRepositoryProvider);
 
       // Show loading indicator
       if (mounted) {
-        showDialog(
+        showDialog<void>(
           context: context,
           barrierDismissible: false,
           builder: (context) => const Center(
@@ -500,7 +502,7 @@ class _RulesetsManagementScreenState
       parsedYaml = Map<String, dynamic>.from(yamlDoc as Map);
     } catch (e) {
       // If parsing fails, show error
-      showDialog(
+      showDialog<void>(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Fehler'),
@@ -516,7 +518,7 @@ class _RulesetsManagementScreenState
       return;
     }
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(ruleset.name),
@@ -555,7 +557,7 @@ class _RulesetsManagementScreenState
             onPressed: () {
               Navigator.pop(context);
               Navigator.of(context).push(
-                MaterialPageRoute(
+                MaterialPageRoute<dynamic>(
                   builder: (context) => RulesetFormScreen(
                     rulesetId: ruleset.id,
                   ),
@@ -743,7 +745,7 @@ class _RulesetsManagementScreenState
       return const SizedBox.shrink();
     }
 
-    final discountMap = Map<String, dynamic>.from(familyDiscount as Map);
+    final discountMap = Map<String, dynamic>.from (familyDiscount);
 
     // Check if it's the new structure with first_child_percent, etc.
     final hasDirectPercentages = discountMap.containsKey('first_child_percent');

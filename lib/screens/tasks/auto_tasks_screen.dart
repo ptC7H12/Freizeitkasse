@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/repositories/expense_repository.dart';
-import '../../data/repositories/payment_repository.dart';
-import '../../data/repositories/task_repository.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/payment_provider.dart';
@@ -204,7 +201,7 @@ class AutoTasksScreen extends ConsumerWidget {
   }
 
   void _showTaskDetails(BuildContext context, WidgetRef ref, GeneratedTask task) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(task.title),
@@ -297,7 +294,9 @@ class AutoTasksScreen extends ConsumerWidget {
     final participantRepo = ref.read(participantRepositoryProvider);
     final currentEvent = ref.read(currentEventProvider);
 
-    if (currentEvent == null) return;
+    if (currentEvent == null) {
+      return;
+    }
 
     // Special handling for expense_reimbursement
     if (task.taskType == 'expense_reimbursement') {

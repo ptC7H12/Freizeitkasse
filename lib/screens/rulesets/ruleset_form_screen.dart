@@ -107,7 +107,9 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
         allowedExtensions: ['yaml', 'yml'],
       );
 
-      if (result == null || result.files.isEmpty) return;
+      if (result == null || result.files.isEmpty) {
+        return;
+      }
 
       final file = File(result.files.single.path!);
       final content = await file.readAsString();
@@ -154,7 +156,9 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       ),
     );
 
-    if (url == null || url.isEmpty) return;
+    if (url == null || url.isEmpty) {
+      return;
+    }
 
     try {
       setState(() => _isLoading = true);
@@ -262,7 +266,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                 : 'Regelwerk erfolgreich aktualisiert'),
           ),
         );
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     } catch (e) {
       if (mounted) {
@@ -316,7 +320,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
 
       if (mounted) {
         context.showSuccess('Regelwerk erfolgreich gelöscht');
-        RouteHelpers.pop(context);
+        RouteHelpers.pop<void>(context);
       }
     } catch (e) {
       if (mounted) {
@@ -662,7 +666,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
   }
 
   void _showHelp() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('YAML-Hilfe'),
@@ -708,7 +712,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => RouteHelpers.pop(context),
+            onPressed: () => RouteHelpers.pop<void>(context),
             child: const Text('Schließen'),
           ),
         ],

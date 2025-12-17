@@ -3,6 +3,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
+import '../utils/logger.dart';
+
 /// Service für File Storage (Belege, Dokumente)
 class FileStorageService {
   /// Hole das App-Dokumente-Verzeichnis
@@ -56,7 +58,7 @@ class FileStorageService {
 
       return targetPath;
     } catch (e) {
-      print('Error uploading receipt: $e');
+      AppLogger.debug('Error uploading receipt: $e');
       return null;
     }
   }
@@ -71,7 +73,7 @@ class FileStorageService {
       }
       return false;
     } catch (e) {
-      print('Error deleting receipt: $e');
+      AppLogger.debug('Error deleting receipt: $e');
       return false;
     }
   }
@@ -117,7 +119,7 @@ class FileStorageService {
   Future<void> shareFile(String filePath) async {
     // TODO: Implement sharing (requires share_plus package)
     // Für jetzt nur als Platzhalter
-    print('Sharing file: $filePath');
+    AppLogger.debug('Sharing file: $filePath');
   }
 }
 

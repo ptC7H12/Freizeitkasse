@@ -136,7 +136,7 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
 
           // Zeige Fehler-Details falls vorhanden
           if (result.errors.isNotEmpty) {
-            showDialog(
+            showDialog<void>(
               context: context,
               builder: (context) => AlertDialog(
                 title: const Text('Import-Fehler'),
@@ -191,7 +191,7 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
 
   /// Zeigt Export/Import-Optionen Dialog
   void _showExportImportOptions() {
-    showModalBottomSheet(
+    showModalBottomSheet<dynamic>(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
@@ -242,7 +242,7 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
                 _downloadImportTemplate();
               },
             ),
-            SizedBox(height: AppConstants.spacingS),
+            const SizedBox(height: AppConstants.spacingS),
           ],
         ),
       ),
@@ -304,13 +304,13 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
             label: const Text('Export/Import'),
             tooltip: 'Teilnehmer exportieren oder importieren',
           ),
-          SizedBox(height: AppConstants.spacingS),
+          const SizedBox(height: AppConstants.spacingS),
           // Haupt-FAB für Hinzufügen
           FloatingActionButton.extended(
             heroTag: 'add_participant',
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
+                MaterialPageRoute<dynamic>(
                   builder: (context) => const ParticipantFormScreen(),
                 ),
               );
@@ -329,7 +329,7 @@ class _ParticipantsAndFamiliesScreenState extends ConsumerState<ParticipantsAndF
         heroTag: 'add_family',
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => const FamilyFormScreen(),
             ),
           );

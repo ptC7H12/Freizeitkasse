@@ -130,7 +130,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
             ),
           ),
           loading: () => const SizedBox.shrink(),
-          error: (_, __) => const SizedBox.shrink(),
+          error: (_, _) => const SizedBox.shrink(),
         ),
 
         // Filter Tabs
@@ -266,7 +266,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
 
   void _navigateToTaskForm(BuildContext context, [Task? task]) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<dynamic>(
         builder: (context) => TaskFormScreen(taskId: task?.id),
       ),
     );

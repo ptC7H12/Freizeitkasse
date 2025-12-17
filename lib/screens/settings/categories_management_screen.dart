@@ -166,7 +166,7 @@ Widget _buildCategoryList(
           color: Theme.of(context).colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, -2),
             ),
@@ -257,7 +257,7 @@ void _showAddDialog(
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
 
-  showDialog(
+  showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
       title: Text(isExpense ? 'Neue Kategorie' : 'Neue Einnahme'),
@@ -361,7 +361,7 @@ void _showEditDialog(
         : (item as IncomeSource).description ?? '',
   );
 
-  showDialog(
+  showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
       title: Text(isExpense ? 'Kategorie bearbeiten' : 'Quelle bearbeiten'),

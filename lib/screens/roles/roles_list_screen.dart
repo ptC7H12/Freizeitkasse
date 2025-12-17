@@ -59,7 +59,7 @@ class RolesListScreen extends ConsumerWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
+                        MaterialPageRoute<dynamic>(
                           builder: (context) => const RoleFormScreen(),
                         ),
                       );
@@ -114,7 +114,7 @@ class RolesListScreen extends ConsumerWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => const RoleFormScreen(),
             ),
           );
@@ -143,7 +143,7 @@ class _RoleListItem extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => RoleFormScreen(roleId: role.id as int?),
             ),
           );

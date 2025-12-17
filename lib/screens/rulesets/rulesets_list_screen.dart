@@ -61,7 +61,7 @@ class RulesetsListScreen extends ConsumerWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
+                        MaterialPageRoute<dynamic>(
                           builder: (context) => const RulesetFormScreen(),
                         ),
                       );
@@ -138,7 +138,7 @@ class RulesetsListScreen extends ConsumerWidget {
                   return const SizedBox.shrink();
                 },
                 loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
               ),
 
               // All Rulesets List
@@ -169,7 +169,7 @@ class RulesetsListScreen extends ConsumerWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => const RulesetFormScreen(),
             ),
           );
@@ -201,7 +201,7 @@ class _RulesetListItem extends ConsumerWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => RulesetFormScreen(rulesetId: ruleset.id),
             ),
           );
@@ -345,7 +345,7 @@ class _RulesetListItem extends ConsumerWidget {
                     ),
                   ),
                 ),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
               ),
             ],
           ),
