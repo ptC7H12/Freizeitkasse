@@ -1304,90 +1304,98 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                     }).toList(),
                   )
                 else
-                  // Desktop: DataTable
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      columnSpacing: 16,
-                      headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
-                      columns: const [
-                        DataColumn(label: Text('Datum', style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text('Typ', style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text('Referenz', style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text('Beschreibung', style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text('Teilnehmer/Familie', style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text('Betrag', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                        DataColumn(label: Text('Saldo', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                      ],
-                      rows: filteredTransactions.map((transaction) {
-                        final Color typeColor = transaction.type == 'Zahlung'
-                            ? const Color(0xFF2196F3)
-                            : transaction.type == 'Einnahme'
+                  // Desktop: DataTable mit horizontalem Scroll
+                  Container(
+                    width: double.infinity,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: MediaQuery.of(context).size.width - 64,
+                        ),
+                        child: DataTable(
+                          columnSpacing: 16,
+                          headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
+                          columns: const [
+                            DataColumn(label: Text('Datum', style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text('Typ', style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text('Referenz', style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text('Beschreibung', style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text('Teilnehmer/Familie', style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text('Betrag', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                            DataColumn(label: Text('Saldo', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                          ],
+                          rows: filteredTransactions.map((transaction) {
+                            final Color typeColor = transaction.type == 'Zahlung'
+                                ? const Color(0xFF2196F3)
+                                : transaction.type == 'Einnahme'
+                                    ? const Color(0xFF4CAF50)
+                                    : const Color(0xFFE91E63);
+
+                            final Color amountColor = transaction.amount >= 0
                                 ? const Color(0xFF4CAF50)
                                 : const Color(0xFFE91E63);
 
-                        final Color amountColor = transaction.amount >= 0
-                            ? const Color(0xFF4CAF50)
-                            : const Color(0xFFE91E63);
+                            final Color saldoColor = transaction.runningBalance >= 0
+                                ? const Color(0xFF4CAF50)
+                                : const Color(0xFFE91E63);
 
-                        final Color saldoColor = transaction.runningBalance >= 0
-                            ? const Color(0xFF4CAF50)
-                            : const Color(0xFFE91E63);
-
-                        return DataRow(
-                          cells: [
-                            DataCell(Text(DateFormat('dd.MM.yyyy').format(transaction.date))),
-                            DataCell(
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: typeColor.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  transaction.type,
-                                  style: TextStyle(
-                                    color: typeColor,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
+                            return DataRow(
+                              cells: [
+                                DataCell(Text(DateFormat('dd.MM.yyyy').format(transaction.date))),
+                                DataCell(
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: typeColor.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      transaction.type,
+                                      style: TextStyle(
+                                        color: typeColor,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            DataCell(Text(transaction.reference ?? '-')),
-                            DataCell(
-                              SizedBox(
-                                width: 200,
-                                child: Text(
-                                  transaction.description,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
+                                DataCell(Text(transaction.reference ?? '-')),
+                                DataCell(
+                                  SizedBox(
+                                    width: 200,
+                                    child: Text(
+                                      transaction.description,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            DataCell(Text(transaction.participantOrFamily ?? '-')),
-                            DataCell(
-                              Text(
-                                NumberFormat.currency(locale: 'de_DE', symbol: '€').format(transaction.amount),
-                                style: TextStyle(
-                                  color: amountColor,
-                                  fontWeight: FontWeight.w600,
+                                DataCell(Text(transaction.participantOrFamily ?? '-')),
+                                DataCell(
+                                  Text(
+                                    NumberFormat.currency(locale: 'de_DE', symbol: '€').format(transaction.amount),
+                                    style: TextStyle(
+                                      color: amountColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                NumberFormat.currency(locale: 'de_DE', symbol: '€').format(transaction.runningBalance),
-                                style: TextStyle(
-                                  color: saldoColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                DataCell(
+                                  Text(
+                                    NumberFormat.currency(locale: 'de_DE', symbol: '€').format(transaction.runningBalance),
+                                    style: TextStyle(
+                                      color: saldoColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        );
-                      }).toList(),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
                   ),
               ],
@@ -1586,34 +1594,42 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                         }).toList(),
                       );
                     } else {
-                      // Desktop: DataTable
-                      return DataTable(
-                        columnSpacing: 24,
-                        headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
-                        columns: const [
-                          DataColumn(label: Text('Rolle', style: TextStyle(fontWeight: FontWeight.bold))),
-                          DataColumn(label: Text('Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                        ],
-                        rows: subsidiesByRole.values.map((roleData) {
-                          return DataRow(
-                            cells: [
-                              DataCell(Text(roleData.roleName)),
-                              DataCell(Text('${roleData.discountPercent.toStringAsFixed(0)}%')),
-                              DataCell(Text('${roleData.participantCount}')),
-                              DataCell(
-                                Text(
-                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(roleData.totalSubsidy),
-                                  style: const TextStyle(
-                                    color: Color(0xFF4CAF50),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
+                      // Desktop: DataTable mit horizontalem Scroll
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: MediaQuery.of(context).size.width - 64,
+                          ),
+                          child: DataTable(
+                            columnSpacing: 24,
+                            headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
+                            columns: const [
+                              DataColumn(label: Text('Rolle', style: TextStyle(fontWeight: FontWeight.bold))),
+                              DataColumn(label: Text('Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                              DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                              DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
                             ],
-                          );
-                        }).toList(),
+                            rows: subsidiesByRole.values.map((roleData) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(Text(roleData.roleName)),
+                                  DataCell(Text('${roleData.discountPercent.toStringAsFixed(0)}%')),
+                                  DataCell(Text('${roleData.participantCount}')),
+                                  DataCell(
+                                    Text(
+                                      NumberFormat.currency(locale: 'de_DE', symbol: '€').format(roleData.totalSubsidy),
+                                      style: const TextStyle(
+                                        color: Color(0xFF4CAF50),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
                       );
                     }
                   },
@@ -1760,34 +1776,42 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                         }).toList(),
                       );
                     } else {
-                      // Desktop: DataTable
-                      return DataTable(
-                        columnSpacing: 24,
-                        headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
-                        columns: const [
-                          DataColumn(label: Text('Rabatttyp', style: TextStyle(fontWeight: FontWeight.bold))),
-                          DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('Ø Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                        ],
-                        rows: subsidiesByType.values.map((typeData) {
-                          return DataRow(
-                            cells: [
-                              DataCell(Text(typeData.discountType)),
-                              DataCell(Text('${typeData.participantCount}')),
-                              DataCell(Text('${typeData.avgDiscountPercent.toStringAsFixed(1)}%')),
-                              DataCell(
-                                Text(
-                                  NumberFormat.currency(locale: 'de_DE', symbol: '€').format(typeData.totalSubsidy),
-                                  style: const TextStyle(
-                                    color: Color(0xFF4CAF50),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
+                      // Desktop: DataTable mit horizontalem Scroll
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: MediaQuery.of(context).size.width - 64,
+                          ),
+                          child: DataTable(
+                            columnSpacing: 24,
+                            headingRowColor: WidgetStateProperty.all(Colors.grey[100]),
+                            columns: const [
+                              DataColumn(label: Text('Rabatttyp', style: TextStyle(fontWeight: FontWeight.bold))),
+                              DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                              DataColumn(label: Text('Ø Rabatt', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                              DataColumn(label: Text('Zuschuss (Soll)', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
                             ],
-                          );
-                        }).toList(),
+                            rows: subsidiesByType.values.map((typeData) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(Text(typeData.discountType)),
+                                  DataCell(Text('${typeData.participantCount}')),
+                                  DataCell(Text('${typeData.avgDiscountPercent.toStringAsFixed(1)}%')),
+                                  DataCell(
+                                    Text(
+                                      NumberFormat.currency(locale: 'de_DE', symbol: '€').format(typeData.totalSubsidy),
+                                      style: const TextStyle(
+                                        color: Color(0xFF4CAF50),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
                       );
                     }
                   },
@@ -2515,36 +2539,46 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                   );
                 }
 
-                return DataTable(
-                  columns: const [
-                    DataColumn(label: Text('Kategorie', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Betrag', style: TextStyle(fontWeight: FontWeight.bold))),
-                  ],
-                  rows: byCategory.entries.map((entry) {
-                    // Count basierend auf dem Betrag / durchschnittlicher Ausgabe - vereinfacht
-                    return DataRow(cells: [
-                      DataCell(Row(
-                        children: [
-                          Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: _getCategoryColor(entry.key),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(entry.key),
-                        ],
-                      )),
-                      const DataCell(Text('-')), // Anzahl könnte aus einer anderen Query kommen
-                      DataCell(Text(
-                        NumberFormat.currency(locale: 'de_DE', symbol: '€').format(entry.value),
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      )),
-                    ]);
-                  }).toList(),
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: MediaQuery.of(context).size.width > 800
+                          ? MediaQuery.of(context).size.width - 64
+                          : MediaQuery.of(context).size.width - 32,
+                    ),
+                    child: DataTable(
+                      columns: const [
+                        DataColumn(label: Text('Kategorie', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Anzahl', style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text('Betrag', style: TextStyle(fontWeight: FontWeight.bold))),
+                      ],
+                      rows: byCategory.entries.map((entry) {
+                        // Count basierend auf dem Betrag / durchschnittlicher Ausgabe - vereinfacht
+                        return DataRow(cells: [
+                          DataCell(Row(
+                            children: [
+                              Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: _getCategoryColor(entry.key),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(entry.key),
+                            ],
+                          )),
+                          const DataCell(Text('-')), // Anzahl könnte aus einer anderen Query kommen
+                          DataCell(Text(
+                            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(entry.value),
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          )),
+                        ]);
+                      }).toList(),
+                    ),
+                  ),
                 );
               },
               loading: () => const CircularProgressIndicator(),
