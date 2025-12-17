@@ -1,5 +1,5 @@
 import 'package:yaml/yaml.dart';
-import 'dart:developer' as developer;
+import '../utils/logger.dart';
 
 /// YAML-Regelwerk-Parser Service
 ///
@@ -32,12 +32,8 @@ class RulesetParserService {
         'role_discounts': _parseRoleDiscounts(doc['role_discounts']),
         'family_discount': _parseFamilyDiscount(doc['family_discount']),
       };
-    } catch (e) {
-      developer.log(
-        'Fehler beim Parsen des YAML: $e',
-        name: 'RulesetParserService',
-        level: 1000, // Error level
-      );
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Parsen des YAML', error: e, stackTrace: stack);
       rethrow;
     }
   }

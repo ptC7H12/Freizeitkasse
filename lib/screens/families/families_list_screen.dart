@@ -213,11 +213,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
       body: _buildContent(familiesAsync),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<dynamic>(
-              builder: (context) => const FamilyFormScreen(),
-            ),
-          );
+          context.pushScreen(const FamilyFormScreen());
         },
         icon: const Icon(Icons.add),
         label: const Text('Familie'),
@@ -337,11 +333,9 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
                             ),
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<dynamic>(
-                                  builder: (context) => FamilyFormScreen(
-                                    familyId: family.id,
-                                  ),
+                              context.pushScreen(
+                                FamilyFormScreen(
+                                  familyId: family.id,
                                 ),
                               );
                             },

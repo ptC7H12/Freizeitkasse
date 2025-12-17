@@ -6,6 +6,7 @@ import '../../widgets/responsive_form_container.dart';
 import '../../extensions/context_extensions.dart';
 import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
+import '../../utils/logger.dart';
 
 class RoleFormScreen extends ConsumerStatefulWidget {
   final int? roleId;
@@ -95,7 +96,8 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
         );
         RouteHelpers.pop<void>(context);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Speichern der Rolle', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Speichern: $e');
       }
@@ -149,7 +151,8 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
         context.showSuccess('Rolle erfolgreich gelöscht');
         RouteHelpers.pop<void>(context);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Löschen der Rolle', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler beim Löschen: $e');
       }

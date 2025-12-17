@@ -507,11 +507,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
       body: _buildContent(participantsAsync),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<dynamic>(
-              builder: (context) => const ParticipantFormScreen(),
-            ),
-          );
+          context.pushScreen(const ParticipantFormScreen());
         },
         icon: const Icon(Icons.person_add),
         label: const Text('Teilnehmer'),
@@ -692,11 +688,9 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                             ),
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<dynamic>(
-                                  builder: (context) => ParticipantDetailScreen(
-                                    participantId: participant.id,
-                                  ),
+                              context.pushScreen(
+                                ParticipantDetailScreen(
+                                  participantId: participant.id,
                                 ),
                               );
                             },

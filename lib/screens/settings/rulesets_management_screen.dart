@@ -161,11 +161,9 @@ class _RulesetsManagementScreenState
                               child: IconButton(
                                 icon: Icon(Icons.edit, color: Colors.orange.shade700),
                                 onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<dynamic>(
-                                      builder: (context) => RulesetFormScreen(
-                                        rulesetId: ruleset.id,
-                                      ),
+                                  context.pushScreen(
+                                    RulesetFormScreen(
+                                      rulesetId: ruleset.id,
                                     ),
                                   );
                                 },
@@ -431,11 +429,7 @@ class _RulesetsManagementScreenState
           const SizedBox(height: AppConstants.spacingL),
           FilledButton.icon(
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<dynamic>(
-                  builder: (context) => const RulesetFormScreen(),
-                ),
-              );
+              context.pushScreen(const RulesetFormScreen());
             },
             icon: const Icon(Icons.add),
             label: const Text('Regelwerk erstellen'),
@@ -611,11 +605,9 @@ class _RulesetsManagementScreenState
           FilledButton.icon(
             onPressed: () {
               Navigator.pop(context);
-              Navigator.of(context).push(
-                MaterialPageRoute<dynamic>(
-                  builder: (context) => RulesetFormScreen(
-                    rulesetId: ruleset.id,
-                  ),
+              context.pushScreen(
+                RulesetFormScreen(
+                  rulesetId: ruleset.id,
                 ),
               );
             },

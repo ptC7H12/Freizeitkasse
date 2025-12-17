@@ -265,10 +265,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
   }
 
   void _navigateToTaskForm(BuildContext context, [Task? task]) {
-    Navigator.of(context).push(
-      MaterialPageRoute<dynamic>(
-        builder: (context) => TaskFormScreen(taskId: task?.id),
-      ),
-    );
+    context.pushScreen(TaskFormScreen(taskId: task?.id));
   }
 }

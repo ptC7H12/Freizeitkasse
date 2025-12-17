@@ -10,6 +10,7 @@ import '../../utils/route_helpers.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/responsive_form_container.dart';
 import '../../utils/constants.dart';
+import '../../utils/logger.dart';
 
 /// Zahlungs-Formular (Create/Edit)
 class PaymentFormScreen extends ConsumerStatefulWidget {
@@ -414,7 +415,8 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
           RouteHelpers.pop<void>(context);
         }
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Speichern der Zahlung', error: e, stackTrace: stack);
       if (mounted) {
         context.showError('Fehler: $e');
       }

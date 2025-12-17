@@ -244,9 +244,10 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
           RouteHelpers.pop<void>(context);
         }
       }
-    } catch (e) {
+    } catch (e, stack) {
+      AppLogger.error('Fehler beim Speichern der Familie', error: e, stackTrace: stack);
       if (mounted) {
-        context.showError('Fehler: $e');
+        context.showError('Fehler beim Speichern: $e');
       }
     } finally {
       if (mounted) {

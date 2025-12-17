@@ -239,11 +239,9 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () async {
-              final result = await Navigator.of(context).push(
-                MaterialPageRoute<dynamic>(
-                  builder: (context) => ParticipantFormScreen(
-                    participantId: widget.participantId,
-                  ),
+              final result = await context.pushScreen(
+                ParticipantFormScreen(
+                  participantId: widget.participantId,
                 ),
               );
               if (result == true) {
@@ -360,11 +358,9 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
             Expanded(
               child: FilledButton.icon(
                 onPressed: () async {
-                  final result = await Navigator.of(context).push(
-                    MaterialPageRoute<dynamic>(
-                      builder: (context) => PaymentFormScreen(
-                        preselectedParticipantId: widget.participantId,
-                      ),
+                  final result = await context.pushScreen(
+                    PaymentFormScreen(
+                      preselectedParticipantId: widget.participantId,
                     ),
                   );
                   if (result == true) {
