@@ -148,7 +148,7 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
       setState(() {
         _organizationController.text = settings.organizationName ?? '';
         _addressController.text = settings.organizationAddress ?? '';
-        // _contactController is not saved to DB (UI only field)
+        _contactController.text = settings.contactInfo ?? '';
         _ibanController.text = settings.iban ?? '';
         _bicController.text = settings.bic ?? '';
         _accountHolderController.text = settings.bankName ?? '';
@@ -181,6 +181,9 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
         organizationAddress: _addressController.text.trim().isEmpty
             ? null
             : _addressController.text.trim(),
+        contactInfo: _contactController.text.trim().isEmpty
+            ? null
+            : _contactController.text.trim(),
         iban: _ibanController.text.trim().isEmpty
             ? null
             : _ibanController.text.trim(),

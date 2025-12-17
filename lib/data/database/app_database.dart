@@ -158,6 +158,7 @@ class Settings extends Table {
   IntColumn get eventId => integer().references(Events, #id)();
   TextColumn get organizationName => text().withLength(max: 200).nullable()();
   TextColumn get organizationAddress => text().withLength(max: 500).nullable()();
+  TextColumn get contactInfo => text().withLength(max: 300).nullable()();
   TextColumn get bankName => text().withLength(max: 200).nullable()();
   TextColumn get iban => text().withLength(max: 34).nullable()();
   TextColumn get bic => text().withLength(max: 11).nullable()();
