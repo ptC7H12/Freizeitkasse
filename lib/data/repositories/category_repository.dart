@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
+import '../../utils/logger.dart';
 
 /// Repository für Ausgaben-Kategorien und Einnahmen-Quellen
 class CategoryRepository {
@@ -42,17 +43,33 @@ class CategoryRepository {
     int sortOrder = 0,
     bool isSystem = false,
   }) async {
-    final id = await _db.into(_db.expenseCategories).insert(
-          ExpenseCategoriesCompanion.insert(
-            eventId: eventId,
-            name: name,
-            description: Value(description),
-            sortOrder: Value(sortOrder),
-            isSystem: Value(isSystem),
-          ),
-        );
+    try {
+      AppLogger.debug('Creating expense category', {
+        'eventId': eventId,
+        'name': name,
+        'isSystem': isSystem,
+      });
 
-    return (await getExpenseCategoryById(id))!;
+      final id = await _db.into(_db.expenseCategories).insert(
+            ExpenseCategoriesCompanion.insert(
+              eventId: eventId,
+              name: name,
+              description: Value(description),
+              sortOrder: Value(sortOrder),
+              isSystem: Value(isSystem),
+            ),
+          );
+
+      AppLogger.info('Expense category created successfully', {
+        'id': id,
+        'name': name,
+      });
+
+      return (await getExpenseCategoryById(id))!;
+    } catch (e, stack) {
+      AppLogger.error('Failed to create expense category', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Update Ausgaben-Kategorie
@@ -62,34 +79,53 @@ class CategoryRepository {
     String? description,
     int? sortOrder,
   }) async {
-    await (_db.update(_db.expenseCategories)
-          ..where((t) => t.id.equals(id)))
-        .write(
-      ExpenseCategoriesCompanion(
-        name: name != null ? Value(name) : const Value.absent(),
-        description: Value(description),
-        sortOrder: sortOrder != null ? Value(sortOrder) : const Value.absent(),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    try {
+      AppLogger.debug('Updating expense category', {'id': id});
+
+      await (_db.update(_db.expenseCategories)
+            ..where((t) => t.id.equals(id)))
+          .write(
+        ExpenseCategoriesCompanion(
+          name: name != null ? Value(name) : const Value.absent(),
+          description: Value(description),
+          sortOrder: sortOrder != null ? Value(sortOrder) : const Value.absent(),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+      AppLogger.info('Expense category updated successfully', {'id': id});
+    } catch (e, stack) {
+      AppLogger.error('Failed to update expense category', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Lösche Ausgaben-Kategorie (soft delete)
   Future<void> deleteExpenseCategory(int id) async {
-    // System-Kategorien dürfen nicht gelöscht werden
-    final category = await getExpenseCategoryById(id);
-    if (category?.isSystem == true) {
-      throw Exception('System-Kategorien können nicht gelöscht werden');
-    }
+    try {
+      AppLogger.debug('Deleting expense category', {'id': id});
 
-    await (_db.update(_db.expenseCategories)
-          ..where((t) => t.id.equals(id)))
-        .write(
-      ExpenseCategoriesCompanion(
-        isActive: const Value(false),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+      // System-Kategorien dürfen nicht gelöscht werden
+      final category = await getExpenseCategoryById(id);
+      if (category?.isSystem == true) {
+        AppLogger.warning('Cannot delete system expense category', {'id': id});
+        throw Exception('System-Kategorien können nicht gelöscht werden');
+      }
+
+      await (_db.update(_db.expenseCategories)
+            ..where((t) => t.id.equals(id)))
+          .write(
+        ExpenseCategoriesCompanion(
+          isActive: const Value(false),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+      AppLogger.info('Expense category soft deleted successfully', {'id': id});
+    } catch (e, stack) {
+      AppLogger.error('Failed to delete expense category', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Initialisiere Standard-Kategorien für ein neues Event
@@ -150,17 +186,33 @@ class CategoryRepository {
     int sortOrder = 0,
     bool isSystem = false,
   }) async {
-    final id = await _db.into(_db.incomeSources).insert(
-          IncomeSourcesCompanion.insert(
-            eventId: eventId,
-            name: name,
-            description: Value(description),
-            sortOrder: Value(sortOrder),
-            isSystem: Value(isSystem),
-          ),
-        );
+    try {
+      AppLogger.debug('Creating income source', {
+        'eventId': eventId,
+        'name': name,
+        'isSystem': isSystem,
+      });
 
-    return (await getIncomeSourceById(id))!;
+      final id = await _db.into(_db.incomeSources).insert(
+            IncomeSourcesCompanion.insert(
+              eventId: eventId,
+              name: name,
+              description: Value(description),
+              sortOrder: Value(sortOrder),
+              isSystem: Value(isSystem),
+            ),
+          );
+
+      AppLogger.info('Income source created successfully', {
+        'id': id,
+        'name': name,
+      });
+
+      return (await getIncomeSourceById(id))!;
+    } catch (e, stack) {
+      AppLogger.error('Failed to create income source', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Update Einnahmen-Quelle
@@ -170,34 +222,53 @@ class CategoryRepository {
     String? description,
     int? sortOrder,
   }) async {
-    await (_db.update(_db.incomeSources)
-          ..where((t) => t.id.equals(id)))
-        .write(
-      IncomeSourcesCompanion(
-        name: name != null ? Value(name) : const Value.absent(),
-        description: Value(description),
-        sortOrder: sortOrder != null ? Value(sortOrder) : const Value.absent(),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    try {
+      AppLogger.debug('Updating income source', {'id': id});
+
+      await (_db.update(_db.incomeSources)
+            ..where((t) => t.id.equals(id)))
+          .write(
+        IncomeSourcesCompanion(
+          name: name != null ? Value(name) : const Value.absent(),
+          description: Value(description),
+          sortOrder: sortOrder != null ? Value(sortOrder) : const Value.absent(),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+      AppLogger.info('Income source updated successfully', {'id': id});
+    } catch (e, stack) {
+      AppLogger.error('Failed to update income source', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Lösche Einnahmen-Quelle (soft delete)
   Future<void> deleteIncomeSource(int id) async {
-    // System-Quellen dürfen nicht gelöscht werden
-    final source = await getIncomeSourceById(id);
-    if (source?.isSystem == true) {
-      throw Exception('System-Quellen können nicht gelöscht werden');
-    }
+    try {
+      AppLogger.debug('Deleting income source', {'id': id});
 
-    await (_db.update(_db.incomeSources)
-          ..where((t) => t.id.equals(id)))
-        .write(
-      IncomeSourcesCompanion(
-        isActive: const Value(false),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+      // System-Quellen dürfen nicht gelöscht werden
+      final source = await getIncomeSourceById(id);
+      if (source?.isSystem == true) {
+        AppLogger.warning('Cannot delete system income source', {'id': id});
+        throw Exception('System-Quellen können nicht gelöscht werden');
+      }
+
+      await (_db.update(_db.incomeSources)
+            ..where((t) => t.id.equals(id)))
+          .write(
+        IncomeSourcesCompanion(
+          isActive: const Value(false),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+      AppLogger.info('Income source soft deleted successfully', {'id': id});
+    } catch (e, stack) {
+      AppLogger.error('Failed to delete income source', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Initialisiere Standard-Quellen für ein neues Event
