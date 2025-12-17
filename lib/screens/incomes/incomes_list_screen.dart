@@ -59,19 +59,6 @@ class IncomesListScreen extends ConsumerWidget {
                           color: Colors.grey[500],
                         ),
                   ),
-                  const SizedBox(height: AppConstants.spacingL),
-                  FilledButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const IncomeFormScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Einnahme hinzufügen'),
-                  ),
                 ],
               ),
             );
