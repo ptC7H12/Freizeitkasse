@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
+import '../../utils/logger.dart';
 
 class TaskRepository {
   final AppDatabase _database;
@@ -95,19 +96,34 @@ class TaskRepository {
     String priority = 'medium',
     int? assignedTo,
   }) async {
-    final companion = TasksCompanion(
-      eventId: Value(eventId),
-      title: Value(title),
-      description: Value(description),
-      status: Value(status),
-      priority: Value(priority),
-      dueDate: Value(dueDate),
-      assignedTo: Value(assignedTo),
-      createdAt: Value(DateTime.now()),
-      updatedAt: Value(DateTime.now()),
-    );
+    try {
+      AppLogger.debug('Creating task', {
+        'eventId': eventId,
+        'title': title,
+        'dueDate': dueDate.toIso8601String(),
+        'priority': priority,
+      });
 
-    return await _database.into(_database.tasks).insert(companion);
+      final companion = TasksCompanion(
+        eventId: Value(eventId),
+        title: Value(title),
+        description: Value(description),
+        status: Value(status),
+        priority: Value(priority),
+        dueDate: Value(dueDate),
+        assignedTo: Value(assignedTo),
+        createdAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      );
+
+      final id = await _database.into(_database.tasks).insert(companion);
+
+      AppLogger.info('Task created successfully', {'id': id, 'title': title});
+      return id;
+    } catch (e, stack) {
+      AppLogger.error('Failed to create task', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Update an existing task
@@ -121,27 +137,41 @@ class TaskRepository {
     int? assignedTo,
     bool? clearAssignment,
   }) async {
-    final existing = await getTaskById(id);
-    if (existing == null) {
-      return false;
+    try {
+      AppLogger.debug('Updating task', {'id': id, 'status': status});
+
+      final existing = await getTaskById(id);
+      if (existing == null) {
+        AppLogger.warning('Task not found for update', {'id': id});
+        return false;
+      }
+
+      final companion = TasksCompanion(
+        title: title != null ? Value(title) : const Value.absent(),
+        description: description != null ? Value(description) : const Value.absent(),
+        status: status != null ? Value(status) : const Value.absent(),
+        priority: priority != null ? Value(priority) : const Value.absent(),
+        dueDate: dueDate != null ? Value(dueDate) : const Value.absent(),
+        assignedTo: clearAssignment == true
+            ? const Value(null)
+            : (assignedTo != null ? Value(assignedTo) : const Value.absent()),
+        updatedAt: Value(DateTime.now()),
+      );
+
+      final success = await (_database.update(_database.tasks)
+            ..where((t) => t.id.equals(id)))
+          .write(companion) >
+          0;
+
+      if (success) {
+        AppLogger.info('Task updated successfully', {'id': id});
+      }
+
+      return success;
+    } catch (e, stack) {
+      AppLogger.error('Failed to update task', error: e, stackTrace: stack);
+      rethrow;
     }
-
-    final companion = TasksCompanion(
-      title: title != null ? Value(title) : const Value.absent(),
-      description: description != null ? Value(description) : const Value.absent(),
-      status: status != null ? Value(status) : const Value.absent(),
-      priority: priority != null ? Value(priority) : const Value.absent(),
-      dueDate: dueDate != null ? Value(dueDate) : const Value.absent(),
-      assignedTo: clearAssignment == true
-          ? const Value(null)
-          : (assignedTo != null ? Value(assignedTo) : const Value.absent()),
-      updatedAt: Value(DateTime.now()),
-    );
-
-    return await (_database.update(_database.tasks)
-          ..where((t) => t.id.equals(id)))
-        .write(companion) >
-        0;
   }
 
   /// Mark manual task as completed (by ID)
@@ -156,28 +186,59 @@ class TaskRepository {
 
   /// Delete a task
   Future<bool> deleteTask(int id) async {
-    return await (_database.delete(_database.tasks)
-          ..where((t) => t.id.equals(id)))
-        .go() >
-        0;
+    try {
+      AppLogger.debug('Deleting task', {'id': id});
+
+      final success = await (_database.delete(_database.tasks)
+            ..where((t) => t.id.equals(id)))
+          .go() >
+          0;
+
+      if (success) {
+        AppLogger.info('Task deleted successfully', {'id': id});
+      } else {
+        AppLogger.warning('Task not found for deletion', {'id': id});
+      }
+
+      return success;
+    } catch (e, stack) {
+      AppLogger.error('Failed to delete task', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Get task statistics
   Future<Map<String, dynamic>> getTaskStatistics(int eventId) async {
-    final tasks = await getTasksByEvent(eventId);
-    final pending = tasks.where((t) => t.status == 'pending').length;
-    final inProgress = tasks.where((t) => t.status == 'in_progress').length;
-    final completed = tasks.where((t) => t.status == 'completed').length;
-    final overdue = await getOverdueTasks(eventId);
+    try {
+      AppLogger.debug('Calculating task statistics', {'eventId': eventId});
 
-    return {
-      'total': tasks.length,
-      'pending': pending,
-      'inProgress': inProgress,
-      'completed': completed,
-      'overdue': overdue.length,
-      'completionRate': tasks.isEmpty ? 0.0 : (completed / tasks.length) * 100,
-    };
+      final tasks = await getTasksByEvent(eventId);
+      final pending = tasks.where((t) => t.status == 'pending').length;
+      final inProgress = tasks.where((t) => t.status == 'in_progress').length;
+      final completed = tasks.where((t) => t.status == 'completed').length;
+      final overdue = await getOverdueTasks(eventId);
+
+      final stats = {
+        'total': tasks.length,
+        'pending': pending,
+        'inProgress': inProgress,
+        'completed': completed,
+        'overdue': overdue.length,
+        'completionRate': tasks.isEmpty ? 0.0 : (completed / tasks.length) * 100,
+      };
+
+      AppLogger.info('Task statistics calculated', {
+        'eventId': eventId,
+        'total': tasks.length,
+        'completed': completed,
+        'overdue': overdue.length,
+      });
+
+      return stats;
+    } catch (e, stack) {
+      AppLogger.error('Failed to calculate task statistics', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   // ============================================================================
@@ -216,42 +277,68 @@ class TaskRepository {
     required int referenceId,
     String? completionNote,
   }) async {
-    // Check if task already exists
-    final existing = await (_database.select(_database.tasks)
-          ..where((t) =>
-              t.eventId.equals(eventId) &
-              t.taskType.equals(taskType) &
-              t.referenceId.equals(referenceId)))
-        .getSingleOrNull();
+    try {
+      AppLogger.debug('Completing task', {
+        'eventId': eventId,
+        'taskType': taskType,
+        'referenceId': referenceId,
+      });
 
-    if (existing != null) {
-      // Update existing task
-      final companion = TasksCompanion(
-        isCompleted: const Value(true),
-        completedAt: Value(DateTime.now()),
-        completionNote: Value(completionNote),
-        updatedAt: Value(DateTime.now()),
-      );
-      return await (_database.update(_database.tasks)
-            ..where((t) => t.id.equals(existing.id)))
-          .write(companion) >
-          0;
-    } else {
-      // Create new completed task
-      final companion = TasksCompanion(
-        eventId: Value(eventId),
-        title: const Value('Auto-generated task'),
-        taskType: Value(taskType),
-        referenceId: Value(referenceId),
-        isCompleted: const Value(true),
-        completedAt: Value(DateTime.now()),
-        completionNote: Value(completionNote),
-        status: const Value('completed'),
-        createdAt: Value(DateTime.now()),
-        updatedAt: Value(DateTime.now()),
-      );
-      await _database.into(_database.tasks).insert(companion);
-      return true;
+      // Check if task already exists
+      final existing = await (_database.select(_database.tasks)
+            ..where((t) =>
+                t.eventId.equals(eventId) &
+                t.taskType.equals(taskType) &
+                t.referenceId.equals(referenceId)))
+          .getSingleOrNull();
+
+      if (existing != null) {
+        // Update existing task
+        final companion = TasksCompanion(
+          isCompleted: const Value(true),
+          completedAt: Value(DateTime.now()),
+          completionNote: Value(completionNote),
+          updatedAt: Value(DateTime.now()),
+        );
+        final success = await (_database.update(_database.tasks)
+              ..where((t) => t.id.equals(existing.id)))
+            .write(companion) >
+            0;
+
+        if (success) {
+          AppLogger.info('Task marked as completed (updated existing)', {
+            'id': existing.id,
+            'taskType': taskType,
+          });
+        }
+
+        return success;
+      } else {
+        // Create new completed task
+        final companion = TasksCompanion(
+          eventId: Value(eventId),
+          title: const Value('Auto-generated task'),
+          taskType: Value(taskType),
+          referenceId: Value(referenceId),
+          isCompleted: const Value(true),
+          completedAt: Value(DateTime.now()),
+          completionNote: Value(completionNote),
+          status: const Value('completed'),
+          createdAt: Value(DateTime.now()),
+          updatedAt: Value(DateTime.now()),
+        );
+        await _database.into(_database.tasks).insert(companion);
+
+        AppLogger.info('Task marked as completed (created new)', {
+          'taskType': taskType,
+          'referenceId': referenceId,
+        });
+
+        return true;
+      }
+    } catch (e, stack) {
+      AppLogger.error('Failed to complete task', error: e, stackTrace: stack);
+      rethrow;
     }
   }
 
