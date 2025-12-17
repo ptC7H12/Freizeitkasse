@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
+import '../../utils/logger.dart';
 
 class RoleRepository {
   final AppDatabase _database;
@@ -43,22 +44,43 @@ class RoleRepository {
     String? displayName,
     String? description,
   }) async {
-    // Check if role with same name already exists
-    final existing = await getRoleByName(eventId, name);
-    if (existing != null) {
-      throw Exception('Eine Rolle mit diesem Namen existiert bereits');
+    try {
+      AppLogger.debug('Creating role', {
+        'eventId': eventId,
+        'name': name,
+      });
+
+      // Check if role with same name already exists
+      final existing = await getRoleByName(eventId, name);
+      if (existing != null) {
+        AppLogger.warning('Role with same name already exists', {
+          'eventId': eventId,
+          'name': name,
+        });
+        throw Exception('Eine Rolle mit diesem Namen existiert bereits');
+      }
+
+      final companion = RolesCompanion(
+        eventId: Value(eventId),
+        name: Value(name),
+        displayName: Value(displayName ?? name), // Use name if displayName not provided
+        description: Value(description),
+        createdAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      );
+
+      final id = await _database.into(_database.roles).insert(companion);
+
+      AppLogger.info('Role created successfully', {
+        'id': id,
+        'name': name,
+      });
+
+      return id;
+    } catch (e, stack) {
+      AppLogger.error('Failed to create role', error: e, stackTrace: stack);
+      rethrow;
     }
-
-    final companion = RolesCompanion(
-      eventId: Value(eventId),
-      name: Value(name),
-      displayName: Value(displayName ?? name), // Use name if displayName not provided
-      description: Value(description),
-      createdAt: Value(DateTime.now()),
-      updatedAt: Value(DateTime.now()),
-    );
-
-    return await _database.into(_database.roles).insert(companion);
   }
 
   /// Update an existing role
@@ -68,67 +90,120 @@ class RoleRepository {
     String? displayName,
     String? description,
   }) async {
-    final existing = await getRoleById(id);
-    if (existing == null) {
-      return false;
-    }
+    try {
+      AppLogger.debug('Updating role', {'id': id});
 
-    // Check if new name conflicts with another role
-    if (name != null && name != existing.name) {
-      final conflict = await getRoleByName(existing.eventId, name);
-      if (conflict != null && conflict.id != id) {
-        throw Exception('Eine Rolle mit diesem Namen existiert bereits');
+      final existing = await getRoleById(id);
+      if (existing == null) {
+        AppLogger.warning('Role not found for update', {'id': id});
+        return false;
       }
+
+      // Check if new name conflicts with another role
+      if (name != null && name != existing.name) {
+        final conflict = await getRoleByName(existing.eventId, name);
+        if (conflict != null && conflict.id != id) {
+          AppLogger.warning('Role name conflict during update', {
+            'id': id,
+            'name': name,
+            'conflictId': conflict.id,
+          });
+          throw Exception('Eine Rolle mit diesem Namen existiert bereits');
+        }
+      }
+
+      final companion = RolesCompanion(
+        name: name != null ? Value(name) : const Value.absent(),
+        displayName: displayName != null ? Value(displayName) : const Value.absent(),
+        description: description != null ? Value(description) : const Value.absent(),
+        updatedAt: Value(DateTime.now()),
+      );
+
+      final success = await (_database.update(_database.roles)
+            ..where((t) => t.id.equals(id)))
+          .write(companion) >
+          0;
+
+      if (success) {
+        AppLogger.info('Role updated successfully', {'id': id});
+      }
+
+      return success;
+    } catch (e, stack) {
+      AppLogger.error('Failed to update role', error: e, stackTrace: stack);
+      rethrow;
     }
-
-    final companion = RolesCompanion(
-      name: name != null ? Value(name) : const Value.absent(),
-      displayName: displayName != null ? Value(displayName) : const Value.absent(),
-      description: description != null ? Value(description) : const Value.absent(),
-      updatedAt: Value(DateTime.now()),
-    );
-
-    return await (_database.update(_database.roles)
-          ..where((t) => t.id.equals(id)))
-        .write(companion) >
-        0;
   }
 
   /// Delete a role
   Future<bool> deleteRole(int id) async {
-    // Check if role is in use by any participants
-    final participantsWithRole = await (_database.select(_database.participants)
-          ..where((t) => t.roleId.equals(id)))
-        .get();
+    try {
+      AppLogger.debug('Deleting role', {'id': id});
 
-    if (participantsWithRole.isNotEmpty) {
-      throw Exception(
-        'Diese Rolle kann nicht gelöscht werden, da sie von ${participantsWithRole.length} Teilnehmer(n) verwendet wird',
-      );
+      // Check if role is in use by any participants
+      final participantsWithRole = await (_database.select(_database.participants)
+            ..where((t) => t.roleId.equals(id)))
+          .get();
+
+      if (participantsWithRole.isNotEmpty) {
+        AppLogger.warning('Cannot delete role - in use by participants', {
+          'id': id,
+          'participantCount': participantsWithRole.length,
+        });
+        throw Exception(
+          'Diese Rolle kann nicht gelöscht werden, da sie von ${participantsWithRole.length} Teilnehmer(n) verwendet wird',
+        );
+      }
+
+      final success = await (_database.delete(_database.roles)
+            ..where((t) => t.id.equals(id)))
+          .go() >
+          0;
+
+      if (success) {
+        AppLogger.info('Role deleted successfully', {'id': id});
+      } else {
+        AppLogger.warning('Role not found for deletion', {'id': id});
+      }
+
+      return success;
+    } catch (e, stack) {
+      AppLogger.error('Failed to delete role', error: e, stackTrace: stack);
+      rethrow;
     }
-
-    return await (_database.delete(_database.roles)
-          ..where((t) => t.id.equals(id)))
-        .go() >
-        0;
   }
 
   /// Get role statistics
   Future<Map<String, dynamic>> getRoleStatistics(int roleId) async {
-    final role = await getRoleById(roleId);
-    if (role == null) {
-      return {'error': 'Rolle nicht gefunden'};
+    try {
+      AppLogger.debug('Getting role statistics', {'roleId': roleId});
+
+      final role = await getRoleById(roleId);
+      if (role == null) {
+        AppLogger.warning('Role not found for statistics', {'roleId': roleId});
+        return {'error': 'Rolle nicht gefunden'};
+      }
+
+      // Count participants with this role
+      final participants = await (_database.select(_database.participants)
+            ..where((t) => t.roleId.equals(roleId) & t.isActive.equals(true)))
+          .get();
+
+      final stats = {
+        'role': role,
+        'participantCount': participants.length,
+      };
+
+      AppLogger.info('Role statistics calculated', {
+        'roleId': roleId,
+        'participantCount': participants.length,
+      });
+
+      return stats;
+    } catch (e, stack) {
+      AppLogger.error('Failed to get role statistics', error: e, stackTrace: stack);
+      rethrow;
     }
-
-    // Count participants with this role
-    final participants = await (_database.select(_database.participants)
-          ..where((t) => t.roleId.equals(roleId) & t.isActive.equals(true)))
-        .get();
-
-    return {
-      'role': role,
-      'participantCount': participants.length,
-    };
   }
 
   /// Get all roles with participant counts
