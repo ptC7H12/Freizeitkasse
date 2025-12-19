@@ -1115,7 +1115,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                 if (filteredTransactions.isEmpty)
                   const Center(
                     child: Padding(
-                      padding: EdgeInsets.all(32.0),
+                      padding: AppConstants.paddingAll32,
                       child: Text(
                         'Keine Transaktionen gefunden',
                         style: TextStyle(color: Colors.grey),
@@ -1141,9 +1141,9 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                           : const Color(0xFFE91E63);
 
                       return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
+                        margin: EdgeInsets.only(bottom: AppConstants.spacingS),
                         child: Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: AppConstants.paddingAll12,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -1465,10 +1465,10 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                       return Column(
                         children: subsidiesByRole.values.map((roleData) {
                           return Card(
-                            margin: const EdgeInsets.only(bottom: 8),
+                            margin: EdgeInsets.only(bottom: AppConstants.spacingS),
                             color: const Color(0xFFF8F9FA),
                             child: Padding(
-                              padding: const EdgeInsets.all(12),
+                              padding: AppConstants.paddingAll12,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -1647,10 +1647,10 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                       return Column(
                         children: subsidiesByType.values.map((typeData) {
                           return Card(
-                            margin: const EdgeInsets.only(bottom: 8),
+                            margin: EdgeInsets.only(bottom: AppConstants.spacingS),
                             color: const Color(0xFFFFF8E1),
                             child: Padding(
-                              padding: const EdgeInsets.all(12),
+                              padding: AppConstants.paddingAll12,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -1923,7 +1923,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
           builder: (context) => const Center(
             child: Card(
               child: Padding(
-                padding: EdgeInsets.all(24.0),
+                padding: AppConstants.paddingAll24,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -2043,7 +2043,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
           builder: (context) => const Center(
             child: Card(
               child: Padding(
-                padding: EdgeInsets.all(24.0),
+                padding: AppConstants.paddingAll24,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
