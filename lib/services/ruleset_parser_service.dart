@@ -1,5 +1,6 @@
 import 'package:yaml/yaml.dart';
 import '../utils/logger.dart';
+import '../utils/exceptions.dart';
 
 /// YAML-Regelwerk-Parser Service
 ///
@@ -21,7 +22,7 @@ class RulesetParserService {
       final doc = loadYaml(yamlContent);
 
       if (doc is! YamlMap) {
-        throw const FormatException('YAML muss ein Dictionary sein');
+        throw const RulesetParseException('YAML muss ein Dictionary sein');
       }
 
       return {
@@ -116,20 +117,20 @@ class RulesetParserService {
       }
       return DateTime.parse(value.toString());
     } catch (e) {
-      throw FormatException('Ungültiges Datum: $value');
+      throw RulesetParseException('Ungültiges Datum: $value');
     }
   }
 
   static List<Map<String, dynamic>> _parseAgeGroups(dynamic ageGroups) {
     if (ageGroups is! YamlList) {
-      throw const FormatException('age_groups muss eine Liste sein');
+      throw const RulesetParseException('age_groups muss eine Liste sein');
     }
 
     final result = <Map<String, dynamic>>[];
 
     for (var group in ageGroups) {
       if (group is! YamlMap) {
-        throw FormatException('Jede age_group muss ein Dictionary sein: $group');
+        throw RulesetParseException('Jede age_group muss ein Dictionary sein: $group');
       }
 
       result.add({
@@ -150,7 +151,7 @@ class RulesetParserService {
       return {};
     }
     if (roleDiscounts is! YamlMap) {
-      throw const FormatException('role_discounts muss ein Dictionary sein');
+      throw const RulesetParseException('role_discounts muss ein Dictionary sein');
     }
 
     final result = <String, dynamic>{};
@@ -160,7 +161,7 @@ class RulesetParserService {
       final value = entry.value;
 
       if (value is! YamlMap) {
-        throw FormatException(
+        throw RulesetParseException(
           'Rollenrabatt für "$key" muss ein Dictionary sein',
         );
       }
@@ -181,7 +182,7 @@ class RulesetParserService {
       return {'enabled': false};
     }
     if (familyDiscount is! YamlMap) {
-      throw const FormatException('family_discount muss ein Dictionary sein');
+      throw const RulesetParseException('family_discount muss ein Dictionary sein');
     }
 
     return {

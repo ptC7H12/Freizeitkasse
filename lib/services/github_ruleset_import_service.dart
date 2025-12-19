@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../utils/logger.dart';
+import '../../utils/exceptions.dart';
 
 /// Service to import rulesets from GitHub
 class GithubRulesetImportService {
@@ -55,7 +56,7 @@ class GithubRulesetImportService {
       final parsed = parseGithubUrl(githubUrl);
 
       if (parsed == null) {
-        throw Exception('Invalid GitHub URL format');
+        throw ValidationException('Invalid GitHub URL format');
       }
 
       final owner = parsed['owner'];
@@ -75,12 +76,12 @@ class GithubRulesetImportService {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('GitHub API error: ${response.statusCode} - ${response.body}');
+        throw NetworkException('GitHub API error: ${response.statusCode} - ${response.body}', statusCode: response.statusCode);
       }
 
       final data = json.decode(response.body);
       if (data is! List) {
-        throw Exception('Unexpected GitHub API response: expected an array');
+        throw ImportExportException('import', 'Unexpected GitHub API response: expected an array');
       }
       final List<dynamic> contents = data;
 
@@ -111,7 +112,7 @@ class GithubRulesetImportService {
       final response = await http.get(Uri.parse(downloadUrl));
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to download file: ${response.statusCode}');
+        throw NetworkException('Failed to download file: ${response.statusCode}', statusCode: response.statusCode);
       }
 
       return response.body;

@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import '../utils/logger.dart';
+import '../utils/exceptions.dart';
 
 /// GitHub Ruleset Import Service
 ///
@@ -40,7 +41,7 @@ class GitHubRulesetService {
       final response = await http.get(Uri.parse(url)).timeout(
         const Duration(seconds: 10),
         onTimeout: () {
-          throw Exception('Timeout beim Laden von GitHub');
+          throw NetworkException('Timeout beim Laden von GitHub');
         },
       );
 

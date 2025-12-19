@@ -3,6 +3,7 @@ import 'package:excel/excel.dart';
 import '../data/repositories/participant_repository.dart';
 import '../data/repositories/family_repository.dart';
 import '../utils/logger.dart';
+import '../utils/exceptions.dart';
 
 class ExcelImportService {
   final ParticipantRepository _participantRepository;
@@ -383,7 +384,7 @@ class ExcelImportService {
         try {
           data['birth_date'] = _parseDateFromCell(birthDateCell);
         } catch (e) {
-          throw Exception('Ungültiges Geburtsdatum: ${birthDateCell.value}');
+          throw ExcelImportException('Ungültiges Geburtsdatum: ${birthDateCell.value}', row: rowIndex + 1);
         }
       }
     }
@@ -572,7 +573,7 @@ class ExcelImportService {
     }
 
     AppLogger.debug('DEBUG _parseDate: FAILED - No format matched for: "$cleanedDateStr"');
-    throw FormatException('Ungültiges Datumsformat: $dateStr');
+    throw ExcelImportException('Ungültiges Datumsformat: $dateStr');
   }
 
 
@@ -630,7 +631,7 @@ class ExcelImportService {
       return outputPath;
     }
 
-    throw Exception('Fehler beim Erstellen der Vorlage');
+    throw ImportExportException('export', 'Fehler beim Erstellen der Vorlage', fileName: outputPath);
   }
 }
 
