@@ -164,14 +164,15 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                 labelText: 'Zahlungsmethode',
                 prefixIcon: Icon(Icons.payment),
               ),
-              items: const [
-                DropdownMenuItem(value: null, child: Text('Keine Angabe')),
-                DropdownMenuItem(value: 'Automatisch', child: Text('Automatisch')),
-                DropdownMenuItem(value: 'Bar', child: Text('Bar')),
-                DropdownMenuItem(value: 'Überweisung', child: Text('Überweisung')),
-                DropdownMenuItem(value: 'EC-Karte', child: Text('EC-Karte')),
-                DropdownMenuItem(value: 'PayPal', child: Text('PayPal')),
-                DropdownMenuItem(value: 'Sonstige', child: Text('Sonstige')),
+              items: [
+                const DropdownMenuItem(value: null, child: Text('Keine Angabe')),
+                const DropdownMenuItem(value: 'Automatisch', child: Text('Automatisch')),
+                ...AppConstants.paymentMethods.map(
+                  (method) => DropdownMenuItem(
+                    value: method,
+                    child: Text(method),
+                  ),
+                ),
               ],
               onChanged: (value) {
                 setState(() {
