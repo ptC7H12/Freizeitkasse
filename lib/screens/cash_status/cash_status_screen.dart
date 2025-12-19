@@ -927,7 +927,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
   }
 
   Widget _buildTransactionHistoryContent(BuildContext context, List<Transaction> allTransactions) {
-    final isMobile = MediaQuery.of(context).size.width <= 800;
+    final isMobile = !context.isDesktop;
 
     // Filter anwenden
     List<Transaction> filteredTransactions = allTransactions;
@@ -1271,7 +1271,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                       scrollDirection: Axis.horizontal,
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
-                          minWidth: MediaQuery.of(context).size.width - 64,
+                          minWidth: context.screenWidth - 64,
                         ),
                         child: DataTable(
                           columnSpacing: 16,
@@ -1368,7 +1368,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
 
   // ========== TAB 3: ZUSCHÜSSE ==========
   Widget _buildSubsidiesTab(BuildContext context, WidgetRef ref, db.AppDatabase database, int eventId) {
-    final isMobile = MediaQuery.of(context).size.width <= 800;
+    final isMobile = !context.isDesktop;
 
     // Nutze SubsidyProvider für korrekte Berechnungen
     final subsidiesByRoleAsync = ref.watch(subsidiesByRoleProvider);
@@ -1559,7 +1559,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                         scrollDirection: Axis.horizontal,
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
-                            minWidth: MediaQuery.of(context).size.width - 64,
+                            minWidth: context.screenWidth - 64,
                           ),
                           child: DataTable(
                             columnSpacing: 24,
@@ -1741,7 +1741,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                         scrollDirection: Axis.horizontal,
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
-                            minWidth: MediaQuery.of(context).size.width - 64,
+                            minWidth: context.screenWidth - 64,
                           ),
                           child: DataTable(
                             columnSpacing: 24,
@@ -2570,9 +2570,9 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                   scrollDirection: Axis.horizontal,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minWidth: MediaQuery.of(context).size.width > 800
-                          ? MediaQuery.of(context).size.width - 64
-                          : MediaQuery.of(context).size.width - 32,
+                      minWidth: context.isDesktop
+                          ? context.screenWidth - 64
+                          : context.screenWidth - 32,
                     ),
                     child: DataTable(
                       columns: const [
