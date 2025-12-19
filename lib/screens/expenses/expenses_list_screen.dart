@@ -10,6 +10,7 @@ import 'expense_form_screen.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
 import '../../widgets/adaptive_list_item.dart';
+import '../../widgets/common/common_widgets.dart';
 import '../../extensions/context_extensions.dart';
 import '../../utils/logger.dart';
 
@@ -125,22 +126,20 @@ class ExpensesListScreen extends ConsumerWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildStatCard(
-                            context,
-                            'Ausgaben gesamt',
-                            expenses.length.toString(),
-                            Icons.receipt_long,
-                            const Color(0xFF2196F3),
+                          child: StatCard(
+                            label: 'Ausgaben gesamt',
+                            value: expenses.length.toString(),
+                            icon: Icons.receipt_long,
+                            color: const Color(0xFF2196F3),
                           ),
                         ),
                         const SizedBox(width: AppConstants.spacing),
                         Expanded(
-                          child: _buildStatCard(
-                            context,
-                            'Gesamtbetrag',
-                            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(gesamtbetrag),
-                            Icons.euro,
-                            const Color(0xFFE91E63),
+                          child: StatCard(
+                            label: 'Gesamtbetrag',
+                            value: NumberFormat.currency(locale: 'de_DE', symbol: '€').format(gesamtbetrag),
+                            icon: Icons.euro,
+                            color: const Color(0xFFE91E63),
                           ),
                         ),
                       ],
@@ -150,22 +149,20 @@ class ExpensesListScreen extends ConsumerWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildStatCard(
-                            context,
-                            'Offene Ausgaben',
-                            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(offeneAusgaben),
-                            Icons.hourglass_empty,
-                            const Color(0xFFFF9800),
+                          child: StatCard(
+                            label: 'Offene Ausgaben',
+                            value: NumberFormat.currency(locale: 'de_DE', symbol: '€').format(offeneAusgaben),
+                            icon: Icons.hourglass_empty,
+                            color: const Color(0xFFFF9800),
                           ),
                         ),
                         const SizedBox(width: AppConstants.spacing),
                         Expanded(
-                          child: _buildStatCard(
-                            context,
-                            'Beglichen',
-                            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(beglichene),
-                            Icons.check_circle,
-                            const Color(0xFF4CAF50),
+                          child: StatCard(
+                            label: 'Beglichen',
+                            value: NumberFormat.currency(locale: 'de_DE', symbol: '€').format(beglichene),
+                            icon: Icons.check_circle,
+                            color: const Color(0xFF4CAF50),
                           ),
                         ),
                       ],
@@ -218,52 +215,6 @@ class ExpensesListScreen extends ConsumerWidget {
     );
   }
 
-  /// Kleine Statistik-Karte
-  Widget _buildStatCard(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: AppConstants.paddingAll16,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: AppConstants.borderRadius8,
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: AppConstants.spacingS),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _ExpenseListItem extends ConsumerWidget {

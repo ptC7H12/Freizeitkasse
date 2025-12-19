@@ -8,6 +8,7 @@ import '../../utils/date_utils.dart';
 import 'payment_form_screen.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../widgets/common/common_widgets.dart';
 
 /// Payments List Screen
 class PaymentsListScreen extends ConsumerWidget {
@@ -229,23 +230,21 @@ class PaymentsListScreen extends ConsumerWidget {
             children: [
               // Zahlung gesamt
               Expanded(
-                child: _buildStatCard(
-                  context,
-                  'Zahlungen gesamt',
-                  zahlungGesamt.toString(),
-                  Icons.receipt_long,
-                  const Color(0xFF2196F3),
+                child: StatCard(
+                  label: 'Zahlungen gesamt',
+                  value: zahlungGesamt.toString(),
+                  icon: Icons.receipt_long,
+                  color: const Color(0xFF2196F3),
                 ),
               ),
               const SizedBox(width: AppConstants.spacing),
               // Gesamtbetrag
               Expanded(
-                child: _buildStatCard(
-                  context,
-                  'Gesamtbetrag',
-                  currencyFormat.format(gesamtbetrag),
-                  Icons.euro,
-                  const Color(0xFF4CAF50),
+                child: StatCard(
+                  label: 'Gesamtbetrag',
+                  value: currencyFormat.format(gesamtbetrag),
+                  icon: Icons.euro,
+                  color: const Color(0xFF4CAF50),
                 ),
               ),
             ],
@@ -298,22 +297,20 @@ class PaymentsListScreen extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: _buildStatCard(
-                  context,
-                  'Zahlungen gesamt',
-                  zahlungGesamt.toString(),
-                  Icons.receipt_long,
-                  const Color(0xFF2196F3),
+                child: StatCard(
+                  label: 'Zahlungen gesamt',
+                  value: zahlungGesamt.toString(),
+                  icon: Icons.receipt_long,
+                  color: const Color(0xFF2196F3),
                 ),
               ),
               const SizedBox(width: AppConstants.spacing),
               Expanded(
-                child: _buildStatCard(
-                  context,
-                  'Gesamtbetrag',
-                  currencyFormat.format(gesamtbetrag),
-                  Icons.euro,
-                  const Color(0xFF4CAF50),
+                child: StatCard(
+                  label: 'Gesamtbetrag',
+                  value: currencyFormat.format(gesamtbetrag),
+                  icon: Icons.euro,
+                  color: const Color(0xFF4CAF50),
                 ),
               ),
             ],
@@ -323,52 +320,6 @@ class PaymentsListScreen extends ConsumerWidget {
     );
   }
 
-  /// Kleine Statistik-Karte
-  Widget _buildStatCard(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: AppConstants.paddingAll16,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: AppConstants.borderRadius8,
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: AppConstants.spacingS),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppConstants.spacingS),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   /// Erwartete Einnahme Karte mit Ausstehend-Info
   Widget _buildExpectedIncomeCard(

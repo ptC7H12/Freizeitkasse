@@ -7,6 +7,7 @@ import '../../providers/subsidy_provider.dart';
 import '../../data/database/app_database.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../widgets/common/common_widgets.dart';
 import '../../extensions/context_extensions.dart';
 
 /// Dashboard Screen
@@ -52,7 +53,10 @@ class DashboardScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ========== FINANZÜBERSICHT ==========
-          _buildSectionHeader(context, Icons.account_balance_wallet, 'Finanzübersicht'),
+          SectionHeader.large(
+            title: 'Finanzübersicht',
+            icon: Icons.account_balance_wallet,
+          ),
           const SizedBox(height: AppConstants.spacing),
 
           Card(
@@ -119,42 +123,37 @@ class DashboardScreen extends ConsumerWidget {
                                   ? Row(
                                       children: [
                                         Expanded(
-                                          child: _buildFinanceDetailCard(
-                                            context,
-                                            'Soll Einnahmen (Gesamt)',
-                                            sollEinnahmenGesamt,
-                                            null,
-                                            const Color(0xFF4CAF50),
+                                          child: FinanceCard(
+                                            label: 'Soll Einnahmen (Gesamt)',
+                                            amount: sollEinnahmenGesamt,
+                                            color: const Color(0xFF4CAF50),
                                           ),
                                         ),
                                         const SizedBox(width: AppConstants.spacing),
                                         Expanded(
-                                          child: _buildFinanceDetailCard(
-                                            context,
-                                            'Soll Zahlungseingänge',
-                                            sollEinnahmenTeilnehmer,
-                                            'durch Teilnahmegebühren',
-                                            const Color(0xFF2196F3),
+                                          child: FinanceCard(
+                                            label: 'Soll Zahlungseingänge',
+                                            amount: sollEinnahmenTeilnehmer,
+                                            subtitle: 'durch Teilnahmegebühren',
+                                            color: const Color(0xFF2196F3),
                                           ),
                                         ),
                                         const SizedBox(width: AppConstants.spacing),
                                         Expanded(
-                                          child: _buildFinanceDetailCard(
-                                            context,
-                                            'Soll Sonstige Einnahmen',
-                                            sollSonstigeEinnahmen,
-                                            'durch Zuschüsse',
-                                            const Color(0xFF2196F3),
+                                          child: FinanceCard(
+                                            label: 'Soll Sonstige Einnahmen',
+                                            amount: sollSonstigeEinnahmen,
+                                            subtitle: 'durch Zuschüsse',
+                                            color: const Color(0xFF2196F3),
                                           ),
                                         ),
                                         const SizedBox(width: AppConstants.spacing),
                                         Expanded(
-                                          child: _buildFinanceDetailCard(
-                                            context,
-                                            'Ist Einnahmen (Gesamt)',
-                                            istEinnahmenGesamt,
-                                            'durch Zahlungen + Sonstige',
-                                            const Color(0xFF4CAF50),
+                                          child: FinanceCard(
+                                            label: 'Ist Einnahmen (Gesamt)',
+                                            amount: istEinnahmenGesamt,
+                                            subtitle: 'durch Zahlungen + Sonstige',
+                                            color: const Color(0xFF4CAF50),
                                             isBold: true,
                                           ),
                                         ),
@@ -162,36 +161,31 @@ class DashboardScreen extends ConsumerWidget {
                                     )
                                   : Column(
                                       children: [
-                                        _buildFinanceDetailCard(
-                                          context,
-                                          'Soll Einnahmen (Gesamt)',
-                                          sollEinnahmenGesamt,
-                                          null,
-                                          const Color(0xFF4CAF50),
+                                        FinanceCard(
+                                          label: 'Soll Einnahmen (Gesamt)',
+                                          amount: sollEinnahmenGesamt,
+                                          color: const Color(0xFF4CAF50),
                                         ),
                                         const SizedBox(height: AppConstants.spacingS),
-                                        _buildFinanceDetailCard(
-                                          context,
-                                          'Soll Zahlungseingänge',
-                                          sollEinnahmenTeilnehmer,
-                                          'durch Teilnahmegebühren',
-                                          const Color(0xFF2196F3),
+                                        FinanceCard(
+                                          label: 'Soll Zahlungseingänge',
+                                          amount: sollEinnahmenTeilnehmer,
+                                          subtitle: 'durch Teilnahmegebühren',
+                                          color: const Color(0xFF2196F3),
                                         ),
                                         const SizedBox(height: AppConstants.spacingS),
-                                        _buildFinanceDetailCard(
-                                          context,
-                                          'Soll Sonstige Einnahmen',
-                                          sollSonstigeEinnahmen,
-                                          'durch Zuschüsse',
-                                          const Color(0xFF2196F3),
+                                        FinanceCard(
+                                          label: 'Soll Sonstige Einnahmen',
+                                          amount: sollSonstigeEinnahmen,
+                                          subtitle: 'durch Zuschüsse',
+                                          color: const Color(0xFF2196F3),
                                         ),
                                         const SizedBox(height: AppConstants.spacingS),
-                                        _buildFinanceDetailCard(
-                                          context,
-                                          'Ist Einnahmen (Gesamt)',
-                                          istEinnahmenGesamt,
-                                          'durch Zahlungen + Sonstige',
-                                          const Color(0xFF4CAF50),
+                                        FinanceCard(
+                                          label: 'Ist Einnahmen (Gesamt)',
+                                          amount: istEinnahmenGesamt,
+                                          subtitle: 'durch Zahlungen + Sonstige',
+                                          color: const Color(0xFF4CAF50),
                                           isBold: true,
                                         ),
                                       ],
@@ -273,22 +267,18 @@ class DashboardScreen extends ConsumerWidget {
                           ? Row(
                               children: [
                                 Expanded(
-                                  child: _buildFinanceDetailCard(
-                                    context,
-                                    'Soll Ausgaben (Gesamt)',
-                                    sollAusgabenGesamt,
-                                    null,
-                                    const Color(0xFFE91E63),
+                                  child: FinanceCard(
+                                    label: 'Soll Ausgaben (Gesamt)',
+                                    amount: sollAusgabenGesamt,
+                                    color: const Color(0xFFE91E63),
                                   ),
                                 ),
                                 const SizedBox(width: AppConstants.spacing),
                                 Expanded(
-                                  child: _buildFinanceDetailCard(
-                                    context,
-                                    'Beglichene Ausgaben',
-                                    beglicheneAusgaben,
-                                    null,
-                                    const Color(0xFFE91E63),
+                                  child: FinanceCard(
+                                    label: 'Beglichene Ausgaben',
+                                    amount: beglicheneAusgaben,
+                                    color: const Color(0xFFE91E63),
                                     isBold: true,
                                   ),
                                 ),
@@ -296,20 +286,16 @@ class DashboardScreen extends ConsumerWidget {
                             )
                           : Column(
                               children: [
-                                _buildFinanceDetailCard(
-                                  context,
-                                  'Soll Ausgaben (Gesamt)',
-                                  sollAusgabenGesamt,
-                                  null,
-                                  const Color(0xFFE91E63),
+                                FinanceCard(
+                                  label: 'Soll Ausgaben (Gesamt)',
+                                  amount: sollAusgabenGesamt,
+                                  color: const Color(0xFFE91E63),
                                 ),
                                 const SizedBox(height: AppConstants.spacingS),
-                                _buildFinanceDetailCard(
-                                  context,
-                                  'Beglichene Ausgaben',
-                                  beglicheneAusgaben,
-                                  null,
-                                  const Color(0xFFE91E63),
+                                FinanceCard(
+                                  label: 'Beglichene Ausgaben',
+                                  amount: beglicheneAusgaben,
+                                  color: const Color(0xFFE91E63),
                                   isBold: true,
                                 ),
                               ],
@@ -392,80 +378,6 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  /// Section Header Widget
-  Widget _buildSectionHeader(BuildContext context, IconData icon, String title) {
-    return Row(
-      children: [
-        Container(
-          padding: AppConstants.paddingAll8,
-          decoration: BoxDecoration(
-            color: AppConstants.primaryColor.withValues(alpha: 0.1),
-            borderRadius: AppConstants.borderRadius8,
-          ),
-          child: Icon(icon, color: AppConstants.primaryColor, size: 24),
-        ),
-        const SizedBox(width: AppConstants.spacingM),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Finance Detail Card (for income/expense details)
-  Widget _buildFinanceDetailCard(
-    BuildContext context,
-    String label,
-    double amount,
-    String? subtitle,
-    Color color, {
-    bool isBold = false,
-  }) {
-    return Container(
-      padding: AppConstants.paddingAll16,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: AppConstants.borderRadius8,
-        border: isBold ? Border.all(color: color, width: 2) : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: color.withValues(alpha: 0.8),
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            NumberFormat.currency(locale: 'de_DE', symbol: '€').format(amount),
-            style: TextStyle(
-              fontSize: isBold ? 24 : 20,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-              color: color,
-            ),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 10,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
 
   /// Saldo Card (highlighted)
   Widget _buildSaldoCard(

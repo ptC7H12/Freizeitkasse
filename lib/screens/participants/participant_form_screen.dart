@@ -8,6 +8,7 @@ import '../../utils/validators.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/forms/price_preview_widget.dart';
 import '../../widgets/responsive_form_container.dart';
+import '../../widgets/common/common_widgets.dart';
 import '../../utils/route_helpers.dart';
 import '../../extensions/context_extensions.dart';
 import '../../utils/constants.dart';
@@ -163,7 +164,7 @@ class _ParticipantFormScreenState
           child: ListView(
             children: [
             // Persönliche Daten
-            _buildSectionHeader('Persönliche Daten'),
+            SectionHeader.small(title: 'Persönliche Daten'),
             _buildTextField(
               controller: _firstNameController,
               label: 'Vorname *',
@@ -183,7 +184,7 @@ class _ParticipantFormScreenState
             const SizedBox(height: AppConstants.spacingL),
 
             // Adresse
-            _buildSectionHeader('Adresse'),
+            SectionHeader.small(title: 'Adresse'),
             _buildTextField(
               controller: _addressController,
               label: 'Adresse',
@@ -193,7 +194,7 @@ class _ParticipantFormScreenState
             const SizedBox(height: AppConstants.spacingL),
 
             // Kontakt
-            _buildSectionHeader('Kontaktdaten'),
+            SectionHeader.small(title: 'Kontaktdaten'),
             _buildTextField(
               controller: _phoneController,
               label: 'Telefon',
@@ -211,7 +212,7 @@ class _ParticipantFormScreenState
             const SizedBox(height: AppConstants.spacingL),
 
             // Notfallkontakt
-            _buildSectionHeader('Notfallkontakt'),
+            SectionHeader.small(title: 'Notfallkontakt'),
             _buildTextField(
               controller: _emergencyContactController,
               label: 'Notfallkontakt Name',
@@ -227,7 +228,7 @@ class _ParticipantFormScreenState
             const SizedBox(height: AppConstants.spacingL),
 
             // Medizinische Informationen
-            _buildSectionHeader('Medizinische Informationen'),
+            SectionHeader.small(title: 'Medizinische Informationen'),
             _buildTextField(
               controller: _medicationsController,
               label: 'Medikamente',
@@ -248,7 +249,7 @@ class _ParticipantFormScreenState
             const SizedBox(height: AppConstants.spacingL),
 
             // Rolle & Familie
-            _buildSectionHeader('Rolle & Familie'),
+            SectionHeader.small(title: 'Rolle & Familie'),
             _buildRoleDropdown(),
             const SizedBox(height: AppConstants.spacing),
             _buildFamilyDropdown(),
@@ -256,7 +257,7 @@ class _ParticipantFormScreenState
             const SizedBox(height: AppConstants.spacingL),
 
             // Sonstige Optionen
-            _buildSectionHeader('Sonstige Optionen'),
+            SectionHeader.small(title: 'Sonstige Optionen'),
             SwitchListTile(
               title: const Text('Bildung & Teilhabe'),
               subtitle: const Text('Teilnehmer erhält Zuschuss'),
@@ -277,7 +278,7 @@ class _ParticipantFormScreenState
             const SizedBox(height: AppConstants.spacingL),
 
             // Preis (TODO: Live-Berechnung)
-            _buildSectionHeader('Preis'),
+            SectionHeader.small(title: 'Preis'),
             _buildPriceSection(),
 
             const SizedBox(height: 32),
@@ -305,18 +306,6 @@ class _ParticipantFormScreenState
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16, top: 8),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
 
   Widget _buildTextField({
     required TextEditingController controller,
