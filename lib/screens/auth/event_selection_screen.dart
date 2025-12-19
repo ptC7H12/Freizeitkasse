@@ -12,6 +12,7 @@ import '../../services/ruleset_parser_service.dart';
 import '../../utils/logger.dart';
 //import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
+import '../../extensions/context_extensions.dart';
 import '../dashboard/dashboard_screen.dart';
 
 /// Event Selection Screen
@@ -59,7 +60,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     final database = ref.watch(databaseProvider);
-    final isDesktop = MediaQuery.of(context).size.width >= 800;
+    final isDesktop = context.isDesktop;
 
     return Scaffold(
       appBar: AppBar(
@@ -258,7 +259,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
   // ========== RECHTE SEITE: EVENT-ERSTELLUNG ==========
 
   Widget _buildCreateEventForm(List<Event> events) {
-    final isDesktop = MediaQuery.of(context).size.width >= 800;
+    final isDesktop = context.isDesktop;
 
     return Center(
       child: ConstrainedBox(

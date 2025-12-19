@@ -383,7 +383,7 @@ class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {
               : const Icon(Icons.save),
           label: Text(_isLoading ? 'Wird gespeichert...' : 'Speichern'),
           style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.all(16),
+            padding: AppConstants.paddingAll16,
           ),
         ),
       ],
@@ -718,7 +718,7 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                       : const Icon(Icons.save),
                   label: Text(_isLoading ? 'Wird gespeichert...' : 'Speichern'),
                   style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
+                    padding: AppConstants.paddingAll16,
                   ),
                 ),
               ],
@@ -756,7 +756,7 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                         icon: const Icon(Icons.rule),
                         label: const Text('Regelwerk-Verwaltung'),
                         style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.all(16),
+                          padding: AppConstants.paddingAll16,
                         ),
                       ),
                     ),
@@ -773,7 +773,7 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                             : const Icon(Icons.cloud_download),
                         label: Text(_isImporting ? 'Importiere...' : 'Von GitHub importieren'),
                         style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.all(16),
+                          padding: AppConstants.paddingAll16,
                           backgroundColor: const Color(0xFF4CAF50),
                         ),
                       ),
@@ -800,7 +800,7 @@ class _RulesetSettingsTabState extends ConsumerState<_RulesetSettingsTab> {
                         ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: AppConstants.paddingAll8,
                           decoration: BoxDecoration(
                             color: Colors.blue.shade50,
                             borderRadius: BorderRadius.circular(4),
@@ -913,7 +913,7 @@ class _CategoriesTab extends StatelessWidget {
                   icon: const Icon(Icons.edit),
                   label: const Text('Kategorien bearbeiten'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
+                    padding: AppConstants.paddingAll16,
                   ),
                 ),
               ],

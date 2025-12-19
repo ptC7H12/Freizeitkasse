@@ -256,7 +256,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
         // Filter chips
         if (_paymentFilter != null)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: AppConstants.paddingH16,
             child: Wrap(
               spacing: 8,
               children: [
@@ -305,7 +305,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
                         final totalPaid = _familyPayments[family.id] ?? 0.0;
 
                         return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
+                          margin: EdgeInsets.only(bottom: AppConstants.spacingM),
                           child: ListTile(
                             leading: const CircleAvatar(
                               child: Icon(Icons.family_restroom),

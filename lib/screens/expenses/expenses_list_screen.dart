@@ -179,7 +179,7 @@ class ExpensesListScreen extends ConsumerWidget {
                 height: 50,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: AppConstants.paddingH16,
                   children: [
                     Chip(
                       label: Text('Alle (${expenses.length})'),

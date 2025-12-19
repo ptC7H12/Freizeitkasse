@@ -42,15 +42,6 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
     'Sonstiges',
   ];
 
-  final List<String> _paymentMethods = [
-    'Barzahlung',
-    'Überweisung',
-    'Lastschrift',
-    'Kreditkarte',
-    'PayPal',
-    'Sonstige',
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -404,7 +395,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                           value: null,
                           child: Text('Keine Angabe'),
                         ),
-                        ..._paymentMethods.map((method) {
+                        ...AppConstants.paymentMethods.map((method) {
                           return DropdownMenuItem(
                             value: method,
                             child: Text(method),

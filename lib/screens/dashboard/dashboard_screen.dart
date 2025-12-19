@@ -7,6 +7,7 @@ import '../../providers/subsidy_provider.dart';
 import '../../data/database/app_database.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../extensions/context_extensions.dart';
 
 /// Dashboard Screen
 ///
@@ -43,8 +44,7 @@ class DashboardScreen extends ConsumerWidget {
     final eventId = currentEvent.id;
 
     // Responsive Layout
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth > 800;
+    final isDesktop = context.isDesktop;
 
     return SingleChildScrollView(
       padding: AppConstants.paddingAll16,

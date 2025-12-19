@@ -551,7 +551,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
         // Filter chips
         if (_ageFilter != null || _genderFilter != null || _paymentFilter != null)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: AppConstants.paddingH16,
             child: Wrap(
               spacing: 8,
               children: [
@@ -642,7 +642,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                       itemBuilder: (context, index) {
                         final participant = filteredParticipants[index];
                         return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
+                          margin: EdgeInsets.only(bottom: AppConstants.spacingM),
                           child: ListTile(
                             leading: const Icon(
                               Icons.person,

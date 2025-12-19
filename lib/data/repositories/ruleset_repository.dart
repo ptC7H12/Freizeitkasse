@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../../services/ruleset_parser_service.dart';
 import '../../utils/logger.dart';
+import '../../utils/exceptions.dart';
 import 'participant_repository.dart';
 
 class RulesetRepository {
@@ -73,7 +74,7 @@ class RulesetRepository {
     try {
       parsedData = RulesetParserService.parseRuleset(yamlContent);
     } catch (e) {
-      throw Exception('Ungültiger YAML-Inhalt: $e');
+      throw RulesetParseException('Ungültiger YAML-Inhalt: $e');
     }
 
     // Convert parsed data to JSON strings for storage
@@ -126,7 +127,7 @@ class RulesetRepository {
         roleDiscountsJson = jsonEncode(parsedData['role_discounts']);
         familyDiscountJson = jsonEncode(parsedData['family_discount']);
       } catch (e) {
-        throw Exception('Ungültiger YAML-Inhalt: $e');
+        throw RulesetParseException('Ungültiger YAML-Inhalt: $e');
       }
     }
 
@@ -211,7 +212,7 @@ class RulesetRepository {
   }) async {
     final source = await getRulesetById(sourceId);
     if (source == null) {
-      throw Exception('Quell-Regelwerk nicht gefunden');
+      throw NotFoundException('Ruleset', sourceId);
     }
 
     final name = newName ?? '${source.name} (Kopie)';
@@ -304,7 +305,7 @@ family_discount:
         .getSingleOrNull();
 
     if (ruleset == null) {
-      throw Exception('Ruleset $rulesetId not found');
+      throw NotFoundException('Ruleset', rulesetId);
     }
 
     final eventId = ruleset.eventId;

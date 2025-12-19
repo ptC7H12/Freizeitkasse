@@ -83,7 +83,7 @@ class RulesetsListScreen extends ConsumerWidget {
                   if (currentRuleset != null) {
                     return Card(
                       color: Theme.of(context).colorScheme.primaryContainer,
-                      margin: const EdgeInsets.only(bottom: 24),
+                      margin: EdgeInsets.only(bottom: AppConstants.spacingL),
                       child: Padding(
                         padding: AppConstants.paddingAll16,
                         child: Column(
@@ -196,7 +196,7 @@ class _RulesetListItem extends ConsumerWidget {
     final statisticsAsync = ref.watch(rulesetStatisticsProvider(ruleset.id));
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: AppConstants.spacingM),
       child: InkWell(
         onTap: () {
           Navigator.push(

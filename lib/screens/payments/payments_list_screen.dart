@@ -124,7 +124,7 @@ class PaymentsListScreen extends ConsumerWidget {
                               }
 
                               return Card(
-                                margin: const EdgeInsets.only(bottom: 12),
+                                margin: EdgeInsets.only(bottom: AppConstants.spacingM),
                                 child: ListTile(
                                   leading: CircleAvatar(
                                     backgroundColor: Colors.green.shade100,

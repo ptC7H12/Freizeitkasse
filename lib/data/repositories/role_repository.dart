@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../../utils/logger.dart';
+import '../../utils/exceptions.dart';
 
 class RoleRepository {
   final AppDatabase _database;
@@ -57,7 +58,7 @@ class RoleRepository {
           'eventId': eventId,
           'name': name,
         });
-        throw Exception('Eine Rolle mit diesem Namen existiert bereits');
+        throw ValidationException('Eine Rolle mit diesem Namen existiert bereits');
       }
 
       final companion = RolesCompanion(
@@ -108,7 +109,7 @@ class RoleRepository {
             'name': name,
             'conflictId': conflict.id,
           });
-          throw Exception('Eine Rolle mit diesem Namen existiert bereits');
+          throw ValidationException('Eine Rolle mit diesem Namen existiert bereits');
         }
       }
 
@@ -150,7 +151,7 @@ class RoleRepository {
           'id': id,
           'participantCount': participantsWithRole.length,
         });
-        throw Exception(
+        throw BusinessRuleException(
           'Diese Rolle kann nicht gelöscht werden, da sie von ${participantsWithRole.length} Teilnehmer(n) verwendet wird',
         );
       }

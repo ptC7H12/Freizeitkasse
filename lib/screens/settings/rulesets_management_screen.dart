@@ -84,10 +84,10 @@ class _RulesetsManagementScreenState
             final isActive = ruleset.isActive;
 
             return Card(
-              margin: const EdgeInsets.only(bottom: 12),
+              margin: EdgeInsets.only(bottom: AppConstants.spacingM),
               elevation: isActive ? 3 : 1,
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: AppConstants.paddingAll12,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -493,7 +493,7 @@ class _RulesetsManagementScreenState
           builder: (context) => const Center(
             child: Card(
               child: Padding(
-                padding: EdgeInsets.all(24),
+                padding: AppConstants.paddingAll24,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
