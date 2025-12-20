@@ -161,7 +161,29 @@ AppConstants.successColor
 
 // Responsive
 AppConstants.maxFormWidth   // 800.0
+
+// Payment Methods
+AppConstants.paymentMethods  // ['Barzahlung', 'Überweisung', ...]
 ```
+
+### Common Widgets (`lib/widgets/common/`)
+**ALWAYS use instead of rebuilding:**
+```dart
+SectionHeader.large(title: 'Title', icon: Icons.star)     // Screen headers
+SectionHeader.medium(title: 'Section', icon: Icons.info)  // Section headers
+SectionHeader.small(title: 'Form Section')                // Form sections
+
+StatCard(label: 'Total', value: '42', icon: Icons.euro, color: Colors.green)
+
+FinanceCard.income(label: 'Einnahmen', amount: 1500.0)    // Green
+FinanceCard.expense(label: 'Ausgaben', amount: 1200.0)    // Red/Pink
+FinanceCard.balance(label: 'Saldo', amount: 300.0)        // Blue
+```
+
+**Refactoring Patterns:**
+- **Large screens (>1000 lines)**: Extract tabs/sections into `widgets/` or `tabs/` subdirectory
+- **Dead code**: Remove unused `_build*` methods after verification with grep
+- **Duplicate widgets**: Extract to common widgets instead of copy-paste
 
 ### Context Extensions (`lib/extensions/context_extensions.dart`)
 ```dart
