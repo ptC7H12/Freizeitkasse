@@ -76,10 +76,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 RulesetSettingsTab(),
 
                 // Tab 3: Kategorien
-                const CategoriesTab(),
+                CategoriesTab(),
 
                 // Tab 4: App-Info
-                const AppInfoTab(),
+                AppInfoTab(),
               ],
             ),
           ),
