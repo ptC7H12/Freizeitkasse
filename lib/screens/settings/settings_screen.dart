@@ -70,10 +70,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
               controller: _tabController,
               children: [
                 // Tab 1: Allgemein
-                const GeneralSettingsTab(),
+                GeneralSettingsTab(),
 
                 // Tab 2: Regelwerk
-                const RulesetSettingsTab(),
+                RulesetSettingsTab(),
 
                 // Tab 3: Kategorien
                 const CategoriesTab(),
@@ -88,11 +88,3 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     );
   }
 }
-
-// ========== TAB 1: ALLGEMEIN ==========
-class _GeneralSettingsTab extends ConsumerStatefulWidget {
-  @override
-  ConsumerState<_GeneralSettingsTab> createState() => _GeneralSettingsTabState();
-}
-
-class _GeneralSettingsTabState extends ConsumerState<_GeneralSettingsTab> {

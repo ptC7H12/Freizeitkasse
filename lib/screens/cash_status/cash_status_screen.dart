@@ -2429,6 +2429,53 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
     );
   }
 
+  Widget _buildStatRow(
+    BuildContext context,
+    String label,
+    double value,
+    String? subtitle,
+    Color color, {
+    bool isBold = false,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: isBold ? 16 : 14,
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                  color: Colors.grey[700],
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        Text(
+          NumberFormat.currency(locale: 'de_DE', symbol: '€').format(value),
+          style: TextStyle(
+            fontSize: isBold ? 20 : 16,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
   Color _getCategoryColor(String category) {
     switch (category.toLowerCase()) {
       case 'verpflegung':
