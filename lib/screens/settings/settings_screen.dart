@@ -68,7 +68,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
+              children: const [
                 // Tab 1: Allgemein
                 GeneralSettingsTab(),
 

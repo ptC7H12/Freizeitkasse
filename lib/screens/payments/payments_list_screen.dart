@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../extensions/context_extensions.dart';
 import '../../providers/payment_provider.dart';
 import '../../providers/participant_provider.dart';
 import '../../providers/family_provider.dart';
@@ -9,7 +10,6 @@ import 'payment_form_screen.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
 import '../../widgets/common/common_widgets.dart';
-import '../../extensions/context_extensions.dart';
 
 /// Payments List Screen
 class PaymentsListScreen extends ConsumerWidget {
@@ -126,7 +126,7 @@ class PaymentsListScreen extends ConsumerWidget {
                               }
 
                               return Card(
-                                margin: EdgeInsets.only(bottom: AppConstants.spacingM),
+                                margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
                                 child: ListTile(
                                   leading: CircleAvatar(
                                     backgroundColor: Colors.green.shade100,

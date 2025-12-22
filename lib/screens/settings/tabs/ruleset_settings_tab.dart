@@ -16,6 +16,8 @@ import '../rulesets_management_screen.dart';
 ///
 /// GitHub-Verzeichnis, Import, Dokumentation-Link
 class RulesetSettingsTab extends ConsumerStatefulWidget {
+  const RulesetSettingsTab({super.key});
+
   @override
   ConsumerState<RulesetSettingsTab> createState() => RulesetSettingsTabState();
 }

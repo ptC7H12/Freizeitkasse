@@ -110,7 +110,7 @@ class CategoryRepository {
       final category = await getExpenseCategoryById(id);
       if (category?.isSystem == true) {
         AppLogger.warning('Cannot delete system expense category', {'id': id});
-        throw BusinessRuleException('System-Kategorien können nicht gelöscht werden');
+        throw const BusinessRuleException('System-Kategorien können nicht gelöscht werden');
       }
 
       await (_db.update(_db.expenseCategories)
@@ -253,7 +253,7 @@ class CategoryRepository {
       final source = await getIncomeSourceById(id);
       if (source?.isSystem == true) {
         AppLogger.warning('Cannot delete system income source', {'id': id});
-        throw BusinessRuleException('System-Quellen können nicht gelöscht werden');
+        throw const BusinessRuleException('System-Quellen können nicht gelöscht werden');
       }
 
       await (_db.update(_db.incomeSources)

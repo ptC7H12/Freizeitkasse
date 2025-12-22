@@ -58,7 +58,7 @@ class RoleRepository {
           'eventId': eventId,
           'name': name,
         });
-        throw ValidationException('Eine Rolle mit diesem Namen existiert bereits');
+        throw const ValidationException('Eine Rolle mit diesem Namen existiert bereits');
       }
 
       final companion = RolesCompanion(
@@ -109,7 +109,7 @@ class RoleRepository {
             'name': name,
             'conflictId': conflict.id,
           });
-          throw ValidationException('Eine Rolle mit diesem Namen existiert bereits');
+          throw const ValidationException('Eine Rolle mit diesem Namen existiert bereits');
         }
       }
 

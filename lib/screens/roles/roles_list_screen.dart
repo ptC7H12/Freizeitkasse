@@ -138,7 +138,7 @@ class _RoleListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.only(bottom: AppConstants.spacingM),
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
       child: InkWell(
         onTap: () {
           Navigator.push(

@@ -642,7 +642,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                       itemBuilder: (context, index) {
                         final participant = filteredParticipants[index];
                         return Card(
-                          margin: EdgeInsets.only(bottom: AppConstants.spacingM),
+                          margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
                           child: ListTile(
                             leading: const Icon(
                               Icons.person,

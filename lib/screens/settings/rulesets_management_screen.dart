@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yaml/yaml.dart';
+import '../../extensions/context_extensions.dart';
 import '../../providers/ruleset_provider.dart';
 import '../../data/database/app_database.dart';
 import '../../utils/constants.dart';
-import '../../extensions/context_extensions.dart';
 import '../rulesets/ruleset_form_screen.dart';
 
 /// Rulesets Management Screen (in Settings)
@@ -85,7 +85,7 @@ class _RulesetsManagementScreenState
             final isActive = ruleset.isActive;
 
             return Card(
-              margin: EdgeInsets.only(bottom: AppConstants.spacingM),
+              margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
               elevation: isActive ? 3 : 1,
               child: Padding(
                 padding: AppConstants.paddingAll12,

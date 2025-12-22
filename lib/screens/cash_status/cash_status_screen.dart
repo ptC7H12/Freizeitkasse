@@ -956,7 +956,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                           : const Color(0xFFE91E63);
 
                       return Card(
-                        margin: EdgeInsets.only(bottom: AppConstants.spacingS),
+                        margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
                         child: Padding(
                           padding: AppConstants.paddingAll12,
                           child: Column(
@@ -1080,7 +1080,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                   )
                 else
                   // Desktop: DataTable mit horizontalem Scroll
-                  Container(
+                  SizedBox(
                     width: double.infinity,
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -1280,7 +1280,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                       return Column(
                         children: subsidiesByRole.values.map((roleData) {
                           return Card(
-                            margin: EdgeInsets.only(bottom: AppConstants.spacingS),
+                            margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
                             color: const Color(0xFFF8F9FA),
                             child: Padding(
                               padding: AppConstants.paddingAll12,
@@ -1462,7 +1462,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                       return Column(
                         children: subsidiesByType.values.map((typeData) {
                           return Card(
-                            margin: EdgeInsets.only(bottom: AppConstants.spacingS),
+                            margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
                             color: const Color(0xFFFFF8E1),
                             child: Padding(
                               padding: AppConstants.paddingAll12,

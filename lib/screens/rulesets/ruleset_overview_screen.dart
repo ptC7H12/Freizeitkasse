@@ -226,7 +226,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
                 final price = groupData['price'] ?? 0.0;
 
                 return Container(
-                  margin: EdgeInsets.only(bottom: AppConstants.spacingM),
+                  margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey[300]!),
                     borderRadius: BorderRadius.circular(8),
@@ -306,7 +306,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
                 final isPercentage = discount <= 1.0;
 
                 return Container(
-                  margin: EdgeInsets.only(bottom: AppConstants.spacingM),
+                  margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey[300]!),
                     borderRadius: BorderRadius.circular(8),
@@ -455,7 +455,7 @@ class RulesetOverviewScreen extends ConsumerWidget {
     final isPercentage = discount <= 1.0;
 
     return Container(
-      margin: EdgeInsets.only(bottom: AppConstants.spacingM),
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(8),

@@ -41,7 +41,7 @@ class GitHubRulesetService {
       final response = await http.get(Uri.parse(url)).timeout(
         const Duration(seconds: 10),
         onTimeout: () {
-          throw NetworkException('Timeout beim Laden von GitHub');
+          throw const NetworkException('Timeout beim Laden von GitHub');
         },
       );
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
+import '../../extensions/context_extensions.dart';
 import '../../providers/family_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../data/database/app_database.dart' as db;
 import '../../utils/constants.dart';
-import '../../extensions/context_extensions.dart';
 import 'family_form_screen.dart';
 import '../../widgets/responsive_scaffold.dart';
 
@@ -306,7 +306,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
                         final totalPaid = _familyPayments[family.id] ?? 0.0;
 
                         return Card(
-                          margin: EdgeInsets.only(bottom: AppConstants.spacingM),
+                          margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
                           child: ListTile(
                             leading: const CircleAvatar(
                               child: Icon(Icons.family_restroom),

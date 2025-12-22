@@ -56,7 +56,7 @@ class GithubRulesetImportService {
       final parsed = parseGithubUrl(githubUrl);
 
       if (parsed == null) {
-        throw ValidationException('Invalid GitHub URL format');
+        throw const ValidationException('Invalid GitHub URL format');
       }
 
       final owner = parsed['owner'];
@@ -81,7 +81,7 @@ class GithubRulesetImportService {
 
       final data = json.decode(response.body);
       if (data is! List) {
-        throw ImportExportException('import', 'Unexpected GitHub API response: expected an array');
+        throw const ImportExportException('import', 'Unexpected GitHub API response: expected an array');
       }
       final List<dynamic> contents = data;
 
