@@ -5,7 +5,7 @@ import '../../../utils/constants.dart';
 ///
 /// Version, Lizenzen, Features
 class AppInfoTab extends StatelessWidget {
-  const _AppInfoTab();
+  const AppInfoTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -123,4 +123,18 @@ class AppInfoTab extends StatelessWidget {
     );
   }
 
+  Widget _buildFeatureTile(String feature) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          const Icon(Icons.check, color: Color(0xFF4CAF50), size: 20),
+          const SizedBox(width: AppConstants.spacingS),
+          Expanded(
+            child: Text(feature),
+          ),
+        ],
+      ),
+    );
+  }
 }
