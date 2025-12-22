@@ -7,7 +7,7 @@ import '../categories_management_screen.dart';
 ///
 /// Ausgaben- und Einnahmen-Kategorien
 class CategoriesTab extends StatelessWidget {
-  const _CategoriesTab();
+  const CategoriesTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -86,5 +86,3 @@ class CategoriesTab extends StatelessWidget {
     );
   }
 }
-
-// ========== TAB 4: APP-INFO ==========
