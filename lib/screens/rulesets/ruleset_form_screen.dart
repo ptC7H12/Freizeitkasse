@@ -278,28 +278,12 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
   }
 
   Future<void> _deleteRuleset() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Regelwerk löschen'),
-        content: const Text(
-          'Möchten Sie dieses Regelwerk wirklich löschen?\n\n'
+    final confirmed = await context.showConfirm(
+      title: 'Regelwerk löschen',
+      message: 'Möchten Sie dieses Regelwerk wirklich löschen?\n\n'
           'Achtung: Dies kann Auswirkungen auf bestehende Teilnehmer haben!',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+      confirmText: 'Löschen',
+      isDestructive: true,
     );
 
     if (confirmed != true) {

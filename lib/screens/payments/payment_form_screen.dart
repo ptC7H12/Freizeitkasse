@@ -432,23 +432,11 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
   }
 
   Future<void> _confirmDelete() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Zahlung löschen?'),
-        content: const Text('Möchten Sie diese Zahlung wirklich löschen?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+    final confirmed = await context.showConfirm(
+      title: 'Zahlung löschen?',
+      message: 'Möchten Sie diese Zahlung wirklich löschen?',
+      confirmText: 'Löschen',
+      isDestructive: true,
     );
 
     if (confirmed == true && mounted) {

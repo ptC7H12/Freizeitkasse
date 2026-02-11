@@ -261,27 +261,13 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
   }
 
   Future<void> _confirmDelete() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Familie löschen?'),
-        content: const Text(
-          'Möchten Sie diese Familie wirklich löschen?\n\n'
+    final confirmed = await context.showConfirm(
+      title: 'Familie löschen?',
+      message: 'Möchten Sie diese Familie wirklich löschen?\n\n'
           'Hinweis: Teilnehmer dieser Familie werden NICHT gelöscht, '
           'sie werden nur von der Familie getrennt.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+      confirmText: 'Löschen',
+      isDestructive: true,
     );
 
     if (confirmed == true && mounted) {

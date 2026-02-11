@@ -741,23 +741,11 @@ class _ParticipantFormScreenState
   }
 
   Future<void> _confirmDelete() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Teilnehmer löschen?'),
-        content: const Text('Möchten Sie diesen Teilnehmer wirklich löschen?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+    final confirmed = await context.showConfirm(
+      title: 'Teilnehmer löschen?',
+      message: 'Möchten Sie diesen Teilnehmer wirklich löschen?',
+      confirmText: 'Löschen',
+      isDestructive: true,
     );
 
     if (confirmed == true && mounted) {
