@@ -33,6 +33,9 @@ class AppConstants {
   /// Informationsfarbe
   static const Color infoColor = Color(0xFF2196F3);
 
+  /// Gefahr-/Ausgabenfarbe (Pink)
+  static const Color dangerColor = Color(0xFFE91E63);
+
   // ===== SPACING =====
 
   /// Kleiner Abstand (4px)

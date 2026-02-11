@@ -555,7 +555,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.check_circle, color: Colors.green),
+                          Icon(Icons.check_circle, color: AppConstants.successColor),
                           const SizedBox(width: AppConstants.spacingS),
                           Text(
                             'YAML ist gültig',
@@ -582,7 +582,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.error, color: Colors.red),
+                          Icon(Icons.error, color: AppConstants.errorColor),
                           const SizedBox(width: AppConstants.spacingS),
                           Text(
                             'YAML-Fehler',

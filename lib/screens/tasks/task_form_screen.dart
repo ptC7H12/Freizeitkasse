@@ -357,7 +357,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                       icon: const Icon(Icons.delete_outline),
                       label: const Text('Löschen'),
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.red.shade700,
+                        foregroundColor: AppConstants.errorColor,
                       ),
                     )
                   else

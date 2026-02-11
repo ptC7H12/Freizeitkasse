@@ -108,7 +108,7 @@ class ResponsiveScaffold extends ConsumerWidget {
 
     return Container(
       width: 280,
-      color: const Color(0xFF2196F3),
+      color: AppConstants.primaryColor,
       child: SafeArea(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -282,7 +282,7 @@ class ResponsiveScaffold extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.red,
+                  color: AppConstants.errorColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -324,7 +324,7 @@ class ResponsiveScaffold extends ConsumerWidget {
 
     return Drawer(
       child: Container(
-        color: const Color(0xFF2196F3),
+        color: AppConstants.primaryColor,
         child: SafeArea(
           child: ListView(
             padding: EdgeInsets.zero,
@@ -573,7 +573,7 @@ class ResponsiveScaffold extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.red,
+                color: AppConstants.errorColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(

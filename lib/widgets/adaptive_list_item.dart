@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/constants.dart';
 
 /// Adaptive List Item Widget
 ///
@@ -65,7 +66,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
                 IconButton(
                   icon: const Icon(Icons.edit_outlined),
                   tooltip: 'Bearbeiten',
-                  color: Colors.blue.shade600,
+                  color: AppConstants.primaryColor,
                   onPressed: widget.onEdit,
                 ),
                 const SizedBox(width: 4),
@@ -73,7 +74,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
                   tooltip: 'Löschen',
-                  color: Colors.red.shade400,
+                  color: AppConstants.errorColor,
                   onPressed: () => _confirmDelete(context),
                 ),
               ],
@@ -100,13 +101,13 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
       },
       background: _buildSwipeBackground(
         alignment: Alignment.centerLeft,
-        color: Colors.blue.shade600,
+        color: AppConstants.primaryColor,
         icon: Icons.edit,
         label: 'Bearbeiten',
       ),
       secondaryBackground: _buildSwipeBackground(
         alignment: Alignment.centerRight,
-        color: Colors.red.shade600,
+        color: AppConstants.errorColor,
         icon: Icons.delete,
         label: 'Löschen',
       ),
@@ -182,7 +183,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.red.shade700,
+              foregroundColor: AppConstants.errorColor,
             ),
             child: const Text('Löschen'),
           ),
