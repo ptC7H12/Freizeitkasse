@@ -4,9 +4,12 @@ import 'package:intl/intl.dart';
 import '../../data/database/app_database.dart';
 import '../../providers/ruleset_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../providers/database_provider.dart';
+import '../../data/repositories/ruleset_repository.dart';
 import 'ruleset_form_screen.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../widgets/adaptive_list_item.dart';
 
 class RulesetsListScreen extends ConsumerWidget {
   const RulesetsListScreen({super.key});
@@ -195,162 +198,166 @@ class _RulesetListItem extends ConsumerWidget {
     final dateFormat = DateFormat('dd.MM.yyyy', 'de_DE');
     final statisticsAsync = ref.watch(rulesetStatisticsProvider(ruleset.id));
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute<dynamic>(
-              builder: (context) => RulesetFormScreen(rulesetId: ruleset.id),
+    return AdaptiveListItem(
+      leading: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: isCurrent
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Colors.grey[100],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          Icons.rule,
+          color: isCurrent
+              ? Theme.of(context).colorScheme.primary
+              : Colors.grey[600],
+        ),
+      ),
+      title: Row(
+        children: [
+          Flexible(
+            child: Text(
+              ruleset.name,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              overflow: TextOverflow.ellipsis,
             ),
-          );
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: AppConstants.paddingAll16,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                ruleset.name,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (isCurrent) ...[
-                              const SizedBox(width: AppConstants.spacingS),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primaryContainer,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  'AKTIV',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today,
-                              size: 14,
-                              color: Colors.grey[600],
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Gültig ab: ${dateFormat.format(ruleset.validFrom)}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: Colors.grey[400],
-                  ),
-                ],
+          ),
+          if (isCurrent) ...[
+            const SizedBox(width: AppConstants.spacingS),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 2,
               ),
-              if (ruleset.description != null) ...[
-                const SizedBox(height: AppConstants.spacingS),
-                Text(
-                  ruleset.description!,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-              const SizedBox(height: AppConstants.spacingM),
-              statisticsAsync.when(
-                data: (stats) {
-                  if (stats.containsKey('error')) {
-                    return Container(
-                      padding: AppConstants.paddingAll8,
-                      decoration: BoxDecoration(
-                        color: Colors.red[50],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.error_outline, size: 16, color: Colors.red),
-                          const SizedBox(width: AppConstants.spacingS),
-                          Expanded(
-                            child: Text(
-                              stats['error'] as String? ?? '',
-                              style: const TextStyle(color: Colors.red, fontSize: 12),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return Wrap(
-                    spacing: 16,
-                    runSpacing: 8,
-                    children: [
-                      _buildStatChip(
-                        context,
-                        Icons.people_outline,
-                        '${stats['ageGroupCount']} Altersgruppen',
-                      ),
-                      _buildStatChip(
-                        context,
-                        Icons.discount,
-                        '${stats['roleDiscountCount']} Rollenrabatte',
-                      ),
-                      if (stats['hasFamilyDiscount'] as bool? ?? false)
-                        _buildStatChip(
-                          context,
-                          Icons.family_restroom,
-                          'Familienrabatt',
-                        ),
-                    ],
-                  );
-                },
-                loading: () => const SizedBox(
-                  height: 20,
-                  child: Center(
-                    child: SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'AKTIV',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                ),
-                error: (_, _) => const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ],
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Text(
+                'Gültig ab: ${dateFormat.format(ruleset.validFrom)}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
               ),
             ],
           ),
-        ),
+          if (ruleset.description != null) ...[
+            const SizedBox(height: AppConstants.spacingS),
+            Text(
+              ruleset.description!,
+              style: Theme.of(context).textTheme.bodyMedium,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          const SizedBox(height: AppConstants.spacingS),
+          statisticsAsync.when(
+            data: (stats) {
+              if (stats.containsKey('error')) {
+                return Container(
+                  padding: AppConstants.paddingAll8,
+                  decoration: BoxDecoration(
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, size: 16, color: Colors.red),
+                      const SizedBox(width: AppConstants.spacingS),
+                      Expanded(
+                        child: Text(
+                          stats['error'] as String? ?? '',
+                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Wrap(
+                spacing: 16,
+                runSpacing: 8,
+                children: [
+                  _buildStatChip(
+                    context,
+                    Icons.people_outline,
+                    '${stats['ageGroupCount']} Altersgruppen',
+                  ),
+                  _buildStatChip(
+                    context,
+                    Icons.discount,
+                    '${stats['roleDiscountCount']} Rollenrabatte',
+                  ),
+                  if (stats['hasFamilyDiscount'] as bool? ?? false)
+                    _buildStatChip(
+                      context,
+                      Icons.family_restroom,
+                      'Familienrabatt',
+                    ),
+                ],
+              );
+            },
+            loading: () => const SizedBox(
+              height: 20,
+              child: Center(
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            ),
+            error: (_, _) => const SizedBox.shrink(),
+          ),
+        ],
       ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute<dynamic>(
+            builder: (context) => RulesetFormScreen(rulesetId: ruleset.id),
+          ),
+        );
+      },
+      onEdit: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute<dynamic>(
+            builder: (context) => RulesetFormScreen(rulesetId: ruleset.id),
+          ),
+        );
+      },
+      onDelete: () async {
+        final database = ref.read(databaseProvider);
+        final repository = RulesetRepository(database);
+        await repository.deleteRuleset(ruleset.id);
+      },
+      deleteConfirmMessage: 'Regelwerk "${ruleset.name}" wirklich löschen?',
     );
   }
 

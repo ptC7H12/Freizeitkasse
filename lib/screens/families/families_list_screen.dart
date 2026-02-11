@@ -5,9 +5,11 @@ import '../../providers/family_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../providers/database_provider.dart';
 import '../../data/database/app_database.dart' as db;
+import '../../data/repositories/family_repository.dart';
 import '../../utils/constants.dart';
 import 'family_form_screen.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../widgets/adaptive_list_item.dart';
 
 /// Families List Screen
 class FamiliesListScreen extends ConsumerStatefulWidget {
@@ -305,42 +307,47 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
                         final expectedPrice = _familyExpectedPrices[family.id] ?? 0.0;
                         final totalPaid = _familyPayments[family.id] ?? 0.0;
 
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
-                          child: ListTile(
-                            leading: const CircleAvatar(
-                              child: Icon(Icons.family_restroom),
-                            ),
-                            title: Text(
-                              family.familyName,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (family.contactPerson != null)
-                                  Text('Kontakt: ${family.contactPerson}'),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Erwartet: ${expectedPrice.toStringAsFixed(2)} € | '
-                                  'Bezahlt: ${totalPaid.toStringAsFixed(2)} €',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: totalPaid >= expectedPrice ? Colors.green : Colors.orange,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () {
-                              context.pushScreen(
-                                FamilyFormScreen(
-                                  familyId: family.id,
-                                ),
-                              );
-                            },
+                        return AdaptiveListItem(
+                          leading: const CircleAvatar(
+                            child: Icon(Icons.family_restroom),
                           ),
+                          title: Text(
+                            family.familyName,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (family.contactPerson != null)
+                                Text('Kontakt: ${family.contactPerson}'),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Erwartet: ${expectedPrice.toStringAsFixed(2)} € | '
+                                'Bezahlt: ${totalPaid.toStringAsFixed(2)} €',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: totalPaid >= expectedPrice ? Colors.green : Colors.orange,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          onTap: () {
+                            context.pushScreen(
+                              FamilyFormScreen(familyId: family.id),
+                            );
+                          },
+                          onEdit: () {
+                            context.pushScreen(
+                              FamilyFormScreen(familyId: family.id),
+                            );
+                          },
+                          onDelete: () async {
+                            final database = ref.read(databaseProvider);
+                            final repository = FamilyRepository(database);
+                            await repository.deleteFamily(family.id);
+                          },
+                          deleteConfirmMessage: 'Familie "${family.familyName}" wirklich löschen?',
                         );
                       },
                     ),

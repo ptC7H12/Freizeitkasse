@@ -5,10 +5,13 @@ import '../../extensions/context_extensions.dart';
 import '../../providers/payment_provider.dart';
 import '../../providers/participant_provider.dart';
 import '../../providers/family_provider.dart';
+import '../../providers/database_provider.dart';
+import '../../data/repositories/payment_repository.dart';
 import '../../utils/date_utils.dart';
 import 'payment_form_screen.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../widgets/adaptive_list_item.dart';
 import '../../widgets/common/common_widgets.dart';
 
 /// Payments List Screen
@@ -125,9 +128,7 @@ class PaymentsListScreen extends ConsumerWidget {
                                 }
                               }
 
-                              return Card(
-                                margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
-                                child: ListTile(
+                              return AdaptiveListItem(
                                   leading: CircleAvatar(
                                     backgroundColor: Colors.green.shade100,
                                     child: Icon(Icons.euro, color: Colors.green.shade700),
@@ -164,15 +165,22 @@ class PaymentsListScreen extends ConsumerWidget {
                                         Text('Methode: ${payment.paymentMethod}'),
                                     ],
                                   ),
-                                  trailing: const Icon(Icons.chevron_right),
                                   onTap: () {
                                     context.pushScreen(
-                                      PaymentFormScreen(
-                                        paymentId: payment.id,
-                                      ),
+                                      PaymentFormScreen(paymentId: payment.id),
                                     );
                                   },
-                                ),
+                                  onEdit: () {
+                                    context.pushScreen(
+                                      PaymentFormScreen(paymentId: payment.id),
+                                    );
+                                  },
+                                  onDelete: () async {
+                                    final database = ref.read(databaseProvider);
+                                    final repository = PaymentRepository(database);
+                                    await repository.deletePayment(payment.id);
+                                  },
+                                  deleteConfirmMessage: 'Zahlung von ${payment.amount.toStringAsFixed(2)} € wirklich löschen?',
                               );
                             },
                           ),

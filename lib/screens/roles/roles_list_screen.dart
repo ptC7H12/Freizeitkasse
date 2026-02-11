@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/role_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../providers/database_provider.dart';
+import '../../data/repositories/role_repository.dart';
 import 'role_form_screen.dart';
 import '../../utils/constants.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../widgets/adaptive_list_item.dart';
 
 class RolesListScreen extends ConsumerWidget {
   const RolesListScreen({super.key});
@@ -126,7 +129,7 @@ class RolesListScreen extends ConsumerWidget {
   }
 }
 
-class _RoleListItem extends StatelessWidget {
+class _RoleListItem extends ConsumerWidget {
   final dynamic role;
   final int participantCount;
 
@@ -136,77 +139,73 @@ class _RoleListItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute<dynamic>(
-              builder: (context) => RoleFormScreen(roleId: role.id as int?),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return AdaptiveListItem(
+      leading: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: Colors.purple[100],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(
+          Icons.badge,
+          color: Colors.purple,
+        ),
+      ),
+      title: Text(
+        (role.name as String?) ?? '',
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-          );
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: AppConstants.paddingAll16,
-          child: Row(
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (role.description != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              (role.description as String?) ?? '',
+              style: Theme.of(context).textTheme.bodyMedium,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          const SizedBox(height: AppConstants.spacingS),
+          Row(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.purple[100],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.badge,
-                  color: Colors.purple,
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacing),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      (role.name as String?) ?? '',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    if (role.description != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        (role.description as String?) ?? '',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    const SizedBox(height: AppConstants.spacingS),
-                    Row(
-                      children: [
-                        Icon(Icons.people, size: 16, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$participantCount Teilnehmer',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: Colors.grey[400],
+              Icon(Icons.people, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Text(
+                '$participantCount Teilnehmer',
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
             ],
           ),
-        ),
+        ],
       ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute<dynamic>(
+            builder: (context) => RoleFormScreen(roleId: role.id as int?),
+          ),
+        );
+      },
+      onEdit: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute<dynamic>(
+            builder: (context) => RoleFormScreen(roleId: role.id as int?),
+          ),
+        );
+      },
+      onDelete: () async {
+        final database = ref.read(databaseProvider);
+        final repository = RoleRepository(database);
+        await repository.deleteRole(role.id as int);
+      },
+      deleteConfirmMessage: 'Rolle "${(role.name as String?) ?? ''}" wirklich löschen?',
     );
   }
 }
