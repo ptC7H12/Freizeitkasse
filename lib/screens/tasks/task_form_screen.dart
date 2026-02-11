@@ -379,8 +379,8 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                 height: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Icon(Icons.check),
-                        label: Text(widget.taskId == null ? 'Erstellen' : 'Speichern'),
+                            : const Icon(Icons.save),
+                        label: Text(widget.taskId == null ? 'Speichern' : 'Aktualisieren'),
                       ),
                     ],
                   ),

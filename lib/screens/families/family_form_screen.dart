@@ -168,20 +168,21 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               maxLines: 3,
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Speichern-Button
-            SizedBox(
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _saveFamily,
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(isEdit ? 'Speichern' : 'Erstellen'),
+            FilledButton.icon(
+              onPressed: _isLoading ? null : _saveFamily,
+              icon: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save),
+              label: Text(isEdit ? 'Aktualisieren' : 'Speichern'),
+              style: FilledButton.styleFrom(
+                padding: AppConstants.paddingAll16,
               ),
             ),
 
