@@ -370,7 +370,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                         onPressed: _isLoading ? null : () => RouteHelpers.pop<void>(context),
                         child: const Text('Abbrechen'),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: AppConstants.spacingM),
                       FilledButton.icon(
                         onPressed: _isLoading ? null : _saveTask,
                         icon: _isLoading

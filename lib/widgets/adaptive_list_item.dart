@@ -49,7 +49,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        margin: EdgeInsets.symmetric(horizontal: AppConstants.spacingS, vertical: AppConstants.spacingXS),
         elevation: _isHovered ? 4 : 1,
         child: ListTile(
           leading: widget.leading,
@@ -69,7 +69,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
                   color: AppConstants.primaryColor,
                   onPressed: widget.onEdit,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: AppConstants.spacingXS),
                 // Löschen-Button
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
@@ -112,7 +112,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
         label: 'Löschen',
       ),
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        margin: EdgeInsets.symmetric(horizontal: AppConstants.spacingS, vertical: AppConstants.spacingXS),
         child: ListTile(
           leading: widget.leading,
           title: widget.title,
@@ -143,7 +143,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
         children: [
           if (isLeft) ...[
             Icon(icon, color: Colors.white, size: 28),
-            const SizedBox(width: 8),
+            SizedBox(width: AppConstants.spacingS),
             Text(
               label,
               style: const TextStyle(
@@ -161,7 +161,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
                 fontSize: 16,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: AppConstants.spacingS),
             Icon(icon, color: Colors.white, size: 28),
           ],
         ],

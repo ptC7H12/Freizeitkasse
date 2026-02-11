@@ -73,7 +73,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                 ? Column(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: EdgeInsets.symmetric(horizontal: AppConstants.spacing, vertical: AppConstants.spacingS),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           border: Border(
@@ -212,11 +212,11 @@ class ResponsiveScaffold extends ConsumerWidget {
 
           // Freizeit wechseln (special item)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: AppConstants.borderRadius8,
                 border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
               ),
               child: _buildNavigationItem(
@@ -238,7 +238,7 @@ class ResponsiveScaffold extends ConsumerWidget {
 
   Widget _buildNavigationSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: AppConstants.spacing, vertical: AppConstants.spacingS),
       child: Text(
         title,
         style: TextStyle(
@@ -263,7 +263,7 @@ class ResponsiveScaffold extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: isSelected ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppConstants.borderRadius8,
       ),
       child: ListTile(
         leading: Icon(icon, color: Colors.white),
@@ -283,7 +283,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: AppConstants.errorColor,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: AppConstants.borderRadius12,
                 ),
                 child: Text(
                   '$badge',
@@ -299,7 +299,7 @@ class ResponsiveScaffold extends ConsumerWidget {
         onTap: onTap,
         hoverColor: Colors.white.withValues(alpha: 0.1),
         dense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: EdgeInsets.symmetric(horizontal: AppConstants.spacing, vertical: AppConstants.spacingXS),
       ),
     );
   }
@@ -452,11 +452,11 @@ class ResponsiveScaffold extends ConsumerWidget {
 
               // Freizeit wechseln (special item)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: AppConstants.borderRadius8,
                     border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
                   ),
                   child: _buildDrawerItem(
@@ -495,7 +495,7 @@ class ResponsiveScaffold extends ConsumerWidget {
           Row(
             children: [
               const Icon(Icons.event, color: Colors.white, size: 24),
-              const SizedBox(width: 12),
+              SizedBox(width: AppConstants.spacingM),
               Expanded(
                 child: Text(
                   currentEvent.name,
@@ -509,7 +509,7 @@ class ResponsiveScaffold extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppConstants.spacingS),
           // Type
           if (currentEvent.eventType != null)
             Text(
@@ -519,7 +519,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                 fontSize: 14,
               ),
             ),
-          const SizedBox(height: 4),
+          SizedBox(height: AppConstants.spacingXS),
           // Date Range
           Text(
             '${dateFormat.format(currentEvent.startDate)} - ${dateFormat.format(currentEvent.endDate)}',
@@ -535,7 +535,7 @@ class ResponsiveScaffold extends ConsumerWidget {
 
   Widget _buildDrawerSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: EdgeInsets.fromLTRB(AppConstants.spacing, AppConstants.spacingM, AppConstants.spacing, AppConstants.spacingS),
       child: Text(
         title,
         style: TextStyle(
@@ -574,7 +574,7 @@ class ResponsiveScaffold extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: AppConstants.errorColor,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: AppConstants.borderRadius12,
               ),
               child: Text(
                 '$badge',

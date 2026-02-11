@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/constants.dart';
 
 /// Responsive Container für Formulare
 ///
@@ -21,7 +22,7 @@ class ResponsiveFormContainer extends StatelessWidget {
     return Center(
       child: Container(
         constraints: BoxConstraints(maxWidth: maxWidth),
-        padding: padding ?? const EdgeInsets.all(16),
+        padding: padding ?? AppConstants.paddingAll16,
         child: child,
       ),
     );
