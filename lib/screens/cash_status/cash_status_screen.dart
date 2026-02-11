@@ -1723,9 +1723,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
       final currentEvent = ref.read(currentEventProvider);
       if (currentEvent == null) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Kein Event ausgewählt')),
-          );
+          context.showInfo('Kein Event ausgewählt');
         }
         return;
       }
@@ -1759,9 +1757,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
       if (subsidiesByRole.isEmpty) {
         if (context.mounted) {
           Navigator.of(context).pop(); // Schließe Loading-Dialog
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Keine rollenbasierten Zuschüsse gefunden')),
-          );
+          context.showInfo('Keine rollenbasierten Zuschüsse gefunden');
         }
         return;
       }
@@ -1830,9 +1826,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop(); // Schließe Loading-Dialog falls offen
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Exportieren: $e')),
-        );
+        context.showError('Fehler beim Exportieren: $e');
       }
     }
   }
@@ -1843,9 +1837,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
       final currentEvent = ref.read(currentEventProvider);
       if (currentEvent == null) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Kein Event ausgewählt')),
-          );
+          context.showInfo('Kein Event ausgewählt');
         }
         return;
       }
@@ -1879,9 +1871,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
       if (subsidiesByRole.isEmpty) {
         if (context.mounted) {
           Navigator.of(context).pop(); // Schließe Loading-Dialog
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Keine rollenbasierten Zuschüsse gefunden')),
-          );
+          context.showInfo('Keine rollenbasierten Zuschüsse gefunden');
         }
         return;
       }
@@ -1950,9 +1940,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop(); // Schließe Loading-Dialog falls offen
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Fehler beim Exportieren: $e')),
-        );
+        context.showError('Fehler beim Exportieren: $e');
       }
     }
   }

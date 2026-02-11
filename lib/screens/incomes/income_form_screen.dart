@@ -140,13 +140,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.incomeId == null
-                ? 'Einnahme erfolgreich erstellt'
-                : 'Einnahme erfolgreich aktualisiert'),
-          ),
-        );
+        context.showSuccess(widget.incomeId == null
+            ? 'Einnahme erfolgreich erstellt'
+            : 'Einnahme erfolgreich aktualisiert');
         RouteHelpers.pop<void>(context);
       }
     } catch (e, stack) {

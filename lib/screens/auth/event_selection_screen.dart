@@ -540,12 +540,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
 
                 // Erfolgsmeldung
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Freizeit "${event.name}" wurde gelöscht'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                  context.showSuccess('Freizeit "${event.name}" wurde gelöscht');
                 }
 
                 // Auswahl zurücksetzen
@@ -631,12 +626,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Freizeit "${_nameController.text}" wurde erstellt'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccess('Freizeit "${_nameController.text}" wurde erstellt');
 
         // Formular zurücksetzen
         setState(() {
@@ -652,12 +642,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fehler beim Erstellen: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showError('Fehler beim Erstellen: $e');
       }
     }
   }
@@ -704,12 +689,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
         await _createRolesFromRuleset(eventId, yamlContent);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Regelwerk von GitHub geladen: $eventType'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccess('Regelwerk von GitHub geladen: $eventType');
         }
       }
     } catch (e) {

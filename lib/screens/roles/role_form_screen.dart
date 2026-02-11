@@ -87,13 +87,9 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.roleId == null
-                ? 'Rolle erfolgreich erstellt'
-                : 'Rolle erfolgreich aktualisiert'),
-          ),
-        );
+        context.showSuccess(widget.roleId == null
+            ? 'Rolle erfolgreich erstellt'
+            : 'Rolle erfolgreich aktualisiert');
         RouteHelpers.pop<void>(context);
       }
     } catch (e, stack) {

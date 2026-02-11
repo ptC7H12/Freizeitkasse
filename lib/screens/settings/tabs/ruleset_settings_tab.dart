@@ -484,12 +484,7 @@ class RulesetSettingsTabState extends ConsumerState<RulesetSettingsTab> {
                   trailing: const Icon(Icons.open_in_new),
                   onTap: () {
                     // TODO: Open documentation
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Dokumentation wird geöffnet...'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
+                    context.showInfo('Dokumentation wird geöffnet...');
                   },
                 ),
               ],

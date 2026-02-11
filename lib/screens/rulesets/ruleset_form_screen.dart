@@ -218,12 +218,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
     // Validate YAML before saving
     _validateYaml();
     if (_yamlError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('YAML-Fehler: $_yamlError'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showError('YAML-Fehler: $_yamlError');
       return;
     }
 
@@ -263,13 +258,9 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.rulesetId == null
-                ? 'Regelwerk erfolgreich erstellt'
-                : 'Regelwerk erfolgreich aktualisiert'),
-          ),
-        );
+        context.showSuccess(widget.rulesetId == null
+            ? 'Regelwerk erfolgreich erstellt'
+            : 'Regelwerk erfolgreich aktualisiert');
         RouteHelpers.pop<void>(context);
       }
     } catch (e, stack) {
