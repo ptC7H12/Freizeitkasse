@@ -8,6 +8,7 @@ import '../../providers/database_provider.dart';
 import '../../data/repositories/ruleset_repository.dart';
 import 'ruleset_form_screen.dart';
 import '../../utils/constants.dart';
+import '../../extensions/context_extensions.dart';
 import '../../widgets/responsive_scaffold.dart';
 import '../../widgets/adaptive_list_item.dart';
 
@@ -62,12 +63,7 @@ class RulesetsListScreen extends ConsumerWidget {
                   const SizedBox(height: AppConstants.spacingL),
                   FilledButton.icon(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<dynamic>(
-                          builder: (context) => const RulesetFormScreen(),
-                        ),
-                      );
+                      context.pushScreen(const RulesetFormScreen());
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Regelwerk erstellen'),
@@ -170,12 +166,7 @@ class RulesetsListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute<dynamic>(
-              builder: (context) => const RulesetFormScreen(),
-            ),
-          );
+          context.pushScreen(const RulesetFormScreen());
         },
         icon: const Icon(Icons.add),
         label: const Text('Regelwerk'),
@@ -337,20 +328,10 @@ class _RulesetListItem extends ConsumerWidget {
         ],
       ),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute<dynamic>(
-            builder: (context) => RulesetFormScreen(rulesetId: ruleset.id),
-          ),
-        );
+        context.pushScreen(RulesetFormScreen(rulesetId: ruleset.id));
       },
       onEdit: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute<dynamic>(
-            builder: (context) => RulesetFormScreen(rulesetId: ruleset.id),
-          ),
-        );
+        context.pushScreen(RulesetFormScreen(rulesetId: ruleset.id));
       },
       onDelete: () async {
         final database = ref.read(databaseProvider);

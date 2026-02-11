@@ -6,6 +6,7 @@ import '../../providers/database_provider.dart';
 import '../../data/repositories/role_repository.dart';
 import 'role_form_screen.dart';
 import '../../utils/constants.dart';
+import '../../extensions/context_extensions.dart';
 import '../../widgets/responsive_scaffold.dart';
 import '../../widgets/adaptive_list_item.dart';
 
@@ -60,12 +61,7 @@ class RolesListScreen extends ConsumerWidget {
                   const SizedBox(height: AppConstants.spacingL),
                   FilledButton.icon(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<dynamic>(
-                          builder: (context) => const RoleFormScreen(),
-                        ),
-                      );
+                      context.pushScreen(const RoleFormScreen());
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Rolle erstellen'),
@@ -115,12 +111,7 @@ class RolesListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute<dynamic>(
-              builder: (context) => const RoleFormScreen(),
-            ),
-          );
+          context.pushScreen(const RoleFormScreen());
         },
         icon: const Icon(Icons.add),
         label: const Text('Rolle'),
@@ -185,20 +176,10 @@ class _RoleListItem extends ConsumerWidget {
         ],
       ),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute<dynamic>(
-            builder: (context) => RoleFormScreen(roleId: role.id as int?),
-          ),
-        );
+        context.pushScreen(RoleFormScreen(roleId: role.id as int?));
       },
       onEdit: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute<dynamic>(
-            builder: (context) => RoleFormScreen(roleId: role.id as int?),
-          ),
-        );
+        context.pushScreen(RoleFormScreen(roleId: role.id as int?));
       },
       onDelete: () async {
         final database = ref.read(databaseProvider);
