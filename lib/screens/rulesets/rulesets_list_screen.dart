@@ -344,7 +344,7 @@ class _RulesetListItem extends ConsumerWidget {
 
   Widget _buildStatChip(BuildContext context, IconData icon, String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: AppConstants.paddingH8V4,
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(8),

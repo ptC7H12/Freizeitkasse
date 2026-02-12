@@ -388,7 +388,7 @@ class PaymentsListScreen extends ConsumerWidget {
           const SizedBox(width: AppConstants.spacing),
           // Ausstehend Info
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: AppConstants.paddingH12V8,
             decoration: BoxDecoration(
               color: isComplete
                   ? const Color(0xFF4CAF50).withValues(alpha: 0.1)

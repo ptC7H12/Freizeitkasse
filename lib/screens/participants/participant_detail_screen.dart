@@ -592,7 +592,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
               ),
               const SizedBox(height: AppConstants.spacingXS),
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: AppConstants.paddingAll8,
                 decoration: BoxDecoration(
                   color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
@@ -644,7 +644,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
             const Divider(height: 16),
             if (_payments.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: AppConstants.paddingV16,
                 child: Center(
                   child: Text(
                     'Noch keine Zahlungen erfasst',

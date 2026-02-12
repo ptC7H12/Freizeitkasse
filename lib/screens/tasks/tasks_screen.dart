@@ -136,7 +136,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
         // Filter Tabs
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: AppConstants.paddingH16,
           child: Row(
             children: [
               _buildFilterChip('Alle', 'all'),

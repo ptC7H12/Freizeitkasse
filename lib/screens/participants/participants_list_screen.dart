@@ -631,7 +631,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
               return Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: AppConstants.paddingH16V8,
                     child: Text(
                       '${filteredParticipants.length} von ${participants.length} Teilnehmern',
                       style: TextStyle(color: Colors.grey[600]),

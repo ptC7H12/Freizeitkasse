@@ -664,7 +664,7 @@ class _RulesetsManagementScreenState
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: AppConstants.paddingH12V4,
                       decoration: BoxDecoration(
                         color: Colors.green[700],
                         borderRadius: BorderRadius.circular(12),
@@ -747,7 +747,7 @@ class _RulesetsManagementScreenState
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: AppConstants.paddingH12V4,
                       decoration: BoxDecoration(
                         color: Colors.orange[700],
                         borderRadius: BorderRadius.circular(12),
@@ -873,7 +873,7 @@ class _RulesetsManagementScreenState
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: AppConstants.paddingH12V4,
             decoration: BoxDecoration(
               color: Colors.pink[700],
               borderRadius: BorderRadius.circular(12),

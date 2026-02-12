@@ -292,7 +292,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
               return Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: AppConstants.paddingH16V8,
                     child: Text(
                       '${filteredFamilies.length} von ${families.length} Familien',
                       style: TextStyle(color: Colors.grey[600]),

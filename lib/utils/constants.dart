@@ -85,6 +85,10 @@ class AppConstants {
   static const EdgeInsets paddingV16 = EdgeInsets.symmetric(vertical: spacing);
   static const EdgeInsets paddingH8 = EdgeInsets.symmetric(horizontal: spacingS);
   static const EdgeInsets paddingV8 = EdgeInsets.symmetric(vertical: spacingS);
+  static const EdgeInsets paddingH16V8 = EdgeInsets.symmetric(horizontal: spacing, vertical: spacingS);
+  static const EdgeInsets paddingH12V4 = EdgeInsets.symmetric(horizontal: spacingM, vertical: spacingXS);
+  static const EdgeInsets paddingH12V8 = EdgeInsets.symmetric(horizontal: spacingM, vertical: spacingS);
+  static const EdgeInsets paddingH8V4 = EdgeInsets.symmetric(horizontal: spacingS, vertical: spacingXS);
 
   // ===== BORDER RADIUS =====
 

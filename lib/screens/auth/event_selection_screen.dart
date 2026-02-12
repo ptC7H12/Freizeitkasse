@@ -214,7 +214,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
                       icon: const Icon(Icons.login),
                       label: const Text('Öffnen'),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(16),
+                        padding: AppConstants.paddingAll16,
                         backgroundColor: const Color(0xFF4CAF50),
                         foregroundColor: Colors.white,
                         disabledBackgroundColor: Colors.grey.shade300,
@@ -236,7 +236,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
                       icon: const Icon(Icons.delete_outline),
                       label: const Text('Löschen'),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(16),
+                        padding: AppConstants.paddingAll16,
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
                         disabledBackgroundColor: Colors.grey.shade300,
@@ -398,7 +398,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
                   icon: const Icon(Icons.check),
                   label: const Text('Bestätigen'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
+                    padding: AppConstants.paddingAll16,
                     backgroundColor: const Color(0xFF2196F3),
                     foregroundColor: Colors.white,
                     textStyle: const TextStyle(

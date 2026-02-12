@@ -497,7 +497,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
             return Column(
               children: data.entries.map((entry) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: AppConstants.paddingV8,
                   child: Row(
                     children: [
                       Expanded(
@@ -974,7 +974,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                                     ),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    padding: AppConstants.paddingH8V4,
                                     decoration: BoxDecoration(
                                       color: typeColor.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(4),
@@ -1120,7 +1120,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                                 DataCell(Text(DateFormat('dd.MM.yyyy').format(transaction.date))),
                                 DataCell(
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    padding: AppConstants.paddingH8V4,
                                     decoration: BoxDecoration(
                                       color: typeColor.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(4),

@@ -267,7 +267,7 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
       return Card(
         color: Colors.red.shade50,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppConstants.paddingAll16,
           child: Row(
             children: [
               Icon(Icons.error_outline, color: Colors.red.shade700),
@@ -321,7 +321,7 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
     return Card(
       color: Colors.blue.shade50,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppConstants.paddingAll16,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
