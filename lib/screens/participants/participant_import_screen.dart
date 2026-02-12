@@ -81,17 +81,7 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
       final path = await service.generateImportTemplate(outputPath);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Vorlage gespeichert: $path'),
-            action: SnackBarAction(
-              label: 'Öffnen',
-              onPressed: () {
-                // TODO: Open file with default app
-              },
-            ),
-          ),
-        );
+        context.showSuccess('Vorlage gespeichert: $path');
       }
     } catch (e) {
       if (mounted) {
