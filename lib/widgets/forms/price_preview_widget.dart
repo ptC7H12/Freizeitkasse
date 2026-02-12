@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
 import '../../services/price_calculator_service.dart';
+import '../../utils/exceptions.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../utils/date_utils.dart';
@@ -78,7 +79,7 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
       final eventId = ref.read(currentEventIdProvider);
 
       if (eventId == null) {
-        throw Exception('Kein Event ausgewählt');
+        throw const BusinessRuleException('Kein Event ausgewählt', code: 'NO_EVENT');
       }
 
       // Event laden
@@ -87,7 +88,7 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
           .getSingleOrNull();
 
       if (event == null) {
-        throw Exception('Event nicht gefunden');
+        throw const NotFoundException('Event', null);
       }
 
       // Aktives Regelwerk laden

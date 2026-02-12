@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../utils/exceptions.dart';
 import '../../providers/participant_provider.dart';
 import '../../utils/constants.dart';
 import '../../utils/route_helpers.dart';
@@ -91,7 +92,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       final currentEvent = ref.read(currentEventProvider);
 
       if (currentEvent == null) {
-        throw Exception('Kein Event ausgewählt');
+        throw const BusinessRuleException('Kein Event ausgewählt', code: 'NO_EVENT');
       }
 
       if (widget.taskId == null) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/family_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../utils/exceptions.dart';
 import '../../utils/logger.dart';
 import '../../utils/validators.dart';
 import '../../widgets/responsive_form_container.dart';
@@ -208,7 +209,7 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
       final eventId = ref.read(currentEventIdProvider);
 
       if (eventId == null) {
-        throw Exception('Kein Event ausgewählt');
+        throw const BusinessRuleException('Kein Event ausgewählt', code: 'NO_EVENT');
       }
 
       if (widget.familyId == null) {

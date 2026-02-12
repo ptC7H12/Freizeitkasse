@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/payment_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../utils/exceptions.dart';
 import '../../providers/participant_provider.dart';
 import '../../providers/family_provider.dart';
 import '../../utils/validators.dart';
@@ -374,7 +375,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
       final eventId = ref.read(currentEventIdProvider);
 
       if (eventId == null) {
-        throw Exception('Kein Event ausgewählt');
+        throw const BusinessRuleException('Kein Event ausgewählt', code: 'NO_EVENT');
       }
 
       final amount =
