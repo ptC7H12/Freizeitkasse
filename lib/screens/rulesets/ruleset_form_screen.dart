@@ -218,12 +218,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
     // Validate YAML before saving
     _validateYaml();
     if (_yamlError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('YAML-Fehler: $_yamlError'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showError('YAML-Fehler: $_yamlError');
       return;
     }
 
@@ -263,13 +258,9 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.rulesetId == null
-                ? 'Regelwerk erfolgreich erstellt'
-                : 'Regelwerk erfolgreich aktualisiert'),
-          ),
-        );
+        context.showSuccess(widget.rulesetId == null
+            ? 'Regelwerk erfolgreich erstellt'
+            : 'Regelwerk erfolgreich aktualisiert');
         RouteHelpers.pop<void>(context);
       }
     } catch (e, stack) {
@@ -287,28 +278,12 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
   }
 
   Future<void> _deleteRuleset() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Regelwerk löschen'),
-        content: const Text(
-          'Möchten Sie dieses Regelwerk wirklich löschen?\n\n'
+    final confirmed = await context.showConfirm(
+      title: 'Regelwerk löschen',
+      message: 'Möchten Sie dieses Regelwerk wirklich löschen?\n\n'
           'Achtung: Dies kann Auswirkungen auf bestehende Teilnehmer haben!',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+      confirmText: 'Löschen',
+      isDestructive: true,
     );
 
     if (confirmed != true) {
@@ -580,7 +555,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.check_circle, color: Colors.green),
+                          Icon(Icons.check_circle, color: AppConstants.successColor),
                           const SizedBox(width: AppConstants.spacingS),
                           Text(
                             'YAML ist gültig',
@@ -607,7 +582,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.error, color: Colors.red),
+                          Icon(Icons.error, color: AppConstants.errorColor),
                           const SizedBox(width: AppConstants.spacingS),
                           Text(
                             'YAML-Fehler',

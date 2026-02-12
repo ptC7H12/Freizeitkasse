@@ -357,7 +357,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                       icon: const Icon(Icons.delete_outline),
                       label: const Text('Löschen'),
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.red.shade700,
+                        foregroundColor: AppConstants.errorColor,
                       ),
                     )
                   else
@@ -370,7 +370,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                         onPressed: _isLoading ? null : () => RouteHelpers.pop<void>(context),
                         child: const Text('Abbrechen'),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: AppConstants.spacingM),
                       FilledButton.icon(
                         onPressed: _isLoading ? null : _saveTask,
                         icon: _isLoading
@@ -379,8 +379,8 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                 height: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Icon(Icons.check),
-                        label: Text(widget.taskId == null ? 'Erstellen' : 'Speichern'),
+                            : const Icon(Icons.save),
+                        label: Text(widget.taskId == null ? 'Speichern' : 'Aktualisieren'),
                       ),
                     ],
                   ),

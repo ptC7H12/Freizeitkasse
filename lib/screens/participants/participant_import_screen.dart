@@ -95,12 +95,7 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fehler beim Erstellen der Vorlage: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showError('Fehler beim Erstellen der Vorlage: $e');
       }
     }
   }
@@ -156,23 +151,13 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
 
       if (result.successCount > 0) {
         AppLogger.info('[ImportScreen] Showing success message: ${result.successCount} participants imported');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${result.successCount} Teilnehmer erfolgreich importiert'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccess('${result.successCount} Teilnehmer erfolgreich importiert');
       }
 
       if (result.hasErrors) {
         AppLogger.warning('[ImportScreen] Import had ${result.errorCount} errors');
         AppLogger.warning('[ImportScreen] Errors: ${result.errors}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Import abgeschlossen mit ${result.errorCount} Fehlern'),
-            backgroundColor: Colors.orange,
-          ),
-        );
+        context.showWarning('Import abgeschlossen mit ${result.errorCount} Fehlern');
       }
     } catch (e, stackTrace) {
       AppLogger.error('[ImportScreen] FATAL ERROR during import', error: e, stackTrace: stackTrace);
@@ -181,13 +166,7 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
       AppLogger.error('[ImportScreen] Stack trace:\n$stackTrace');
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fehler beim Import: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 10),
-          ),
-        );
+        context.showError('Fehler beim Import: $e');
       }
     } finally {
       AppLogger.info('[ImportScreen] Cleaning up - setting _isImporting to false');

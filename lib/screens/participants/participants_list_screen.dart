@@ -7,6 +7,7 @@ import '../../providers/database_provider.dart';
 import '../../providers/participant_excel_provider.dart';
 import '../../providers/payment_provider.dart';
 import '../../data/database/app_database.dart';
+import '../../data/repositories/participant_repository.dart';
 import '../../utils/date_utils.dart';
 import '../../utils/route_helpers.dart';
 import 'participant_form_screen.dart';
@@ -15,6 +16,7 @@ import 'participant_detail_screen.dart';
 import '../../utils/constants.dart';
 import '../../extensions/context_extensions.dart';
 import '../../widgets/responsive_scaffold.dart';
+import '../../widgets/adaptive_list_item.dart';
 import '../../utils/logger.dart';
 
 /// Participants List Screen
@@ -641,60 +643,69 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                       itemCount: filteredParticipants.length,
                       itemBuilder: (context, index) {
                         final participant = filteredParticipants[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
-                          child: ListTile(
-                            leading: const Icon(
-                              Icons.person,
-                              size: 40,
-                            ),
-                            title: Text(
-                              '${participant.lastName}, ${participant.firstName}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 4),
-                                // Familie-Info (wenn vorhanden)
-                                if (participant.familyId != null)
-                                  FutureBuilder(
-                                    future: ref.read(databaseProvider).select(ref.read(databaseProvider).families)
-                                      .get()
-                                      .then((families) => families.where((f) => f.id == participant.familyId).firstOrNull),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData && snapshot.data != null) {
-                                        return Padding(
-                                          padding: const EdgeInsets.only(bottom: 2),
-                                          child: Text(
-                                            snapshot.data!.familyName,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey[600],
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                      return const SizedBox.shrink();
-                                    },
-                                  ),
-                                Text(
-                                  'Geb.: ${AppDateUtils.formatGerman(participant.birthDate)} (${AppDateUtils.calculateAge(participant.birthDate)} Jahre)',
-                                ),
-                                const SizedBox(height: 4),
-                                _buildPaymentStatusRow(participant),
-                              ],
-                            ),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () {
-                              context.pushScreen(
-                                ParticipantDetailScreen(
-                                  participantId: participant.id,
-                                ),
-                              );
-                            },
+                        return AdaptiveListItem(
+                          leading: const Icon(
+                            Icons.person,
+                            size: 40,
                           ),
+                          title: Text(
+                            '${participant.lastName}, ${participant.firstName}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              // Familie-Info (wenn vorhanden)
+                              if (participant.familyId != null)
+                                FutureBuilder(
+                                  future: ref.read(databaseProvider).select(ref.read(databaseProvider).families)
+                                    .get()
+                                    .then((families) => families.where((f) => f.id == participant.familyId).firstOrNull),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData && snapshot.data != null) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(bottom: 2),
+                                        child: Text(
+                                          snapshot.data!.familyName,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[600],
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return const SizedBox.shrink();
+                                  },
+                                ),
+                              Text(
+                                'Geb.: ${AppDateUtils.formatGerman(participant.birthDate)} (${AppDateUtils.calculateAge(participant.birthDate)} Jahre)',
+                              ),
+                              const SizedBox(height: 4),
+                              _buildPaymentStatusRow(participant),
+                            ],
+                          ),
+                          onTap: () {
+                            context.pushScreen(
+                              ParticipantDetailScreen(
+                                participantId: participant.id,
+                              ),
+                            );
+                          },
+                          onEdit: () {
+                            context.pushScreen(
+                              ParticipantFormScreen(
+                                participantId: participant.id,
+                              ),
+                            );
+                          },
+                          onDelete: () async {
+                            final database = ref.read(databaseProvider);
+                            final repository = ParticipantRepository(database);
+                            await repository.deleteParticipant(participant.id);
+                          },
+                          deleteConfirmMessage: '${participant.firstName} ${participant.lastName} wirklich löschen?',
                         );
                       },
                     ),

@@ -519,12 +519,7 @@ class _RulesetsManagementScreenState
 
       // Show success message
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Regelwerk "${ruleset.name}" wurde aktiviert'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccess('Regelwerk "${ruleset.name}" wurde aktiviert');
       }
     } catch (e) {
       // Close loading dialog if open
@@ -534,12 +529,7 @@ class _RulesetsManagementScreenState
 
       // Show error
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Fehler beim Aktivieren: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showError('Fehler beim Aktivieren: $e');
       }
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/constants.dart';
 
 /// Adaptive List Item Widget
 ///
@@ -48,7 +49,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        margin: EdgeInsets.symmetric(horizontal: AppConstants.spacingS, vertical: AppConstants.spacingXS),
         elevation: _isHovered ? 4 : 1,
         child: ListTile(
           leading: widget.leading,
@@ -65,15 +66,15 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
                 IconButton(
                   icon: const Icon(Icons.edit_outlined),
                   tooltip: 'Bearbeiten',
-                  color: Colors.blue.shade600,
+                  color: AppConstants.primaryColor,
                   onPressed: widget.onEdit,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: AppConstants.spacingXS),
                 // Löschen-Button
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
                   tooltip: 'Löschen',
-                  color: Colors.red.shade400,
+                  color: AppConstants.errorColor,
                   onPressed: () => _confirmDelete(context),
                 ),
               ],
@@ -100,18 +101,18 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
       },
       background: _buildSwipeBackground(
         alignment: Alignment.centerLeft,
-        color: Colors.blue.shade600,
+        color: AppConstants.primaryColor,
         icon: Icons.edit,
         label: 'Bearbeiten',
       ),
       secondaryBackground: _buildSwipeBackground(
         alignment: Alignment.centerRight,
-        color: Colors.red.shade600,
+        color: AppConstants.errorColor,
         icon: Icons.delete,
         label: 'Löschen',
       ),
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        margin: EdgeInsets.symmetric(horizontal: AppConstants.spacingS, vertical: AppConstants.spacingXS),
         child: ListTile(
           leading: widget.leading,
           title: widget.title,
@@ -142,7 +143,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
         children: [
           if (isLeft) ...[
             Icon(icon, color: Colors.white, size: 28),
-            const SizedBox(width: 8),
+            SizedBox(width: AppConstants.spacingS),
             Text(
               label,
               style: const TextStyle(
@@ -160,7 +161,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
                 fontSize: 16,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: AppConstants.spacingS),
             Icon(icon, color: Colors.white, size: 28),
           ],
         ],
@@ -182,7 +183,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.red.shade700,
+              foregroundColor: AppConstants.errorColor,
             ),
             child: const Text('Löschen'),
           ),

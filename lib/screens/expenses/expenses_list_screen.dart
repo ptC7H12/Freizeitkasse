@@ -38,12 +38,7 @@ class ExpensesListScreen extends ConsumerWidget {
       selectedIndex: 4,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute<dynamic>(
-              builder: (context) => const ExpenseFormScreen(),
-            ),
-          );
+          context.pushScreen(const ExpenseFormScreen());
         },
         icon: const Icon(Icons.add),
         label: const Text('Ausgabe'),
@@ -368,20 +363,10 @@ class _ExpenseListItem extends ConsumerWidget {
         ],
       ),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute<dynamic>(
-            builder: (context) => ExpenseFormScreen(expenseId: expense.id),
-          ),
-        );
+        context.pushScreen(ExpenseFormScreen(expenseId: expense.id));
       },
       onEdit: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute<dynamic>(
-            builder: (context) => ExpenseFormScreen(expenseId: expense.id),
-          ),
-        );
+        context.pushScreen(ExpenseFormScreen(expenseId: expense.id));
       },
       onDelete: () async {
         final database = ref.read(databaseProvider);

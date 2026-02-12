@@ -87,13 +87,9 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.roleId == null
-                ? 'Rolle erfolgreich erstellt'
-                : 'Rolle erfolgreich aktualisiert'),
-          ),
-        );
+        context.showSuccess(widget.roleId == null
+            ? 'Rolle erfolgreich erstellt'
+            : 'Rolle erfolgreich aktualisiert');
         RouteHelpers.pop<void>(context);
       }
     } catch (e, stack) {
@@ -111,28 +107,12 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
   }
 
   Future<void> _deleteRole() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Rolle löschen'),
-        content: const Text(
-          'Möchten Sie diese Rolle wirklich löschen?\n\n'
+    final confirmed = await context.showConfirm(
+      title: 'Rolle löschen',
+      message: 'Möchten Sie diese Rolle wirklich löschen?\n\n'
           'Achtung: Rollen, die von Teilnehmern verwendet werden, können nicht gelöscht werden.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+      confirmText: 'Löschen',
+      isDestructive: true,
     );
 
     if (confirmed != true) {

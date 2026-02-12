@@ -229,12 +229,7 @@ class IncomesListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute<dynamic>(
-              builder: (context) => const IncomeFormScreen(),
-            ),
-          );
+          context.pushScreen(const IncomeFormScreen());
         },
         icon: const Icon(Icons.add),
         label: const Text('Einnahme'),
@@ -346,20 +341,10 @@ class _IncomeListItem extends ConsumerWidget {
         ],
       ),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute<dynamic>(
-            builder: (context) => IncomeFormScreen(incomeId: income.id),
-          ),
-        );
+        context.pushScreen(IncomeFormScreen(incomeId: income.id));
       },
       onEdit: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute<dynamic>(
-            builder: (context) => IncomeFormScreen(incomeId: income.id),
-          ),
-        );
+        context.pushScreen(IncomeFormScreen(incomeId: income.id));
       },
       onDelete: () async {
         final database = ref.read(databaseProvider);

@@ -133,23 +133,11 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       return;
     }
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Beleg löschen?'),
-        content: const Text('Möchten Sie den Beleg wirklich löschen?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+    final confirmed = await context.showConfirm(
+      title: 'Beleg löschen?',
+      message: 'Möchten Sie den Beleg wirklich löschen?',
+      confirmText: 'Löschen',
+      isDestructive: true,
     );
 
     if (confirmed == true) {
@@ -243,25 +231,11 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   }
 
   Future<void> _deleteExpense() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ausgabe löschen'),
-        content: const Text('Möchten Sie diese Ausgabe wirklich löschen?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+    final confirmed = await context.showConfirm(
+      title: 'Ausgabe löschen',
+      message: 'Möchten Sie diese Ausgabe wirklich löschen?',
+      confirmText: 'Löschen',
+      isDestructive: true,
     );
 
     if (confirmed != true) {
@@ -567,7 +541,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                         title: Text(_receiptFilePath!.split('/').last),
                         subtitle: const Text('Beleg hochgeladen'),
                         trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
+                          icon: Icon(Icons.delete, color: AppConstants.errorColor),
                           onPressed: _deleteReceipt,
                           tooltip: 'Beleg löschen',
                         ),

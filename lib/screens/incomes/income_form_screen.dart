@@ -140,13 +140,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.incomeId == null
-                ? 'Einnahme erfolgreich erstellt'
-                : 'Einnahme erfolgreich aktualisiert'),
-          ),
-        );
+        context.showSuccess(widget.incomeId == null
+            ? 'Einnahme erfolgreich erstellt'
+            : 'Einnahme erfolgreich aktualisiert');
         RouteHelpers.pop<void>(context);
       }
     } catch (e, stack) {
@@ -164,25 +160,11 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
   }
 
   Future<void> _deleteIncome() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Einnahme löschen'),
-        content: const Text('Möchten Sie diese Einnahme wirklich löschen?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+    final confirmed = await context.showConfirm(
+      title: 'Einnahme löschen',
+      message: 'Möchten Sie diese Einnahme wirklich löschen?',
+      confirmText: 'Löschen',
+      isDestructive: true,
     );
 
     if (confirmed != true) {

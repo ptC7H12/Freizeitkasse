@@ -168,20 +168,21 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
               maxLines: 3,
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: AppConstants.spacingL),
 
             // Speichern-Button
-            SizedBox(
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _saveFamily,
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(isEdit ? 'Speichern' : 'Erstellen'),
+            FilledButton.icon(
+              onPressed: _isLoading ? null : _saveFamily,
+              icon: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save),
+              label: Text(isEdit ? 'Aktualisieren' : 'Speichern'),
+              style: FilledButton.styleFrom(
+                padding: AppConstants.paddingAll16,
               ),
             ),
 
@@ -260,27 +261,13 @@ class _FamilyFormScreenState extends ConsumerState<FamilyFormScreen> {
   }
 
   Future<void> _confirmDelete() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Familie löschen?'),
-        content: const Text(
-          'Möchten Sie diese Familie wirklich löschen?\n\n'
+    final confirmed = await context.showConfirm(
+      title: 'Familie löschen?',
+      message: 'Möchten Sie diese Familie wirklich löschen?\n\n'
           'Hinweis: Teilnehmer dieser Familie werden NICHT gelöscht, '
           'sie werden nur von der Familie getrennt.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+      confirmText: 'Löschen',
+      isDestructive: true,
     );
 
     if (confirmed == true && mounted) {
