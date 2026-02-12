@@ -138,16 +138,16 @@ class MGBFreizeitplanerApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppConstants.primaryColor,
           brightness: Brightness.dark,
-          primary: const Color(0xFF64B5F6),
-          secondary: const Color(0xFF81C784),
-          tertiary: const Color(0xFFFFB74D),
+          primary: AppConstants.primaryColorDarkTheme,
+          secondary: AppConstants.secondaryColorDarkTheme,
+          tertiary: AppConstants.tertiaryColorDarkTheme,
         ),
         useMaterial3: true,
 
         appBarTheme: const AppBarTheme(
           centerTitle: false,
           elevation: AppConstants.elevationLow,
-          backgroundColor: Color(0xFF1976D2),
+          backgroundColor: AppConstants.appBarColorDarkTheme,
           foregroundColor: Colors.white,
         ),
       ),
