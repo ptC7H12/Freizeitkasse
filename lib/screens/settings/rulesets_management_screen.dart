@@ -102,7 +102,7 @@ class _RulesetsManagementScreenState
                             color: Colors.white,
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppConstants.spacingM),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +114,7 @@ class _RulesetsManagementScreenState
                                   fontSize: 16,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: AppConstants.spacingXS),
                               Text(
                                 'Gültig ab: ${_formatDate(ruleset.validFrom)}',
                                 style: TextStyle(
@@ -141,7 +141,7 @@ class _RulesetsManagementScreenState
                                   tooltip: 'Aktivieren',
                                 ),
                               ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: AppConstants.spacingXS),
                             Container(
                               decoration: BoxDecoration(
                                 color: Colors.blue.shade100,
@@ -153,7 +153,7 @@ class _RulesetsManagementScreenState
                                 tooltip: 'Vorschau',
                               ),
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: AppConstants.spacingXS),
                             Container(
                               decoration: BoxDecoration(
                                 color: Colors.orange.shade100,
@@ -178,7 +178,7 @@ class _RulesetsManagementScreenState
 
                     // AKTIV Badge und Beschreibung
                     if (isActive || ruleset.description != null) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppConstants.spacingM),
                       Row(
                         children: [
                           if (isActive)
@@ -199,7 +199,7 @@ class _RulesetsManagementScreenState
                                     color: Colors.white,
                                     size: 14,
                                   ),
-                                  SizedBox(width: 4),
+                                  SizedBox(width: AppConstants.spacingXS),
                                   Text(
                                     'AKTIV',
                                     style: TextStyle(
@@ -212,7 +212,7 @@ class _RulesetsManagementScreenState
                               ),
                             ),
                           if (isActive && ruleset.description != null)
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppConstants.spacingS),
                           if (ruleset.description != null)
                             Expanded(
                               child: Text(
@@ -345,7 +345,7 @@ class _RulesetsManagementScreenState
                           'Dateiname-Pattern:',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppConstants.spacingXS),
                         Text(
                           '{Freizeittyp}_{Jahr}.yaml',
                           style: TextStyle(
@@ -358,7 +358,7 @@ class _RulesetsManagementScreenState
                           'Beispiele:',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppConstants.spacingXS),
                         const Text('• Kinderfreizeit_2025.yaml'),
                         const Text('• Teeniefreizeit_2025.yaml'),
                         const Text('• Jugendfreizeit_2025.yaml'),
@@ -391,7 +391,7 @@ class _RulesetsManagementScreenState
                     fontSize: 15,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppConstants.spacingXS),
                 Text(
                   description,
                   style: TextStyle(
@@ -451,15 +451,15 @@ class _RulesetsManagementScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Möchten Sie das Regelwerk "${ruleset.name}" aktivieren?'),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             const Text(
               'Dies wird:',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             const Text('• Alle anderen Regelwerke deaktivieren'),
             const Text('• Alle Teilnehmerpreise neu berechnen'),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
             const Text(
               'Hinweis: Teilnehmer mit manuellen Preisen werden übersprungen.',
               style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
@@ -499,7 +499,7 @@ class _RulesetsManagementScreenState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CircularProgressIndicator(),
-                    SizedBox(height: 16),
+                    SizedBox(height: AppConstants.spacing),
                     Text('Regelwerk wird aktiviert...'),
                     Text('Preise werden neu berechnet...', style: TextStyle(fontSize: 12)),
                   ],
@@ -625,7 +625,7 @@ class _RulesetsManagementScreenState
             Row(
               children: [
                 Icon(Icons.cake, color: Colors.green[700], size: 20),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppConstants.spacingS),
                 Text(
                   'Altersgruppen',
                   style: TextStyle(
@@ -636,7 +636,7 @@ class _RulesetsManagementScreenState
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppConstants.spacingM),
             ...groupsList.map((group) {
               final groupMap = Map<String, dynamic>.from(group as Map);
               final name = (groupMap['name'] ?? 'Unbenannt') as String;
@@ -717,7 +717,7 @@ class _RulesetsManagementScreenState
             Row(
               children: [
                 Icon(Icons.groups, color: Colors.blue[700], size: 20),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppConstants.spacingS),
                 Text(
                   'Rollenrabatte',
                   style: TextStyle(
@@ -728,7 +728,7 @@ class _RulesetsManagementScreenState
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppConstants.spacingM),
             ...discountEntries.map((entry) {
               final discountData = entry.value is Map
                   ? Map<String, dynamic>.from(entry.value as Map)
@@ -756,7 +756,7 @@ class _RulesetsManagementScreenState
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(Icons.discount, size: 14, color: Colors.white),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: AppConstants.spacingXS),
                           Text(
                             '${(discountPercent as num).toStringAsFixed(0)}%',
                             style: const TextStyle(
@@ -803,7 +803,7 @@ class _RulesetsManagementScreenState
             Row(
               children: [
                 Icon(Icons.family_restroom, color: Colors.pink[700], size: 20),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppConstants.spacingS),
                 Text(
                   'Familienrabatte',
                   style: TextStyle(
@@ -814,7 +814,7 @@ class _RulesetsManagementScreenState
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppConstants.spacingM),
 
             if (hasDirectPercentages) ...[
               // New structure: first_child_percent, second_child_percent, etc.
@@ -882,7 +882,7 @@ class _RulesetsManagementScreenState
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.discount, size: 14, color: Colors.white),
-                const SizedBox(width: 4),
+                const SizedBox(width: AppConstants.spacingXS),
                 Text(
                   '${discountPercent.toStringAsFixed(0)}%',
                   style: const TextStyle(

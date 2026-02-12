@@ -115,7 +115,7 @@ class RulesetsListScreen extends ConsumerWidget {
                             Row(
                               children: [
                                 const Icon(Icons.calendar_today, size: 16),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: AppConstants.spacingXS),
                                 Text(
                                   'Gültig ab: ${DateFormat('dd.MM.yyyy', 'de_DE').format(currentRuleset.validFrom)}',
                                   style: Theme.of(context).textTheme.bodyMedium,
@@ -242,11 +242,11 @@ class _RulesetListItem extends ConsumerWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 4),
+          const SizedBox(height: AppConstants.spacingXS),
           Row(
             children: [
               Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppConstants.spacingXS),
               Text(
                 'Gültig ab: ${dateFormat.format(ruleset.validFrom)}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -353,7 +353,7 @@ class _RulesetListItem extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: Colors.grey[700]),
-          const SizedBox(width: 4),
+          const SizedBox(width: AppConstants.spacingXS),
           Text(
             label,
             style: TextStyle(

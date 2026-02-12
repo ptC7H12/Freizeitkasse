@@ -101,7 +101,7 @@ class _ExportSpeedDialState extends State<ExportSpeedDial>
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppConstants.spacingM),
                 // Button
                 FloatingActionButton.small(
                   heroTag: 'pdf_export_fab',
@@ -147,7 +147,7 @@ class _ExportSpeedDialState extends State<ExportSpeedDial>
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppConstants.spacingM),
                 // Button
                 FloatingActionButton.small(
                   heroTag: 'excel_export_fab',

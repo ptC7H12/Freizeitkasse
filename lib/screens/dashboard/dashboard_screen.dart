@@ -409,7 +409,7 @@ class DashboardScreen extends ConsumerWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppConstants.spacingXS),
                 Text(
                   NumberFormat.currency(locale: 'de_DE', symbol: '€').format(saldo),
                   style: TextStyle(
@@ -418,7 +418,7 @@ class DashboardScreen extends ConsumerWidget {
                     color: color,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppConstants.spacingXS),
                 Text(
                   formula,
                   style: TextStyle(

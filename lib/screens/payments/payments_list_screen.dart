@@ -74,12 +74,12 @@ class PaymentsListScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.payment, size: 100, color: Colors.grey),
-                            SizedBox(height: 24),
+                            SizedBox(height: AppConstants.spacingL),
                             Text(
                               'Noch keine Zahlungen',
                               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(height: 8),
+                            SizedBox(height: AppConstants.spacingS),
                             Text(
                               'Erfasse die erste Zahlung.',
                               style: TextStyle(color: Colors.grey),
@@ -143,11 +143,11 @@ class PaymentsListScreen extends ConsumerWidget {
                                   subtitle: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const SizedBox(height: 4),
+                                      const SizedBox(height: AppConstants.spacingXS),
                                       Row(
                                         children: [
                                           Icon(payerIcon, size: 14, color: payerColor),
-                                          const SizedBox(width: 4),
+                                          const SizedBox(width: AppConstants.spacingXS),
                                           Expanded(
                                             child: Text(
                                               payerName,
@@ -406,7 +406,7 @@ class PaymentsListScreen extends ConsumerWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppConstants.spacingXS),
                 Text(
                   currencyFormat.format(ausstehend.abs()),
                   style: TextStyle(
