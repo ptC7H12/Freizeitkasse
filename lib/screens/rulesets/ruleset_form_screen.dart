@@ -13,6 +13,7 @@ import '../../extensions/context_extensions.dart';
 import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
 import '../../utils/logger.dart';
+import '../../utils/exceptions.dart';
 class RulesetFormScreen extends ConsumerStatefulWidget {
   final int? rulesetId;
 
@@ -77,7 +78,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       locale: const Locale('de', 'DE'),
     );
 
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null && picked != _selectedDate && mounted) {
       setState(() {
         _selectedDate = picked;
       });
@@ -177,7 +178,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
           context.showSuccess('YAML von GitHub importiert');
         }
       } else {
-        throw Exception('HTTP ${response.statusCode}');
+        throw NetworkException('HTTP-Fehler beim Import', statusCode: response.statusCode);
       }
     } catch (e, stack) {
       AppLogger.error('Fehler beim Importieren von GitHub', error: e, stackTrace: stack);
@@ -341,7 +342,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed == true && mounted) {
       setState(() {
         _yamlController.text = template;
       });

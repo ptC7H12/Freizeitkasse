@@ -95,7 +95,7 @@ class ExpensesListScreen extends ConsumerWidget {
               Container(
                 padding: AppConstants.paddingAll16,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE91E63).withValues(alpha: 0.1),
+                  color: AppConstants.dangerColor.withValues(alpha: 0.1),
                   border: Border(
                     bottom: BorderSide(color: Colors.grey.shade300),
                   ),
@@ -105,7 +105,7 @@ class ExpensesListScreen extends ConsumerWidget {
                   children: [
                     const Row(
                       children: [
-                        Icon(Icons.shopping_cart, color: Color(0xFFE91E63), size: 24),
+                        Icon(Icons.shopping_cart, color: AppConstants.dangerColor, size: 24),
                         SizedBox(width: AppConstants.spacingS),
                         Text(
                           'Übersicht',
@@ -125,7 +125,7 @@ class ExpensesListScreen extends ConsumerWidget {
                             label: 'Ausgaben gesamt',
                             value: expenses.length.toString(),
                             icon: Icons.receipt_long,
-                            color: const Color(0xFF2196F3),
+                            color: AppConstants.primaryColor,
                           ),
                         ),
                         const SizedBox(width: AppConstants.spacing),
@@ -134,7 +134,7 @@ class ExpensesListScreen extends ConsumerWidget {
                             label: 'Gesamtbetrag',
                             value: NumberFormat.currency(locale: 'de_DE', symbol: '€').format(gesamtbetrag),
                             icon: Icons.euro,
-                            color: const Color(0xFFE91E63),
+                            color: AppConstants.dangerColor,
                           ),
                         ),
                       ],
@@ -148,7 +148,7 @@ class ExpensesListScreen extends ConsumerWidget {
                             label: 'Offene Ausgaben',
                             value: NumberFormat.currency(locale: 'de_DE', symbol: '€').format(offeneAusgaben),
                             icon: Icons.hourglass_empty,
-                            color: const Color(0xFFFF9800),
+                            color: AppConstants.warningColor,
                           ),
                         ),
                         const SizedBox(width: AppConstants.spacing),
@@ -157,7 +157,7 @@ class ExpensesListScreen extends ConsumerWidget {
                             label: 'Beglichen',
                             value: NumberFormat.currency(locale: 'de_DE', symbol: '€').format(beglichene),
                             icon: Icons.check_circle,
-                            color: const Color(0xFF4CAF50),
+                            color: AppConstants.successColor,
                           ),
                         ),
                       ],

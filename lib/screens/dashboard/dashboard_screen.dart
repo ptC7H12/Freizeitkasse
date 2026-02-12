@@ -67,11 +67,11 @@ class DashboardScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // === EINNAHMEN ===
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.trending_up, color: Color(0xFF4CAF50), size: 24),
-                      SizedBox(width: AppConstants.spacingS),
-                      Text(
+                      Icon(Icons.trending_up, color: AppConstants.successColor, size: 24),
+                      const SizedBox(width: AppConstants.spacingS),
+                      const Text(
                         'Einnahmen',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
@@ -126,7 +126,7 @@ class DashboardScreen extends ConsumerWidget {
                                           child: FinanceCard(
                                             label: 'Soll Einnahmen (Gesamt)',
                                             amount: sollEinnahmenGesamt,
-                                            color: const Color(0xFF4CAF50),
+                                            color: AppConstants.successColor,
                                           ),
                                         ),
                                         const SizedBox(width: AppConstants.spacing),
@@ -135,7 +135,7 @@ class DashboardScreen extends ConsumerWidget {
                                             label: 'Soll Zahlungseingänge',
                                             amount: sollEinnahmenTeilnehmer,
                                             subtitle: 'durch Teilnahmegebühren',
-                                            color: const Color(0xFF2196F3),
+                                            color: AppConstants.primaryColor,
                                           ),
                                         ),
                                         const SizedBox(width: AppConstants.spacing),
@@ -144,7 +144,7 @@ class DashboardScreen extends ConsumerWidget {
                                             label: 'Soll Sonstige Einnahmen',
                                             amount: sollSonstigeEinnahmen,
                                             subtitle: 'durch Zuschüsse',
-                                            color: const Color(0xFF2196F3),
+                                            color: AppConstants.primaryColor,
                                           ),
                                         ),
                                         const SizedBox(width: AppConstants.spacing),
@@ -153,7 +153,7 @@ class DashboardScreen extends ConsumerWidget {
                                             label: 'Ist Einnahmen (Gesamt)',
                                             amount: istEinnahmenGesamt,
                                             subtitle: 'durch Zahlungen + Sonstige',
-                                            color: const Color(0xFF4CAF50),
+                                            color: AppConstants.successColor,
                                             isBold: true,
                                           ),
                                         ),
@@ -164,28 +164,28 @@ class DashboardScreen extends ConsumerWidget {
                                         FinanceCard(
                                           label: 'Soll Einnahmen (Gesamt)',
                                           amount: sollEinnahmenGesamt,
-                                          color: const Color(0xFF4CAF50),
+                                          color: AppConstants.successColor,
                                         ),
                                         const SizedBox(height: AppConstants.spacingS),
                                         FinanceCard(
                                           label: 'Soll Zahlungseingänge',
                                           amount: sollEinnahmenTeilnehmer,
                                           subtitle: 'durch Teilnahmegebühren',
-                                          color: const Color(0xFF2196F3),
+                                          color: AppConstants.primaryColor,
                                         ),
                                         const SizedBox(height: AppConstants.spacingS),
                                         FinanceCard(
                                           label: 'Soll Sonstige Einnahmen',
                                           amount: sollSonstigeEinnahmen,
                                           subtitle: 'durch Zuschüsse',
-                                          color: const Color(0xFF2196F3),
+                                          color: AppConstants.primaryColor,
                                         ),
                                         const SizedBox(height: AppConstants.spacingS),
                                         FinanceCard(
                                           label: 'Ist Einnahmen (Gesamt)',
                                           amount: istEinnahmenGesamt,
                                           subtitle: 'durch Zahlungen + Sonstige',
-                                          color: const Color(0xFF4CAF50),
+                                          color: AppConstants.successColor,
                                           isBold: true,
                                         ),
                                       ],
@@ -237,11 +237,11 @@ class DashboardScreen extends ConsumerWidget {
                   const Divider(height: 32),
 
                   // === AUSGABEN ===
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.trending_down, color: Color(0xFFE91E63), size: 24),
-                      SizedBox(width: AppConstants.spacingS),
-                      Text(
+                      Icon(Icons.trending_down, color: AppConstants.dangerColor, size: 24),
+                      const SizedBox(width: AppConstants.spacingS),
+                      const Text(
                         'Ausgaben',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
@@ -270,7 +270,7 @@ class DashboardScreen extends ConsumerWidget {
                                   child: FinanceCard(
                                     label: 'Soll Ausgaben (Gesamt)',
                                     amount: sollAusgabenGesamt,
-                                    color: const Color(0xFFE91E63),
+                                    color: AppConstants.dangerColor,
                                   ),
                                 ),
                                 const SizedBox(width: AppConstants.spacing),
@@ -278,7 +278,7 @@ class DashboardScreen extends ConsumerWidget {
                                   child: FinanceCard(
                                     label: 'Beglichene Ausgaben',
                                     amount: beglicheneAusgaben,
-                                    color: const Color(0xFFE91E63),
+                                    color: AppConstants.dangerColor,
                                     isBold: true,
                                   ),
                                 ),
@@ -289,13 +289,13 @@ class DashboardScreen extends ConsumerWidget {
                                 FinanceCard(
                                   label: 'Soll Ausgaben (Gesamt)',
                                   amount: sollAusgabenGesamt,
-                                  color: const Color(0xFFE91E63),
+                                  color: AppConstants.dangerColor,
                                 ),
                                 const SizedBox(height: AppConstants.spacingS),
                                 FinanceCard(
                                   label: 'Beglichene Ausgaben',
                                   amount: beglicheneAusgaben,
-                                  color: const Color(0xFFE91E63),
+                                  color: AppConstants.dangerColor,
                                   isBold: true,
                                 ),
                               ],
@@ -306,11 +306,11 @@ class DashboardScreen extends ConsumerWidget {
                   const Divider(height: 32),
 
                   // === SALDO ===
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.account_balance, color: Color(0xFFFF9800), size: 24),
-                      SizedBox(width: AppConstants.spacingS),
-                      Text(
+                      Icon(Icons.account_balance, color: AppConstants.warningColor, size: 24),
+                      const SizedBox(width: AppConstants.spacingS),
+                      const Text(
                         'Saldo',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
@@ -386,7 +386,7 @@ class DashboardScreen extends ConsumerWidget {
     String formula,
   ) {
     final isPositive = saldo >= 0;
-    final color = isPositive ? const Color(0xFF4CAF50) : const Color(0xFFE91E63);
+    final color = isPositive ? AppConstants.successColor : AppConstants.dangerColor;
 
     return Container(
       padding: AppConstants.paddingAll16,
@@ -409,7 +409,7 @@ class DashboardScreen extends ConsumerWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppConstants.spacingXS),
                 Text(
                   NumberFormat.currency(locale: 'de_DE', symbol: '€').format(saldo),
                   style: TextStyle(
@@ -418,12 +418,12 @@ class DashboardScreen extends ConsumerWidget {
                     color: color,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppConstants.spacingXS),
                 Text(
                   formula,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                 ),
               ],

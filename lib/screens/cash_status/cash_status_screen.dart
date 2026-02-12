@@ -497,7 +497,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
             return Column(
               children: data.entries.map((entry) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: AppConstants.paddingV8,
                   child: Row(
                     children: [
                       Expanded(
@@ -974,7 +974,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                                     ),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    padding: AppConstants.paddingH8V4,
                                     decoration: BoxDecoration(
                                       color: typeColor.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(4),
@@ -990,7 +990,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppConstants.spacingS),
                               // Beschreibung
                               Text(
                                 transaction.description,
@@ -1002,7 +1002,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                                 overflow: TextOverflow.ellipsis,
                               ),
                               if (transaction.participantOrFamily != null) ...[
-                                const SizedBox(height: 4),
+                                const SizedBox(height: AppConstants.spacingXS),
                                 Text(
                                   transaction.participantOrFamily!,
                                   style: TextStyle(
@@ -1012,7 +1012,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                                 ),
                               ],
                               if (transaction.reference != null) ...[
-                                const SizedBox(height: 4),
+                                const SizedBox(height: AppConstants.spacingXS),
                                 Text(
                                   'Ref: ${transaction.reference}',
                                   style: TextStyle(
@@ -1120,7 +1120,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                                 DataCell(Text(DateFormat('dd.MM.yyyy').format(transaction.date))),
                                 DataCell(
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    padding: AppConstants.paddingH8V4,
                                     decoration: BoxDecoration(
                                       color: typeColor.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(4),
@@ -1294,7 +1294,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: AppConstants.spacingS),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
@@ -1476,7 +1476,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: AppConstants.spacingS),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
@@ -1741,7 +1741,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CircularProgressIndicator(),
-                    SizedBox(height: 16),
+                    SizedBox(height: AppConstants.spacing),
                     Text('Erstelle PDF-Dateien...'),
                   ],
                 ),
@@ -1784,7 +1784,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
             title: const Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.green),
-                SizedBox(width: 8),
+                SizedBox(width: AppConstants.spacingS),
                 Text('PDF-Export erfolgreich'),
               ],
             ),
@@ -1796,14 +1796,14 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                   '${filePaths.length} PDF-Dateien wurden erfolgreich erstellt:',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppConstants.spacingM),
                 ...filePaths.map((path) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text('• ${path.split('/').last}', style: const TextStyle(fontSize: 12)),
                 )),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppConstants.spacingM),
                 const Divider(),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppConstants.spacingS),
                 const Text(
                   'Speicherort:',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
@@ -1855,7 +1855,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CircularProgressIndicator(),
-                    SizedBox(height: 16),
+                    SizedBox(height: AppConstants.spacing),
                     Text('Erstelle Excel-Dateien...'),
                   ],
                 ),
@@ -1898,7 +1898,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
             title: const Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.green),
-                SizedBox(width: 8),
+                SizedBox(width: AppConstants.spacingS),
                 Text('Excel-Export erfolgreich'),
               ],
             ),
@@ -1910,14 +1910,14 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                   '${filePaths.length} Excel-Dateien wurden erfolgreich erstellt:',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppConstants.spacingM),
                 ...filePaths.map((path) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text('• ${path.split('/').last}', style: const TextStyle(fontSize: 12)),
                 )),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppConstants.spacingM),
                 const Divider(),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppConstants.spacingS),
                 const Text(
                   'Speicherort:',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
@@ -2395,7 +2395,7 @@ class _CashStatusScreenState extends ConsumerState<CashStatusScreen> with Single
                                   shape: BoxShape.circle,
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: AppConstants.spacingS),
                               Text(entry.key),
                             ],
                           )),

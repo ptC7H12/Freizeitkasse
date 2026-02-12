@@ -224,28 +224,28 @@ class UIHelpers {
 
   // ===== RESPONSIVE HELPERS =====
 
-  /// Prüft ob das Device ein Tablet ist
-  static bool isTablet(BuildContext context) {
-    return MediaQuery.of(context).size.width >= AppConstants.breakpointTablet;
-  }
-
-  /// Prüft ob das Device ein Desktop ist
+  /// Prüft ob das Device ein Desktop ist (>=800px)
   static bool isDesktop(BuildContext context) {
     return MediaQuery.of(context).size.width >= AppConstants.breakpointDesktop;
   }
 
-  /// Prüft ob das Device ein Smartphone ist
+  /// Prüft ob das Device ein Smartphone ist (<800px)
   static bool isMobile(BuildContext context) {
-    return MediaQuery.of(context).size.width < AppConstants.breakpointTablet;
+    return MediaQuery.of(context).size.width < AppConstants.breakpointDesktop;
+  }
+
+  /// Prüft ob das Device extra-breit ist (>=1200px)
+  static bool isWide(BuildContext context) {
+    return MediaQuery.of(context).size.width >= AppConstants.breakpointWide;
   }
 
   /// Gibt die optimale Anzahl an Spalten für ein Grid zurück
   static int getGridColumnCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    if (width >= AppConstants.breakpointDesktop) {
+    if (width >= AppConstants.breakpointWide) {
       return 4;
     }
-    if (width >= AppConstants.breakpointTablet) {
+    if (width >= AppConstants.breakpointDesktop) {
       return 3;
     }
     return 2;

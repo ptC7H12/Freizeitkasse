@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/category_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../data/database/app_database.dart';
+import '../../utils/exceptions.dart';
 import '../../utils/ui_helpers.dart';
 import '../../utils/constants.dart';
 /// import '../../extensions/context_extensions.dart';
@@ -303,7 +304,7 @@ void _showAddDialog(
               final eventId = ref.read(currentEventIdProvider);
 
               if (eventId == null) {
-                throw Exception('Kein Event ausgewählt');
+                throw const BusinessRuleException('Kein Event ausgewählt', code: 'NO_EVENT');
               }
 
               if (isExpense) {

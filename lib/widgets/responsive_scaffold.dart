@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../data/database/app_database.dart';
 import '../providers/current_event_provider.dart';
+import '../utils/route_helpers.dart';
+import '../screens/auth/event_selection_screen.dart';
 import '../providers/task_provider.dart';
 import '../utils/constants.dart';
 import '../screens/dashboard/dashboard_screen.dart';
@@ -39,7 +41,7 @@ class ResponsiveScaffold extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth > 800;
+        final isDesktop = constraints.maxWidth >= AppConstants.breakpointDesktop;
 
         if (isDesktop) {
           return _buildDesktopLayout(context, ref);
@@ -225,7 +227,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                 'Freizeit wechseln',
                 () {
                   ref.read(currentEventProvider.notifier).clearEvent();
-                  Navigator.of(context).pushReplacementNamed('/');
+                  RouteHelpers.pushAndRemoveAll(context, const EventSelectionScreen());
                 },
               ),
             ),
@@ -465,7 +467,7 @@ class ResponsiveScaffold extends ConsumerWidget {
                     'Freizeit wechseln',
                     () {
                       ref.read(currentEventProvider.notifier).clearEvent();
-                      Navigator.of(context).pushReplacementNamed('/');
+                      RouteHelpers.pushAndRemoveAll(context, const EventSelectionScreen());
                     },
                   ),
                 ),

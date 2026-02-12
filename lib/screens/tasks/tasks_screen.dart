@@ -136,7 +136,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
         // Filter Tabs
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: AppConstants.paddingH16,
           child: Row(
             children: [
               _buildFilterChip('Alle', 'all'),
@@ -194,7 +194,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
                           Row(
                             children: [
                               Icon(Icons.calendar_today, size: 12, color: isOverdue ? Colors.red : Colors.grey),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: AppConstants.spacingXS),
                               Text(
                                 'Fällig: ${DateFormat('dd.MM.yyyy', 'de_DE').format(task.dueDate!)}',
                                 style: TextStyle(
@@ -232,7 +232,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
     return Column(
       children: [
         Icon(icon, color: color),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppConstants.spacingXS),
         Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: color)),
         Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
       ],

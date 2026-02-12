@@ -10,7 +10,7 @@ import '../../providers/role_provider.dart';
 import '../../services/github_ruleset_service.dart';
 import '../../services/ruleset_parser_service.dart';
 import '../../utils/logger.dart';
-//import '../../utils/route_helpers.dart';
+import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
 import '../../extensions/context_extensions.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -214,7 +214,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
                       icon: const Icon(Icons.login),
                       label: const Text('Öffnen'),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(16),
+                        padding: AppConstants.paddingAll16,
                         backgroundColor: const Color(0xFF4CAF50),
                         foregroundColor: Colors.white,
                         disabledBackgroundColor: Colors.grey.shade300,
@@ -236,7 +236,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
                       icon: const Icon(Icons.delete_outline),
                       label: const Text('Löschen'),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(16),
+                        padding: AppConstants.paddingAll16,
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
                         disabledBackgroundColor: Colors.grey.shade300,
@@ -398,7 +398,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
                   icon: const Icon(Icons.check),
                   label: const Text('Bestätigen'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
+                    padding: AppConstants.paddingAll16,
                     backgroundColor: const Color(0xFF2196F3),
                     foregroundColor: Colors.white,
                     textStyle: const TextStyle(
@@ -478,11 +478,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
     ref.read(currentEventProvider.notifier).selectEvent(event);
 
     // Zum Dashboard navigieren
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<dynamic>(
-        builder: (context) => const DashboardScreen(),
-      ),
-    );
+    RouteHelpers.pushReplacement(context, const DashboardScreen());
   }
 
   void _showDeleteDialog(Event event) {

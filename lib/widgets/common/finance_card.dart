@@ -51,7 +51,7 @@ class FinanceCard extends StatelessWidget {
       label: label,
       amount: amount,
       subtitle: subtitle,
-      color: const Color(0xFFE91E63),
+      color: AppConstants.dangerColor,
       isBold: isBold,
     );
   }
@@ -92,7 +92,7 @@ class FinanceCard extends StatelessWidget {
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppConstants.spacingXS),
           Text(
             NumberFormat.currency(locale: 'de_DE', symbol: '€').format(amount),
             style: TextStyle(
@@ -102,7 +102,7 @@ class FinanceCard extends StatelessWidget {
             ),
           ),
           if (subtitle != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: AppConstants.spacingXS),
             Text(
               subtitle!,
               style: TextStyle(

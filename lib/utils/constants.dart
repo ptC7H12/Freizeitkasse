@@ -7,7 +7,7 @@ class AppConstants {
   // Private constructor um Instanziierung zu verhindern
   AppConstants._();
 
-  // ===== FARBEN =====
+  // ===== FARBEN (Light Theme) =====
 
   /// Primärfarbe (Material Blue)
   static const Color primaryColor = Color(0xFF2196F3);
@@ -21,20 +21,34 @@ class AppConstants {
   /// Tertiärfarbe (Orange für Warnungen/Highlights)
   static const Color tertiaryColor = Color(0xFFFF9800);
 
-  /// Erfolgsfarbe
-  static const Color successColor = Color(0xFF4CAF50);
+  /// Erfolgsfarbe (= secondaryColor)
+  static const Color successColor = secondaryColor;
 
-  /// Warnfarbe
-  static const Color warningColor = Color(0xFFFF9800);
+  /// Warnfarbe (= tertiaryColor)
+  static const Color warningColor = tertiaryColor;
 
   /// Fehlerfarbe
   static const Color errorColor = Color(0xFFF44336);
 
-  /// Informationsfarbe
-  static const Color infoColor = Color(0xFF2196F3);
+  /// Informationsfarbe (= primaryColor)
+  static const Color infoColor = primaryColor;
 
   /// Gefahr-/Ausgabenfarbe (Pink)
   static const Color dangerColor = Color(0xFFE91E63);
+
+  // ===== FARBEN (Dark Theme) =====
+
+  /// Primärfarbe Dark Theme
+  static const Color primaryColorDarkTheme = Color(0xFF64B5F6);
+
+  /// Sekundärfarbe Dark Theme
+  static const Color secondaryColorDarkTheme = Color(0xFF81C784);
+
+  /// Tertiärfarbe Dark Theme
+  static const Color tertiaryColorDarkTheme = Color(0xFFFFB74D);
+
+  /// AppBar-Hintergrund Dark Theme
+  static const Color appBarColorDarkTheme = Color(0xFF1976D2);
 
   // ===== SPACING =====
 
@@ -71,6 +85,10 @@ class AppConstants {
   static const EdgeInsets paddingV16 = EdgeInsets.symmetric(vertical: spacing);
   static const EdgeInsets paddingH8 = EdgeInsets.symmetric(horizontal: spacingS);
   static const EdgeInsets paddingV8 = EdgeInsets.symmetric(vertical: spacingS);
+  static const EdgeInsets paddingH16V8 = EdgeInsets.symmetric(horizontal: spacing, vertical: spacingS);
+  static const EdgeInsets paddingH12V4 = EdgeInsets.symmetric(horizontal: spacingM, vertical: spacingXS);
+  static const EdgeInsets paddingH12V8 = EdgeInsets.symmetric(horizontal: spacingM, vertical: spacingS);
+  static const EdgeInsets paddingH8V4 = EdgeInsets.symmetric(horizontal: spacingS, vertical: spacingXS);
 
   // ===== BORDER RADIUS =====
 
@@ -117,11 +135,12 @@ class AppConstants {
   /// Maximale Breite für Formulare auf Desktop
   static const double maxFormWidth = 800.0;
 
-  /// Breakpoint für Tablet (600px)
-  static const double breakpointTablet = 600.0;
+  /// Breakpoint für Mobile/Desktop Layout-Wechsel (800px)
+  /// Unterhalb: Mobile-Layout (Drawer), Oberhalb: Desktop-Layout (Sidebar)
+  static const double breakpointDesktop = 800.0;
 
-  /// Breakpoint für Desktop (1200px)
-  static const double breakpointDesktop = 1200.0;
+  /// Breakpoint für extra-breite Layouts (1200px)
+  static const double breakpointWide = 1200.0;
 
   // ===== ELEVATION =====
 

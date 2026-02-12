@@ -460,7 +460,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
               child: Row(
                 children: [
                   Icon(Icons.table_chart),
-                  SizedBox(width: 8),
+                  SizedBox(width: AppConstants.spacingS),
                   Text('Teilnehmer exportieren'),
                 ],
               ),
@@ -470,7 +470,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
               child: Row(
                 children: [
                   Icon(Icons.description),
-                  SizedBox(width: 8),
+                  SizedBox(width: AppConstants.spacingS),
                   Text('Import-Vorlage herunterladen'),
                 ],
               ),
@@ -631,7 +631,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
               return Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: AppConstants.paddingH16V8,
                     child: Text(
                       '${filteredParticipants.length} von ${participants.length} Teilnehmern',
                       style: TextStyle(color: Colors.grey[600]),
@@ -655,7 +655,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(height: 4),
+                              const SizedBox(height: AppConstants.spacingXS),
                               // Familie-Info (wenn vorhanden)
                               if (participant.familyId != null)
                                 FutureBuilder(
@@ -682,7 +682,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
                               Text(
                                 'Geb.: ${AppDateUtils.formatGerman(participant.birthDate)} (${AppDateUtils.calculateAge(participant.birthDate)} Jahre)',
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: AppConstants.spacingXS),
                               _buildPaymentStatusRow(participant),
                             ],
                           ),
@@ -733,12 +733,12 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
             size: 100,
             color: Colors.grey,
           ),
-          SizedBox(height: 24),
+          SizedBox(height: AppConstants.spacingL),
           Text(
             'Noch keine Teilnehmer',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: AppConstants.spacingS),
           Text(
             'Füge deinen ersten Teilnehmer hinzu.',
             style: TextStyle(color: Colors.grey),
@@ -800,7 +800,7 @@ class _ParticipantsListScreenState extends ConsumerState<ParticipantsListScreen>
               size: 14,
               color: statusColor,
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppConstants.spacingXS),
             Text(
               'Preis: ${totalPrice.toStringAsFixed(2)} €',
               style: TextStyle(

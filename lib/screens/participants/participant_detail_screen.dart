@@ -436,7 +436,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
             ),
             const Divider(height: 24),
             _buildPaymentRow('Gesamtpreis', totalPrice, fontWeight: FontWeight.bold),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppConstants.spacing),
 
             // Aufschlüsselung der Zahlungen
             Text(
@@ -447,10 +447,10 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
                 color: Colors.grey[700],
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             _buildPaymentRow('  Direkte Zahlungen', directPayments, color: Colors.blue, fontSize: 14),
             if (familyShare > 0) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: AppConstants.spacingXS),
               _buildPaymentRow(
                 '  Anteilige Familienzahlungen',
                 familyShare,
@@ -460,7 +460,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
             ],
             const Divider(height: 16),
             _buildPaymentRow('Gesamt bezahlt', totalPaid, color: Colors.green, fontWeight: FontWeight.w600),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppConstants.spacingS),
             _buildPaymentRow(
               'Offener Betrag',
               outstanding,
@@ -590,9 +590,9 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
                 'Manueller Preis',
                 '${_participant!.manualPriceOverride!.toStringAsFixed(2)} €',
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppConstants.spacingXS),
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: AppConstants.paddingAll8,
                 decoration: BoxDecoration(
                   color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
@@ -600,7 +600,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
                 child: Row(
                   children: [
                     const Icon(Icons.info_outline, size: 16, color: Colors.orange),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppConstants.spacingS),
                     Expanded(
                       child: Text(
                         'Preis wurde manuell überschrieben',
@@ -644,7 +644,7 @@ class _ParticipantDetailScreenState extends ConsumerState<ParticipantDetailScree
             const Divider(height: 16),
             if (_payments.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: AppConstants.paddingV16,
                 child: Center(
                   child: Text(
                     'Noch keine Zahlungen erfasst',

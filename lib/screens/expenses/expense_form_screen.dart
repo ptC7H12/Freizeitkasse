@@ -99,7 +99,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       locale: const Locale('de', 'DE'),
     );
 
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null && picked != _selectedDate && mounted) {
       setState(() {
         _selectedDate = picked;
       });

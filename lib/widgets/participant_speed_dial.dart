@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/constants.dart';
 
 /// Participant SpeedDial Widget
 ///
@@ -99,7 +100,7 @@ class _ParticipantSpeedDialState extends State<ParticipantSpeedDial>
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppConstants.spacingM),
                 FloatingActionButton.small(
                   heroTag: 'export_participants_fab',
                   onPressed: () {
@@ -143,7 +144,7 @@ class _ParticipantSpeedDialState extends State<ParticipantSpeedDial>
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppConstants.spacingM),
                 FloatingActionButton.small(
                   heroTag: 'import_participants_fab',
                   onPressed: () {

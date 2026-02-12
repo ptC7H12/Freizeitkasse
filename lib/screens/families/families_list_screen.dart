@@ -292,7 +292,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
               return Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: AppConstants.paddingH16V8,
                     child: Text(
                       '${filteredFamilies.length} von ${families.length} Familien',
                       style: TextStyle(color: Colors.grey[600]),
@@ -320,7 +320,7 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
                             children: [
                               if (family.contactPerson != null)
                                 Text('Kontakt: ${family.contactPerson}'),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: AppConstants.spacingXS),
                               Text(
                                 'Erwartet: ${expectedPrice.toStringAsFixed(2)} € | '
                                 'Bezahlt: ${totalPaid.toStringAsFixed(2)} €',
@@ -369,12 +369,12 @@ class _FamiliesListScreenState extends ConsumerState<FamiliesListScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.family_restroom, size: 100, color: Colors.grey),
-          SizedBox(height: 24),
+          SizedBox(height: AppConstants.spacingL),
           Text(
             'Noch keine Familien',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: AppConstants.spacingS),
           Text(
             'Füge deine erste Familie hinzu.',
             style: TextStyle(color: Colors.grey),

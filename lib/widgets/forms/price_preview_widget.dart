@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
 import '../../services/price_calculator_service.dart';
+import '../../utils/exceptions.dart';
 import '../../providers/database_provider.dart';
 import '../../providers/current_event_provider.dart';
 import '../../utils/date_utils.dart';
+import '../../utils/constants.dart';
 import '../../utils/logger.dart';
 
 /// Live-Preisberechnung Widget
@@ -78,7 +80,7 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
       final eventId = ref.read(currentEventIdProvider);
 
       if (eventId == null) {
-        throw Exception('Kein Event ausgewählt');
+        throw const BusinessRuleException('Kein Event ausgewählt', code: 'NO_EVENT');
       }
 
       // Event laden
@@ -87,7 +89,7 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
           .getSingleOrNull();
 
       if (event == null) {
-        throw Exception('Event nicht gefunden');
+        throw const NotFoundException('Event', null);
       }
 
       // Aktives Regelwerk laden
@@ -265,11 +267,11 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
       return Card(
         color: Colors.red.shade50,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppConstants.paddingAll16,
           child: Row(
             children: [
               Icon(Icons.error_outline, color: Colors.red.shade700),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppConstants.spacingS),
               Expanded(
                 child: Text(
                   _error!,
@@ -293,7 +295,7 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
                 width: 20,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              SizedBox(width: 12),
+              SizedBox(width: AppConstants.spacingM),
               Text('Berechne Preis...'),
             ],
           ),
@@ -319,7 +321,7 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
     return Card(
       color: Colors.blue.shade50,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppConstants.paddingAll16,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -344,9 +346,9 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
               ],
             ),
             if (hasDiscounts) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: AppConstants.spacingM),
               const Divider(),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppConstants.spacingS),
               const Text(
                 'Rabatte:',
                 style: TextStyle(
@@ -354,13 +356,13 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
                   fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppConstants.spacingXS),
               ...discountReasons.map((reason) => Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Row(
                       children: [
                         Icon(Icons.check_circle, size: 16, color: Colors.green.shade700),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppConstants.spacingS),
                         Expanded(
                           child: Text(
                             reason as String,
@@ -370,9 +372,9 @@ class _PricePreviewWidgetState extends ConsumerState<PricePreviewWidget> {
                       ],
                     ),
                   )),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppConstants.spacingS),
               const Divider(),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppConstants.spacingS),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

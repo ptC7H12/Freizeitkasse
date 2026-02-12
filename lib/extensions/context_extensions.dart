@@ -54,14 +54,14 @@ extension ContextExtensions on BuildContext {
 
   // ===== RESPONSIVE =====
 
-  /// Ist Mobile?
+  /// Ist Mobile? (<800px)
   bool get isMobile => UIHelpers.isMobile(this);
 
-  /// Ist Tablet?
-  bool get isTablet => UIHelpers.isTablet(this);
-
-  /// Ist Desktop?
+  /// Ist Desktop? (>=800px)
   bool get isDesktop => UIHelpers.isDesktop(this);
+
+  /// Ist extra-breit? (>=1200px)
+  bool get isWide => UIHelpers.isWide(this);
 
   // ===== NAVIGATION =====
 

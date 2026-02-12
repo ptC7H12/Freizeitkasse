@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/app_database.dart' as db;
 import '../../providers/participant_provider.dart';
 import '../../providers/current_event_provider.dart';
+import '../../utils/exceptions.dart';
 import '../../providers/database_provider.dart';
 import '../../utils/validators.dart';
 import '../../utils/date_utils.dart';
@@ -357,7 +358,7 @@ class _ParticipantFormScreenState
       locale: const Locale('de', 'DE'),
     );
 
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         _birthDate = picked;
       });
@@ -634,7 +635,7 @@ class _ParticipantFormScreenState
       final eventId = ref.read(currentEventIdProvider);
 
       if (eventId == null) {
-        throw Exception('Kein Event ausgewählt');
+        throw const BusinessRuleException('Kein Event ausgewählt', code: 'NO_EVENT');
       }
 
       final manualPrice = _hasManualPrice && _manualPriceController.text.isNotEmpty

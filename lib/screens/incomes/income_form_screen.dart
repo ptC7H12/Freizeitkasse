@@ -83,7 +83,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
       locale: const Locale('de', 'DE'),
     );
 
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null && picked != _selectedDate && mounted) {
       setState(() {
         _selectedDate = picked;
       });
