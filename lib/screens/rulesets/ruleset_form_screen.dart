@@ -78,7 +78,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       locale: const Locale('de', 'DE'),
     );
 
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null && picked != _selectedDate && mounted) {
       setState(() {
         _selectedDate = picked;
       });
@@ -342,7 +342,7 @@ class _RulesetFormScreenState extends ConsumerState<RulesetFormScreen> {
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed == true && mounted) {
       setState(() {
         _yamlController.text = template;
       });

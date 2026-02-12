@@ -358,7 +358,7 @@ class _ParticipantFormScreenState
       locale: const Locale('de', 'DE'),
     );
 
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         _birthDate = picked;
       });

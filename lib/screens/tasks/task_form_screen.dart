@@ -293,7 +293,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2100),
                   );
-                  if (picked != null) {
+                  if (picked != null && mounted) {
                     setState(() {
                       _dueDate = picked;
                     });

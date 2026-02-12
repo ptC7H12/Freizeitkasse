@@ -354,7 +354,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
       locale: const Locale('de', 'DE'),
     );
 
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         _paymentDate = picked;
       });
