@@ -39,7 +39,7 @@ class ResponsiveScaffold extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth > 800;
+        final isDesktop = constraints.maxWidth >= AppConstants.breakpointDesktop;
 
         if (isDesktop) {
           return _buildDesktopLayout(context, ref);

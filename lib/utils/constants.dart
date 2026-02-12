@@ -117,11 +117,12 @@ class AppConstants {
   /// Maximale Breite für Formulare auf Desktop
   static const double maxFormWidth = 800.0;
 
-  /// Breakpoint für Tablet (600px)
-  static const double breakpointTablet = 600.0;
+  /// Breakpoint für Mobile/Desktop Layout-Wechsel (800px)
+  /// Unterhalb: Mobile-Layout (Drawer), Oberhalb: Desktop-Layout (Sidebar)
+  static const double breakpointDesktop = 800.0;
 
-  /// Breakpoint für Desktop (1200px)
-  static const double breakpointDesktop = 1200.0;
+  /// Breakpoint für extra-breite Layouts (1200px)
+  static const double breakpointWide = 1200.0;
 
   // ===== ELEVATION =====
 

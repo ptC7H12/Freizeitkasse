@@ -34,7 +34,7 @@ class _AdaptiveListItemState extends State<AdaptiveListItem> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 800;
+    final isDesktop = MediaQuery.of(context).size.width >= AppConstants.breakpointDesktop;
 
     if (isDesktop) {
       return _buildDesktopListItem();
