@@ -10,7 +10,7 @@ import '../../providers/role_provider.dart';
 import '../../services/github_ruleset_service.dart';
 import '../../services/ruleset_parser_service.dart';
 import '../../utils/logger.dart';
-//import '../../utils/route_helpers.dart';
+import '../../utils/route_helpers.dart';
 import '../../utils/constants.dart';
 import '../../extensions/context_extensions.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -478,11 +478,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
     ref.read(currentEventProvider.notifier).selectEvent(event);
 
     // Zum Dashboard navigieren
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<dynamic>(
-        builder: (context) => const DashboardScreen(),
-      ),
-    );
+    RouteHelpers.pushReplacement(context, const DashboardScreen());
   }
 
   void _showDeleteDialog(Event event) {
