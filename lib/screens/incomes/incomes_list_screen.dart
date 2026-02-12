@@ -79,7 +79,7 @@ class IncomesListScreen extends ConsumerWidget {
               Container(
                 padding: AppConstants.paddingAll16,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+                  color: AppConstants.successColor.withValues(alpha: 0.1),
                   border: Border(
                     bottom: BorderSide(color: Colors.grey.shade300),
                   ),
@@ -89,7 +89,7 @@ class IncomesListScreen extends ConsumerWidget {
                   children: [
                     const Row(
                       children: [
-                        Icon(Icons.account_balance_wallet, color: Color(0xFF4CAF50), size: 24),
+                        Icon(Icons.account_balance_wallet, color: AppConstants.successColor, size: 24),
                         SizedBox(width: AppConstants.spacingS),
                         Text(
                           'Übersicht',
@@ -110,14 +110,14 @@ class IncomesListScreen extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: AppConstants.borderRadius8,
-                              border: Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.3)),
+                              border: Border.all(color: AppConstants.successColor.withValues(alpha: 0.3)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Row(
                                   children: [
-                                    Icon(Icons.euro, color: Color(0xFF4CAF50), size: 20),
+                                    Icon(Icons.euro, color: AppConstants.successColor, size: 20),
                                     SizedBox(width: AppConstants.spacingS),
                                     Text(
                                       'Gesamteinnahmen',
@@ -134,7 +134,7 @@ class IncomesListScreen extends ConsumerWidget {
                                   style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF4CAF50),
+                                    color: AppConstants.successColor,
                                   ),
                                 ),
                               ],
@@ -149,14 +149,14 @@ class IncomesListScreen extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: AppConstants.borderRadius8,
-                              border: Border.all(color: const Color(0xFF2196F3).withValues(alpha: 0.3)),
+                              border: Border.all(color: AppConstants.primaryColor.withValues(alpha: 0.3)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Row(
                                   children: [
-                                    Icon(Icons.receipt_long, color: Color(0xFF2196F3), size: 20),
+                                    Icon(Icons.receipt_long, color: AppConstants.primaryColor, size: 20),
                                     SizedBox(width: AppConstants.spacingS),
                                     Text(
                                       'Anzahl Einnahmen',
@@ -173,7 +173,7 @@ class IncomesListScreen extends ConsumerWidget {
                                   style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF2196F3),
+                                    color: AppConstants.primaryColor,
                                   ),
                                 ),
                               ],

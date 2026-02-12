@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/constants.dart';
 
 /// Export SpeedDial Widget
 ///
@@ -12,7 +13,7 @@ class ExportSpeedDial extends StatefulWidget {
     super.key,
     required this.onPdfExport,
     required this.onExcelExport,
-    this.backgroundColor = const Color(0xFF4CAF50),
+    this.backgroundColor = AppConstants.successColor,
   });
 
   @override

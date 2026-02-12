@@ -51,7 +51,7 @@ class FinanceCard extends StatelessWidget {
       label: label,
       amount: amount,
       subtitle: subtitle,
-      color: const Color(0xFFE91E63),
+      color: AppConstants.dangerColor,
       isBold: isBold,
     );
   }
