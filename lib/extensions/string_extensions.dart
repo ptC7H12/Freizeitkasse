@@ -1,3 +1,5 @@
+import '../utils/validators.dart';
+
 /// Extensions für String
 ///
 /// Erweitert String mit nützlichen Helper-Methoden
@@ -48,13 +50,11 @@ extension StringExtensions on String {
     return null;
   }
 
-  /// Ist gültige Email? (Basic Check)
-  bool get isValidEmail {
-    final emailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-    );
-    return emailRegex.hasMatch(this);
-  }
+  /// Ist gültige Email? (delegiert an Validators.email)
+  bool get isValidEmail => Validators.email(this) == null;
+
+  /// Ist gültige deutsche IBAN?
+  bool get isValidIBAN => Validators.iban(this) == null;
 
   /// Ist numerisch?
   bool get isNumeric => double.tryParse(this) != null;
