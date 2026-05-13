@@ -655,9 +655,7 @@ class _EventSelectionScreenState extends ConsumerState<EventSelectionScreen> {
       final settingsRepository = ref.read(settingsRepositoryProvider);
       final settings = await settingsRepository.getOrCreateSettings(eventId);
 
-      // Use saved GitHub path or fallback to default
-      final githubPath = settings.githubRulesetPath ??
-          'https://raw.githubusercontent.com/ptC7H12/Freizeitkasse/master/rulesets/valid';
+      final githubPath = settings.githubRulesetPath ?? AppConstants.defaultGithubRulesetPath;
 
       AppLogger.info('[EventSelectionScreen] Loading ruleset from GitHub: $githubPath');
 

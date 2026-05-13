@@ -176,7 +176,32 @@ class TaskRepository {
 
   /// Mark manual task as completed (by ID)
   Future<bool> markTaskAsCompleted(int id) async {
-    return updateTask(id: id, status: 'completed');
+    try {
+      final existing = await getTaskById(id);
+      if (existing == null) {
+        AppLogger.warning('Task not found for completion', {'id': id});
+        return false;
+      }
+
+      final companion = TasksCompanion(
+        status: const Value('completed'),
+        isCompleted: const Value(true),
+        completedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      );
+
+      final success = await (_database.update(_database.tasks)
+            ..where((t) => t.id.equals(id)))
+          .write(companion) > 0;
+
+      if (success) {
+        AppLogger.info('Task marked as completed', {'id': id});
+      }
+      return success;
+    } catch (e, stack) {
+      AppLogger.error('Failed to mark task as completed', error: e, stackTrace: stack);
+      rethrow;
+    }
   }
 
   /// Mark task as in progress

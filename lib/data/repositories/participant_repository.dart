@@ -134,14 +134,16 @@ class ParticipantRepository {
       familyId: Value(familyId),
     );
 
-    final participantId = await _db.into(_db.participants).insert(companion);
+    return _db.transaction(() async {
+      final participantId = await _db.into(_db.participants).insert(companion);
 
-    // Preise aller Familienmitglieder neu berechnen (da sich Anzahl ändert)
-    if (familyId != null) {
-      await recalculateFamilyPrices(familyId);
-    }
+      // Preise aller Familienmitglieder neu berechnen (da sich Anzahl ändert)
+      if (familyId != null) {
+        await recalculateFamilyPrices(familyId);
+      }
 
-    return participantId;
+      return participantId;
+    });
   }
 
   // ============================================================================

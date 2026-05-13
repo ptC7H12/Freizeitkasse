@@ -354,14 +354,13 @@ class DashboardScreen extends ConsumerWidget {
                                 (sum, expense) => sum + expense.amount,
                               );
 
-                              // Formel: Soll Einnahmen (Gesamt) + Ist Einnahmen Sonstige - Soll Ausgaben (Gesamt)
                               final sollEinnahmenGesamt = sollEinnahmenTeilnehmer + istSonstigeEinnahmen;
-                              final saldo = sollEinnahmenGesamt + istSonstigeEinnahmen - sollAusgabenGesamt;
+                              final saldo = sollEinnahmenGesamt - sollAusgabenGesamt;
 
                               return _buildSaldoCard(
                                 context,
                                 saldo,
-                                'Soll Einnahmen (Gesamt) + Ist Sonstige Einnahmen - Soll Ausgaben (Gesamt)',
+                                'Soll Einnahmen (Gesamt) - Soll Ausgaben (Gesamt)',
                               );
                             },
                           );

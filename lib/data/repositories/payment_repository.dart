@@ -115,23 +115,6 @@ class PaymentRepository {
     return payments.fold<double>(0.0, (sum, p) => sum + p.amount);
   }
 
-  // Get outstanding amount for participant (OLD - doesn't include family payments)
-  Future<double> getOutstandingAmount(int participantId) async {
-    final participant = await (_db.select(_db.participants)
-          ..where((tbl) => tbl.id.equals(participantId)))
-        .getSingleOrNull();
-
-    if (participant == null) {
-      return 0.0;
-    }
-
-    final expectedPrice =
-        participant.manualPriceOverride ?? participant.calculatedPrice;
-    final totalPaid = await getTotalPaymentsForParticipant(participantId);
-
-    return expectedPrice - totalPaid;
-  }
-
   // ============================================================================
   // FAMILY PAYMENT LOGIC
   // ============================================================================

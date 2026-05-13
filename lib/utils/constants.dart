@@ -196,6 +196,12 @@ class AppConstants {
   /// Lange Animation (500ms)
   static const Duration animationDurationLong = Duration(milliseconds: 500);
 
+  // ===== GITHUB =====
+
+  /// Standard-Basis-URL für Regelwerk-Vorlagen auf GitHub
+  static const String defaultGithubRulesetPath =
+      'https://raw.githubusercontent.com/ptC7H12/Freizeitkasse/master/rulesets/valid';
+
   // ===== APP-INFO =====
 
   /// App-Name

@@ -464,115 +464,61 @@ class ExcelImportService {
     }
   }
 
-  /// Parse date from Excel cell (handles both DateCellValue and string formats)
+  /// Parse date from Excel cell (handles DateCellValue, DateTimeCellValue, numeric serial, and string formats)
   DateTime _parseDateFromCell(Data cell) {
     final value = cell.value;
-    AppLogger.debug('DEBUG _parseDateFromCell: Cell value: $value');
-    AppLogger.debug('DEBUG _parseDateFromCell: Cell value type: ${value.runtimeType}');
 
-    // Handle DateCellValue (native Excel date)
     if (value is DateCellValue) {
-      AppLogger.debug('DEBUG _parseDateFromCell: Detected DateCellValue');
       return DateTime(value.year, value.month, value.day);
     }
 
-    // Handle DateTimeCellValue
     if (value is DateTimeCellValue) {
-      AppLogger.debug('DEBUG _parseDateFromCell: Detected DateTimeCellValue');
       return DateTime(value.year, value.month, value.day);
     }
 
-    // Handle numeric value (Excel serial date number)
+    // Excel serial date number (days since 1899-12-30)
     if (value is IntCellValue || value is DoubleCellValue) {
-      AppLogger.debug('DEBUG _parseDateFromCell: Detected numeric value (Excel serial date)');
       final numValue = value is IntCellValue ? value.value.toDouble() : (value as DoubleCellValue).value;
-      AppLogger.debug('DEBUG _parseDateFromCell: Numeric value: $numValue');
       final excelEpoch = DateTime(1899, 12, 30);
-      final result = excelEpoch.add(Duration(days: numValue.toInt()));
-      AppLogger.debug('DEBUG _parseDateFromCell: Converted to DateTime: $result');
-      return result;
+      return excelEpoch.add(Duration(days: numValue.toInt()));
     }
 
-    // Handle string formats
     if (value is TextCellValue) {
-      AppLogger.debug('DEBUG _parseDateFromCell: Detected TextCellValue');
       return _parseDate(value.value.toString());
     }
 
-    // Fallback: try to parse as string
-    AppLogger.debug('DEBUG _parseDateFromCell: Fallback - treating as string');
-    final dateStr = value.toString();
-    return _parseDate(dateStr);
+    return _parseDate(value.toString());
   }
 
-
-  /// Parse date string (supports DD.MM.YYYY, YYYY-MM-DD, etc.)
+  /// Parse date string (supports DD.MM.YYYY, YYYY-MM-DD, DD/MM/YYYY)
   DateTime _parseDate(String dateStr) {
-    AppLogger.debug('DEBUG _parseDate: Input string: "$dateStr"');
-    AppLogger.debug('DEBUG _parseDate: String length: ${dateStr.length}');
-    AppLogger.debug('DEBUG _parseDate: Codeunits: ${dateStr.codeUnits}');
+    final s = dateStr.trim();
 
-    // Trim and clean the string
-    final cleanedDateStr = dateStr.trim();
-    AppLogger.debug('DEBUG _parseDate: Cleaned string: "$cleanedDateStr"');
-
-    // Try DD.MM.YYYY format (German)
-    if (cleanedDateStr.contains('.')) {
-      AppLogger.debug('DEBUG _parseDate: Detected DOT format (German)');
-      final parts = cleanedDateStr.split('.');
-      AppLogger.debug('DEBUG _parseDate: Split parts: $parts (count: ${parts.length})');
-
+    if (s.contains('.')) {
+      final parts = s.split('.');
       if (parts.length == 3) {
         try {
-          final day = int.parse(parts[0].trim());
-          final month = int.parse(parts[1].trim());
-          final year = int.parse(parts[2].trim());
-          AppLogger.debug('DEBUG _parseDate: Parsed values - Day: $day, Month: $month, Year: $year');
-
-          final result = DateTime(year, month, day);
-          AppLogger.debug('DEBUG _parseDate: Successfully created DateTime: $result');
-          return result;
-        } catch (e) {
-          AppLogger.debug('DEBUG _parseDate: Error parsing German format: $e');
-        }
+          return DateTime(int.parse(parts[2].trim()), int.parse(parts[1].trim()), int.parse(parts[0].trim()));
+        } catch (_) {}
       }
     }
 
-    // Try YYYY-MM-DD format (ISO)
-    if (cleanedDateStr.contains('-')) {
-      AppLogger.debug('DEBUG _parseDate: Detected DASH format (ISO)');
+    if (s.contains('-')) {
       try {
-        final result = DateTime.parse(cleanedDateStr);
-        AppLogger.debug('DEBUG _parseDate: Successfully parsed ISO format: $result');
-        return result;
-      } catch (e) {
-        AppLogger.debug('DEBUG _parseDate: Error parsing ISO format: $e');
-      }
+        return DateTime.parse(s);
+      } catch (_) {}
     }
 
-    // Try DD/MM/YYYY format
-    if (cleanedDateStr.contains('/')) {
-      AppLogger.debug('DEBUG _parseDate: Detected SLASH format');
-      final parts = cleanedDateStr.split('/');
-      AppLogger.debug('DEBUG _parseDate: Split parts: $parts (count: ${parts.length})');
-
+    if (s.contains('/')) {
+      final parts = s.split('/');
       if (parts.length == 3) {
         try {
-          final day = int.parse(parts[0].trim());
-          final month = int.parse(parts[1].trim());
-          final year = int.parse(parts[2].trim());
-          AppLogger.debug('DEBUG _parseDate: Parsed values - Day: $day, Month: $month, Year: $year');
-
-          final result = DateTime(year, month, day);
-          AppLogger.debug('DEBUG _parseDate: Successfully created DateTime: $result');
-          return result;
-        } catch (e) {
-          AppLogger.debug('DEBUG _parseDate: Error parsing slash format: $e');
-        }
+          return DateTime(int.parse(parts[2].trim()), int.parse(parts[1].trim()), int.parse(parts[0].trim()));
+        } catch (_) {}
       }
     }
 
-    AppLogger.debug('DEBUG _parseDate: FAILED - No format matched for: "$cleanedDateStr"');
+    AppLogger.warning('[ExcelImport] Ungültiges Datumsformat: "$s"');
     throw ExcelImportException('Ungültiges Datumsformat: $dateStr');
   }
 

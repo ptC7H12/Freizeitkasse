@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
+import '../../utils/constants.dart';
 import '../../utils/logger.dart';
 
 class SettingsRepository {
@@ -35,8 +36,7 @@ class SettingsRepository {
           iban: const Value(null),
           bic: const Value(null),
           invoiceFooter: const Value(null),
-          // Default GitHub ruleset path
-          githubRulesetPath: const Value('https://raw.githubusercontent.com/ptC7H12/Freizeitkasse/master/rulesets/valid'),
+          githubRulesetPath: const Value(AppConstants.defaultGithubRulesetPath),
         ),
       );
 

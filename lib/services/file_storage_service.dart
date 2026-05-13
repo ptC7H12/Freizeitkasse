@@ -57,8 +57,8 @@ class FileStorageService {
       await file.copy(targetPath);
 
       return targetPath;
-    } catch (e) {
-      AppLogger.debug('Error uploading receipt: $e');
+    } catch (e, stack) {
+      AppLogger.error('[FileStorageService] Fehler beim Hochladen des Belegs', error: e, stackTrace: stack);
       return null;
     }
   }
@@ -72,8 +72,8 @@ class FileStorageService {
         return true;
       }
       return false;
-    } catch (e) {
-      AppLogger.debug('Error deleting receipt: $e');
+    } catch (e, stack) {
+      AppLogger.error('[FileStorageService] Fehler beim Löschen des Belegs', error: e, stackTrace: stack);
       return false;
     }
   }

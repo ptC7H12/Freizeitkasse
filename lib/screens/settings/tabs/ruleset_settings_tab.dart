@@ -320,7 +320,7 @@ class RulesetSettingsTabState extends ConsumerState<RulesetSettingsTab> {
                     labelText: 'Pfad zum Regelwerk',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.link),
-                    hintText: 'https://raw.githubusercontent.com/ptC7H12/Freizeitkasse/master/rulesets/valid',
+                    hintText: AppConstants.defaultGithubRulesetPath,
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingS),

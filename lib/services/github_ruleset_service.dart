@@ -50,15 +50,15 @@ class GitHubRulesetService {
         return response.body;
       } else if (response.statusCode == 404) {
         AppLogger.warning('[GitHubRulesetService] Ruleset nicht gefunden auf GitHub: $url (404)');
-
-        // Versuche Fallback auf generisches Ruleset ohne Jahr
         return await _loadFallbackRuleset(cleanBasePath, normalizedEventType);
       } else {
-        AppLogger.error('[GitHubRulesetService] Fehler beim Laden von GitHub: ${response.statusCode}');
+        AppLogger.error('[GitHubRulesetService] HTTP ${response.statusCode} beim Laden von GitHub: $url');
         return null;
       }
+    } on NetworkException {
+      rethrow;
     } catch (e) {
-      AppLogger.error('[GitHubRulesetService] Exception beim Laden von GitHub', error: e);
+      AppLogger.error('[GitHubRulesetService] Unerwarteter Fehler beim Laden von GitHub', error: e);
       return null;
     }
   }
@@ -84,9 +84,11 @@ class GitHubRulesetService {
         AppLogger.info('[GitHubRulesetService] Fallback-Ruleset geladen: ${response.body.length} Zeichen');
         return response.body;
       } else {
-        AppLogger.warning('[GitHubRulesetService] Fallback-Ruleset nicht gefunden: ${response.statusCode}');
+        AppLogger.warning('[GitHubRulesetService] Fallback-Ruleset nicht gefunden: HTTP ${response.statusCode}');
         return null;
       }
+    } on NetworkException {
+      rethrow;
     } catch (e) {
       AppLogger.error('[GitHubRulesetService] Fehler beim Laden des Fallback-Rulesets', error: e);
       return null;
