@@ -139,15 +139,14 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
         _importResult = result;
       });
 
-      if (result.successCount > 0) {
-        AppLogger.info('[ImportScreen] Showing success message: ${result.successCount} participants imported');
+      if (result.rolledBack) {
+        AppLogger.warning('[ImportScreen] Import zurückgesetzt: ${result.errorCount} Fehler');
+        context.showError(
+          'Import fehlgeschlagen: ${result.errorCount} Fehler – keine Daten wurden gespeichert',
+        );
+      } else if (result.successCount > 0) {
+        AppLogger.info('[ImportScreen] ${result.successCount} Teilnehmer importiert');
         context.showSuccess('${result.successCount} Teilnehmer erfolgreich importiert');
-      }
-
-      if (result.hasErrors) {
-        AppLogger.warning('[ImportScreen] Import had ${result.errorCount} errors');
-        AppLogger.warning('[ImportScreen] Errors: ${result.errors}');
-        context.showWarning('Import abgeschlossen mit ${result.errorCount} Fehlern');
       }
     } catch (e, stackTrace) {
       AppLogger.error('[ImportScreen] FATAL ERROR during import', error: e, stackTrace: stackTrace);
@@ -167,6 +166,95 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
       }
       AppLogger.info('[ImportScreen] ==================== IMPORT END ====================');
     }
+  }
+
+  Widget _buildResultCard(BuildContext context, ExcelImportResult result) {
+    final isRolledBack = result.rolledBack;
+    final isSuccess = !isRolledBack && !result.hasErrors;
+
+    final cardColor = isRolledBack
+        ? Colors.red[50]
+        : isSuccess
+            ? Colors.green[50]
+            : Colors.orange[50];
+    final iconColor = isRolledBack
+        ? Colors.red[700]
+        : isSuccess
+            ? Colors.green[700]
+            : Colors.orange[700];
+    final titleColor = isRolledBack
+        ? Colors.red[900]
+        : isSuccess
+            ? Colors.green[900]
+            : Colors.orange[900];
+    final icon = isRolledBack
+        ? Icons.cancel
+        : isSuccess
+            ? Icons.check_circle
+            : Icons.warning_amber;
+
+    return Card(
+      color: cardColor,
+      child: Padding(
+        padding: AppConstants.paddingAll16,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: iconColor),
+                const SizedBox(width: AppConstants.spacingS),
+                Text(
+                  'Import-Ergebnis',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: titleColor,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppConstants.spacingM),
+            Text('Gesamtzeilen: ${result.totalRows}'),
+            if (isRolledBack) ...[
+              Text('Verarbeitet (nicht gespeichert): ${result.successCount}'),
+              Text('Fehler: ${result.errorCount}'),
+              const SizedBox(height: AppConstants.spacingS),
+              Text(
+                'Keine Daten wurden gespeichert. Bitte die Fehler beheben und den Import wiederholen.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.red[800],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ] else ...[
+              Text('Erfolgreich importiert: ${result.successCount}'),
+            ],
+            if (result.hasErrors) ...[
+              const SizedBox(height: AppConstants.spacingM),
+              const Divider(),
+              const SizedBox(height: AppConstants.spacingM),
+              Text(
+                'Fehlerdetails:',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: AppConstants.spacingS),
+              ...result.errors.take(10).map((error) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text('• $error', style: const TextStyle(fontSize: 12)),
+                  )),
+              if (result.errors.length > 10)
+                Text(
+                  '... und ${result.errors.length - 10} weitere Fehler',
+                  style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -348,64 +436,7 @@ class _ParticipantImportScreenState extends ConsumerState<ParticipantImportScree
           // Import Results
           if (_importResult != null) ...[
             const SizedBox(height: AppConstants.spacing),
-            Card(
-              color: _importResult!.hasErrors ? Colors.orange[50] : Colors.green[50],
-              child: Padding(
-                padding: AppConstants.paddingAll16,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          _importResult!.hasErrors ? Icons.warning_amber : Icons.check_circle,
-                          color: _importResult!.hasErrors ? Colors.orange[700] : Colors.green[700],
-                        ),
-                        const SizedBox(width: AppConstants.spacingS),
-                        Text(
-                          'Import-Ergebnis',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: _importResult!.hasErrors
-                                    ? Colors.orange[900]
-                                    : Colors.green[900],
-                              ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppConstants.spacingM),
-                    Text('Gesamtzeilen: ${_importResult!.totalRows}'),
-                    Text('Erfolgreich: ${_importResult!.successCount}'),
-                    if (_importResult!.hasErrors)
-                      Text('Fehler: ${_importResult!.errorCount}'),
-                    if (_importResult!.hasErrors) ...[
-                      const SizedBox(height: AppConstants.spacingM),
-                      const Divider(),
-                      const SizedBox(height: AppConstants.spacingM),
-                      Text(
-                        'Fehlerdetails:',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      const SizedBox(height: AppConstants.spacingS),
-                      ..._importResult!.errors.take(10).map((error) => Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
-                            child: Text(
-                              '• $error',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          )),
-                      if (_importResult!.errors.length > 10)
-                        Text(
-                          '... und ${_importResult!.errors.length - 10} weitere Fehler',
-                          style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
-                        ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
+            _buildResultCard(context, _importResult!),
           ],
         ],
       ),

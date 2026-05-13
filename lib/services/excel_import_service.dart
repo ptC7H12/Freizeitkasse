@@ -1,15 +1,18 @@
 import 'dart:io';
 import 'package:excel/excel.dart';
+import '../data/database/app_database.dart';
 import '../data/repositories/participant_repository.dart';
 import '../data/repositories/family_repository.dart';
 import '../utils/logger.dart';
 import '../utils/exceptions.dart';
 
 class ExcelImportService {
+  final AppDatabase _db;
   final ParticipantRepository _participantRepository;
   final FamilyRepository _familyRepository;
 
-  ExcelImportService(this._participantRepository, this._familyRepository);
+  ExcelImportService(this._db, this._participantRepository, this._familyRepository);
+
   Future<ExcelImportResult> importParticipantsFromExcel({
     required String filePath,
     required int eventId,
@@ -17,184 +20,131 @@ class ExcelImportService {
     final result = ExcelImportResult();
 
     try {
-      AppLogger.info('[ExcelImport] Starting import from file: $filePath');
-      AppLogger.info('[ExcelImport] Target event ID: $eventId');
+      AppLogger.info('[ExcelImport] Start Import von: $filePath (Event: $eventId)');
 
-      // Read Excel file
-      AppLogger.debug('[ExcelImport] Reading file bytes...');
+      // ── DATEI-PARSING (keine DB-Writes) ──────────────────────────────────
       final bytes = File(filePath).readAsBytesSync();
-      AppLogger.debug('[ExcelImport] File size: ${bytes.length} bytes');
-
-      // Decode Excel
-      AppLogger.debug('[ExcelImport] Decoding Excel file...');
       final excel = Excel.decodeBytes(bytes);
-      AppLogger.info('[ExcelImport] Excel decoded. Found ${excel.tables.length} sheets');
+      AppLogger.info('[ExcelImport] ${excel.tables.length} Tabellen gefunden');
 
-      // Get first sheet
       if (excel.tables.isEmpty) {
-        const error = 'Excel-Datei enthält keine Tabellen';
-        AppLogger.error('[ExcelImport] $error');
-        result.errors.add(error);
+        result.errors.add('Excel-Datei enthält keine Tabellen');
         return result;
       }
 
-      final firstSheetName = excel.tables.keys.first;
-      AppLogger.info('[ExcelImport] Using sheet: $firstSheetName');
-
-      final sheet = excel.tables[firstSheetName];
-      if (sheet == null) {
-        final error = 'Sheet "$firstSheetName" ist null';
-        AppLogger.error('[ExcelImport] $error');
-        result.errors.add(error);
+      final sheet = excel.tables[excel.tables.keys.first];
+      if (sheet == null || sheet.maxRows < 2) {
+        result.errors.add('Excel-Datei muss mindestens eine Header-Zeile und eine Datenzeile enthalten');
         return result;
       }
 
-      AppLogger.info('[ExcelImport] Sheet has ${sheet.maxRows} rows and ${sheet.maxColumns} columns');
+      result.totalRows = sheet.maxRows - 1;
+      AppLogger.info('[ExcelImport] ${result.totalRows} Datenzeilen gefunden');
 
-      // Validate sheet has data
-      if (sheet.maxRows < 2) {
-        const error = 'Excel-Datei muss mindestens eine Header-Zeile und eine Datenzeile enthalten';
-        AppLogger.error('[ExcelImport] $error');
-        result.errors.add(error);
-        return result;
-      }
-
-      // Read header row to map columns dynamically
-      AppLogger.debug('[ExcelImport] Reading header row...');
       final headerRow = sheet.rows.firstOrNull;
       if (headerRow == null) {
-        const error = 'Header-Zeile konnte nicht gelesen werden';
-        AppLogger.error('[ExcelImport] $error');
-        result.errors.add(error);
+        result.errors.add('Header-Zeile konnte nicht gelesen werden');
         return result;
       }
 
       final columnMapping = _buildColumnMapping(headerRow);
-      AppLogger.info('[ExcelImport] Column Mapping: $columnMapping');
 
-      // Validate required columns
       if (!columnMapping.containsKey('first_name') ||
           !columnMapping.containsKey('last_name') ||
           !columnMapping.containsKey('birth_date')) {
-        const error = 'Erforderliche Spalten fehlen: Vorname, Nachname, Geburtsdatum';
-        AppLogger.error('[ExcelImport] $error');
-        result.errors.add(error);
+        result.errors.add('Erforderliche Spalten fehlen: Vorname, Nachname, Geburtsdatum');
         return result;
       }
 
-      // PHASE 1: Create families based on Familien-Nr
-      AppLogger.info('[ExcelImport] PHASE 1: Creating families...');
-      final familyMap = await _createFamilies(sheet, columnMapping, eventId, result);
-      AppLogger.info('[ExcelImport] Created ${familyMap.length} families');
+      // ── DB-OPERATIONEN (atomar in einer Transaktion) ──────────────────────
+      await _db.transaction(() async {
+        // Phase 1: Familien anlegen
+        AppLogger.info('[ExcelImport] Phase 1: Familien anlegen...');
+        final familyMap = await _createFamilies(sheet, columnMapping, eventId, result);
+        AppLogger.info('[ExcelImport] ${familyMap.length} Familien angelegt');
 
-      // PHASE 2: Import participants with family assignments
-      AppLogger.info('[ExcelImport] PHASE 2: Importing participants...');
-      // Skip header row (row 0)
-      for (var rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
-        final row = sheet.rows[rowIndex];
+        // Phase 2: Teilnehmer importieren
+        AppLogger.info('[ExcelImport] Phase 2: Teilnehmer importieren...');
+        for (var rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
+          final row = sheet.rows[rowIndex];
+          try {
+            final participantData = _parseRowWithMapping(row, columnMapping, rowIndex);
 
-        try {
-          // Parse row data with dynamic column mapping
-          final participantData = _parseRowWithMapping(row, columnMapping, rowIndex);
-
-          // Validate required fields
-          if (participantData['first_name'] == null ||
-              participantData['last_name'] == null ||
-              participantData['birth_date'] == null) {
-            result.errors.add(
-              'Zeile ${rowIndex + 1}: Vorname, Nachname und Geburtsdatum sind erforderlich',
-            );
-            continue;
-          }
-
-          // Get family ID if Familien-Nr exists
-          int? familyId;
-          String? familyNumber;
-          if (participantData.containsKey('family_number') &&
-              participantData['family_number'] != null) {
-            familyNumber = participantData['family_number'].toString().trim();
-            if (familyNumber.isNotEmpty) {
-              familyId = familyMap[familyNumber];
-              if (familyId != null) {
-                AppLogger.debug('[ExcelImport] Row ${rowIndex + 1}: Assigning to family $familyNumber (ID: $familyId)');
-              } else {
-                AppLogger.warning('[ExcelImport] Row ${rowIndex + 1}: Family number "$familyNumber" not found in familyMap!');
-              }
+            if (participantData['first_name'] == null ||
+                participantData['last_name'] == null ||
+                participantData['birth_date'] == null) {
+              result.errors.add('Zeile ${rowIndex + 1}: Vorname, Nachname und Geburtsdatum sind erforderlich');
+              continue;
             }
-          }
 
-          // Build address from either combined field or separate fields
-          String? address;
-          if (participantData.containsKey('address') && participantData['address'] != null) {
-            // Use combined address field if available
-            address = participantData['address'] as String?;
-          } else {
-            // Combine separate address fields if available
-            final street = participantData['street'] as String?;
-            final postalCode = participantData['postal_code'] as String?;
-            final city = participantData['city'] as String?;
-
-            if (street != null || postalCode != null || city != null) {
-              final parts = <String>[];
-              if (street != null && street.isNotEmpty) {
-                parts.add(street);
-              }
-              if (postalCode != null && postalCode.isNotEmpty) {
-                if (city != null && city.isNotEmpty) {
-                  parts.add('$postalCode $city');
-                } else {
-                  parts.add(postalCode);
+            int? familyId;
+            String? familyNumber;
+            if (participantData.containsKey('family_number') && participantData['family_number'] != null) {
+              familyNumber = participantData['family_number'].toString().trim();
+              if (familyNumber.isNotEmpty) {
+                familyId = familyMap[familyNumber];
+                if (familyId == null) {
+                  AppLogger.warning('[ExcelImport] Zeile ${rowIndex + 1}: Familien-Nr "$familyNumber" nicht gefunden');
                 }
-              } else if (city != null && city.isNotEmpty) {
-                parts.add(city);
               }
-              address = parts.join(', ');
             }
+
+            final address = _buildAddress(participantData);
+
+            await _participantRepository.createParticipant(
+              eventId: eventId,
+              firstName: participantData['first_name'] as String,
+              lastName: participantData['last_name'] as String,
+              birthDate: participantData['birth_date'] as DateTime,
+              gender: participantData['gender'] as String?,
+              address: address,
+              email: participantData['email'] as String?,
+              phone: participantData['phone'] as String?,
+              emergencyContactName: participantData['emergency_contact_name'] as String?,
+              emergencyContactPhone: participantData['emergency_contact_phone'] as String?,
+              allergies: participantData['allergies'] as String?,
+              medications: participantData['medications'] as String?,
+              dietaryRestrictions: participantData['dietary_restrictions'] as String?,
+              notes: participantData['notes'] as String?,
+              familyId: familyId,
+            );
+
+            result.successCount++;
+            AppLogger.debug(
+              '[ExcelImport] Zeile ${rowIndex + 1}: '
+              '${participantData['first_name']} ${participantData['last_name']}'
+              '${familyId != null ? " → Familie $familyNumber" : ""}',
+            );
+          } catch (e, stackTrace) {
+            AppLogger.error('[ExcelImport] Fehler in Zeile ${rowIndex + 1}', error: e, stackTrace: stackTrace);
+            result.errors.add('Zeile ${rowIndex + 1}: $e');
           }
-
-          // Create participant
-          await _participantRepository.createParticipant(
-            eventId: eventId,
-            firstName: participantData['first_name'] as String,
-            lastName: participantData['last_name'] as String,
-            birthDate: participantData['birth_date'] as DateTime,
-            gender: participantData['gender'] as String?,
-            address: address,
-            email: participantData['email'] as String?,
-            phone: participantData['phone'] as String?,
-            emergencyContactName: participantData['emergency_contact_name'] as String?,
-            emergencyContactPhone: participantData['emergency_contact_phone'] as String?,
-            allergies: participantData['allergies'] as String?,
-            medications: participantData['medications'] as String?,
-            dietaryRestrictions: participantData['dietary_restrictions'] as String?,
-            notes: participantData['notes'] as String?,
-            familyId: familyId,
-          );
-
-          result.successCount++;
-          final familyInfo = familyId != null ? ' → Familie ID: $familyId (Nr: $familyNumber)' : ' → Einzelperson';
-          AppLogger.info('[ExcelImport] ✓ Row ${rowIndex + 1}: ${participantData['first_name']} ${participantData['last_name']}$familyInfo');
-        } catch (e, stackTrace) {
-          AppLogger.error('[ExcelImport] Error in row ${rowIndex + 1}', error: e, stackTrace: stackTrace);
-          result.errors.add('Zeile ${rowIndex + 1}: $e');
         }
-      }
 
-      result.totalRows = sheet.maxRows - 1; // Exclude header
-      AppLogger.info('[ExcelImport] Import complete: ${result.successCount}/${result.totalRows} successful, ${result.errorCount} errors');
+        // Fehler in Zeilen → Transaktion abbrechen, alles zurücksetzen
+        if (result.errors.isNotEmpty) {
+          AppLogger.warning(
+            '[ExcelImport] ${result.errorCount} Fehler aufgetreten – '
+            'Transaktion wird zurückgesetzt (${result.successCount} verarbeitete Zeilen werden verworfen)',
+          );
+          throw const _ImportRollbackException();
+        }
+      });
+
+      AppLogger.info('[ExcelImport] Import erfolgreich: ${result.successCount}/${result.totalRows} Teilnehmer gespeichert');
+    } on _ImportRollbackException {
+      result.rolledBack = true;
+      AppLogger.warning('[ExcelImport] Import zurückgesetzt – keine Daten gespeichert');
     } catch (e, stackTrace) {
-      AppLogger.error('[ExcelImport] Fatal error during import', error: e, stackTrace: stackTrace);
-      final errorMessage = 'Fehler beim Lesen der Excel-Datei: $e\n\nStack Trace:\n$stackTrace';
-      AppLogger.error('[ExcelImport] Full error details: $errorMessage');
+      AppLogger.error('[ExcelImport] Fataler Fehler beim Import', error: e, stackTrace: stackTrace);
       result.errors.add('Fehler beim Lesen der Excel-Datei: $e');
     }
 
-    AppLogger.info('[ExcelImport] Import result: $result');
+    AppLogger.info('[ExcelImport] Ergebnis: $result');
     return result;
   }
 
-  /// Create families based on Familien-Nr column
-  /// Returns a map of family_number -> family_id
+  /// Erstellt Familien aus der Familien-Nr-Spalte und gibt family_number→id zurück
   Future<Map<String, int>> _createFamilies(
     Sheet sheet,
     Map<String, int> columnMapping,
@@ -203,164 +153,109 @@ class ExcelImportService {
   ) async {
     final familyMap = <String, int>{};
 
-    // Return early if no family column
     if (!columnMapping.containsKey('family_number')) {
-      AppLogger.warning('[ExcelImport] No Familien-Nr column found - skipping family creation');
+      AppLogger.info('[ExcelImport] Keine Familien-Nr-Spalte – Familien werden übersprungen');
       return familyMap;
     }
 
-    AppLogger.info('[ExcelImport] Starting family creation from Familien-Nr column (index: ${columnMapping['family_number']})');
-
-    // Group rows by family number and track first person name
-    final familyGroups = <String, List<String>>{};  // family_number -> [lastName, firstName]
-    final familyMemberCounts = <String, int>{};  // family_number -> member count
+    // Eindeutige Familien sammeln (Familien-Nr → [Nachname, Vorname] des ersten Mitglieds)
+    final familyGroups = <String, List<String>>{};
+    final familyMemberCounts = <String, int>{};
 
     for (var rowIndex = 1; rowIndex < sheet.maxRows; rowIndex++) {
       final row = sheet.rows[rowIndex];
-      final familyNumberCell = _getCellValue(row, columnMapping['family_number']!);
+      final familyNumber = _getCellValue(row, columnMapping['family_number']!);
+      if (familyNumber == null || familyNumber.isEmpty) continue;
 
-      AppLogger.debug('[ExcelImport] Row $rowIndex: family_number cell = "$familyNumberCell"');
+      familyMemberCounts[familyNumber] = (familyMemberCounts[familyNumber] ?? 0) + 1;
+      if (familyGroups.containsKey(familyNumber)) continue;
 
-      if (familyNumberCell != null && familyNumberCell.isNotEmpty) {
-        final familyNumber = familyNumberCell.toString().trim();
+      final firstName = columnMapping.containsKey('first_name')
+          ? _getCellValue(row, columnMapping['first_name']!) : null;
+      final lastName = columnMapping.containsKey('last_name')
+          ? _getCellValue(row, columnMapping['last_name']!) : null;
 
-        // Count members in this family
-        familyMemberCounts[familyNumber] = (familyMemberCounts[familyNumber] ?? 0) + 1;
-
-        // Skip if already processed (we only need the first person)
-        if (familyGroups.containsKey(familyNumber)) {
-          AppLogger.debug('[ExcelImport] Family $familyNumber already processed, skipping');
-          continue;
-        }
-
-        // Get first person's name for family name
-        String? firstName;
-        String? lastName;
-
-        if (columnMapping.containsKey('first_name')) {
-          firstName = _getCellValue(row, columnMapping['first_name']!);
-        }
-        if (columnMapping.containsKey('last_name')) {
-          lastName = _getCellValue(row, columnMapping['last_name']!);
-        }
-
-        if (firstName != null && lastName != null) {
-          // Store as [lastName, firstName] like Python code does
-          familyGroups[familyNumber] = [lastName, firstName];
-          AppLogger.info('[ExcelImport] Found family $familyNumber: First member = "$lastName $firstName" (Row $rowIndex)');
-        } else {
-          AppLogger.warning('[ExcelImport] Row $rowIndex: Family number $familyNumber found but name is incomplete (firstName: $firstName, lastName: $lastName)');
-        }
+      if (firstName != null && lastName != null) {
+        familyGroups[familyNumber] = [lastName, firstName];
       }
     }
 
-    AppLogger.info('[ExcelImport] Found ${familyGroups.length} unique families:');
-    for (var entry in familyMemberCounts.entries) {
-      AppLogger.info('[ExcelImport]   Familie ${entry.key}: ${entry.value} Mitglieder');
-    }
+    AppLogger.info('[ExcelImport] ${familyGroups.length} Familien gefunden');
 
-    // Create families
-    for (var entry in familyGroups.entries) {
+    for (final entry in familyGroups.entries) {
       final familyNumber = entry.key;
       final names = entry.value;
-      final lastName = names[0];
-      final firstName = names[1];
-      // Format like Python: "LastName FirstName" (Familie Mustermann Max)
-      final familyName = 'Familie $lastName $firstName';
-      final memberCount = familyMemberCounts[familyNumber] ?? 0;
+      final familyName = 'Familie ${names[0]} ${names[1]}';
 
       try {
         final familyId = await _familyRepository.createFamily(
           eventId: eventId,
           familyName: familyName,
         );
-
         familyMap[familyNumber] = familyId;
-        AppLogger.info('[ExcelImport] ✓ Created family: "$familyName" (Nr: $familyNumber, ID: $familyId, Members: $memberCount)');
+        AppLogger.debug('[ExcelImport] Familie "$familyName" angelegt (Nr: $familyNumber, ID: $familyId, ${familyMemberCounts[familyNumber]} Mitglieder)');
       } catch (e) {
-        AppLogger.error('[ExcelImport] Failed to create family for number $familyNumber', error: e);
-        result.errors.add('Fehler beim Erstellen der Familie "$familyName": $e');
+        AppLogger.error('[ExcelImport] Familie "$familyName" konnte nicht angelegt werden', error: e);
+        result.errors.add('Fehler beim Anlegen der Familie "$familyName": $e');
       }
     }
 
-    AppLogger.info('[ExcelImport] Family creation complete: ${familyMap.length} families created');
     return familyMap;
   }
 
-
-  /// Build column mapping from header row
+  /// Baut das Column-Mapping aus der Header-Zeile
   Map<String, int> _buildColumnMapping(List<Data?> headerRow) {
     final mapping = <String, int>{};
 
-    AppLogger.info('[ExcelImport] Building column mapping from ${headerRow.length} headers');
-
     for (var i = 0; i < headerRow.length; i++) {
       final cell = headerRow[i];
-      if (cell == null || cell.value == null) {
-        continue;
-      }
+      if (cell == null || cell.value == null) continue;
 
-      final headerName = cell.value.toString().trim().toLowerCase();
-      AppLogger.debug('[ExcelImport] Header[$i]: "$headerName"');
+      final h = cell.value.toString().trim().toLowerCase();
 
-      // Map known header names (case-insensitive, with variations)
-      if (headerName.contains('vorname')) {
+      if (h.contains('vorname')) {
         mapping['first_name'] = i;
-        AppLogger.info('[ExcelImport] ✓ Mapped first_name to column $i');
-      } else if (headerName.contains('nachname')) {
+      } else if (h.contains('nachname')) {
         mapping['last_name'] = i;
-        AppLogger.info('[ExcelImport] ✓ Mapped last_name to column $i');
-      } else if (headerName.contains('geburtsdatum') || headerName.contains('geburtstag')) {
+      } else if (h.contains('geburtsdatum') || h.contains('geburtstag')) {
         mapping['birth_date'] = i;
-        AppLogger.info('[ExcelImport] ✓ Mapped birth_date to column $i');
-      } else if (headerName.contains('geschlecht')) {
+      } else if (h.contains('geschlecht')) {
         mapping['gender'] = i;
-        AppLogger.info('[ExcelImport] ✓ Mapped gender to column $i');
-      } else if (headerName.contains('e-mail') || headerName.contains('email')) {
+      } else if (h.contains('e-mail') || h.contains('email')) {
         mapping['email'] = i;
-      } else if (headerName.contains('telefon') || headerName.contains('phone')) {
+      } else if (h.contains('telefon') || h.contains('phone')) {
         mapping['phone'] = i;
-      } else if (headerName.contains('adresse')) {
-        // Wenn "Adresse" gefunden wird, direkt als address mappen
+      } else if (h.contains('adresse')) {
         mapping['address'] = i;
-      } else if (headerName.contains('straße') || headerName.contains('strasse')) {
-        // Separate Straße-Spalte
+      } else if (h.contains('straße') || h.contains('strasse')) {
         mapping['street'] = i;
-      } else if (headerName.contains('plz') || headerName.contains('postleitzahl')) {
-        // Separate PLZ-Spalte
+      } else if (h.contains('plz') || h.contains('postleitzahl')) {
         mapping['postal_code'] = i;
-      } else if (headerName.contains('stadt') || headerName.contains('ort')) {
-        // Separate Ort-Spalte
+      } else if (h.contains('stadt') || h.contains('ort')) {
         mapping['city'] = i;
-      } else if (headerName.contains('notfall') && headerName.contains('name')) {
+      } else if (h.contains('notfall') && h.contains('name')) {
         mapping['emergency_contact_name'] = i;
-      } else if (headerName.contains('notfall') && (headerName.contains('telefon') || headerName.contains('phone'))) {
+      } else if (h.contains('notfall') && (h.contains('telefon') || h.contains('phone'))) {
         mapping['emergency_contact_phone'] = i;
-      } else if (headerName.contains('allergi')) {
+      } else if (h.contains('allergi')) {
         mapping['allergies'] = i;
-      } else if (headerName.contains('medikament')) {
+      } else if (h.contains('medikament')) {
         mapping['medications'] = i;
-      } else if (headerName.contains('ernährung') || headerName.contains('diät')) {
+      } else if (h.contains('ernährung') || h.contains('diät')) {
         mapping['dietary_restrictions'] = i;
-      } else if (headerName.contains('notiz') || headerName.contains('bemerkung')) {
+      } else if (h.contains('notiz') || h.contains('bemerkung')) {
         mapping['notes'] = i;
-      } else if (headerName.contains('familie') && (headerName.contains('nr') || headerName.contains('nummer'))) {
+      } else if (h.contains('familie') && (h.contains('nr') || h.contains('nummer'))) {
         mapping['family_number'] = i;
-        AppLogger.info('[ExcelImport] ✓ Mapped family_number to column $i (header: "$headerName")');
       }
     }
 
-    AppLogger.info('[ExcelImport] Column mapping complete: ${mapping.length} columns mapped');
-    if (mapping.containsKey('family_number')) {
-      AppLogger.info('[ExcelImport] ✓ Family column detected at index ${mapping['family_number']}');
-    } else {
-      AppLogger.warning('[ExcelImport] ⚠ No family column detected - participants will not be grouped into families');
-    }
-
+    AppLogger.info('[ExcelImport] Spalten-Mapping: ${mapping.length} Spalten erkannt'
+        '${mapping.containsKey('family_number') ? ' (inkl. Familien-Nr)' : ''}');
     return mapping;
   }
 
-  /// Parse a single row with dynamic column mapping
+  /// Liest eine Zeile anhand des Column-Mappings
   Map<String, dynamic> _parseRowWithMapping(
     List<Data?> row,
     Map<String, int> columnMapping,
@@ -368,16 +263,15 @@ class ExcelImportService {
   ) {
     final data = <String, dynamic>{};
 
-    // Parse each field using the column mapping
-    if (columnMapping.containsKey('first_name')) {
-      data['first_name'] = _getCellValue(row, columnMapping['first_name']!);
+    for (final key in ['first_name', 'last_name', 'gender', 'street', 'postal_code',
+                       'city', 'email', 'phone', 'emergency_contact_name',
+                       'emergency_contact_phone', 'allergies', 'medications',
+                       'dietary_restrictions', 'notes', 'family_number', 'address']) {
+      if (columnMapping.containsKey(key)) {
+        data[key] = _getCellValue(row, columnMapping[key]!);
+      }
     }
 
-    if (columnMapping.containsKey('last_name')) {
-      data['last_name'] = _getCellValue(row, columnMapping['last_name']!);
-    }
-
-    // Parse birth date
     if (columnMapping.containsKey('birth_date')) {
       final birthDateCell = row[columnMapping['birth_date']!];
       if (birthDateCell != null && birthDateCell.value != null) {
@@ -389,82 +283,47 @@ class ExcelImportService {
       }
     }
 
-    if (columnMapping.containsKey('gender')) {
-      data['gender'] = _getCellValue(row, columnMapping['gender']!);
-    }
-
-    if (columnMapping.containsKey('street')) {
-      data['street'] = _getCellValue(row, columnMapping['street']!);
-    }
-
-    if (columnMapping.containsKey('postal_code')) {
-      data['postal_code'] = _getCellValue(row, columnMapping['postal_code']!);
-    }
-
-    if (columnMapping.containsKey('city')) {
-      data['city'] = _getCellValue(row, columnMapping['city']!);
-    }
-
-    if (columnMapping.containsKey('email')) {
-      data['email'] = _getCellValue(row, columnMapping['email']!);
-    }
-
-    if (columnMapping.containsKey('phone')) {
-      data['phone'] = _getCellValue(row, columnMapping['phone']!);
-    }
-
-    if (columnMapping.containsKey('emergency_contact_name')) {
-      data['emergency_contact_name'] = _getCellValue(row, columnMapping['emergency_contact_name']!);
-    }
-
-    if (columnMapping.containsKey('emergency_contact_phone')) {
-      data['emergency_contact_phone'] = _getCellValue(row, columnMapping['emergency_contact_phone']!);
-    }
-
-    if (columnMapping.containsKey('allergies')) {
-      data['allergies'] = _getCellValue(row, columnMapping['allergies']!);
-    }
-
-    if (columnMapping.containsKey('medications')) {
-      data['medications'] = _getCellValue(row, columnMapping['medications']!);
-    }
-
-    if (columnMapping.containsKey('dietary_restrictions')) {
-      data['dietary_restrictions'] = _getCellValue(row, columnMapping['dietary_restrictions']!);
-    }
-
-    if (columnMapping.containsKey('notes')) {
-      data['notes'] = _getCellValue(row, columnMapping['notes']!);
-    }
-
-    if (columnMapping.containsKey('family_number')) {
-      data['family_number'] = _getCellValue(row, columnMapping['family_number']!);
-    }
-
     return data;
   }
 
-  /// Get cell value as string
+  /// Kombiniert Adressfelder (kombiniertes Feld oder Einzelfelder)
+  String? _buildAddress(Map<String, dynamic> data) {
+    if (data.containsKey('address') && data['address'] != null) {
+      return data['address'] as String?;
+    }
+
+    final street = data['street'] as String?;
+    final postalCode = data['postal_code'] as String?;
+    final city = data['city'] as String?;
+
+    if (street == null && postalCode == null && city == null) return null;
+
+    final parts = <String>[];
+    if (street != null && street.isNotEmpty) parts.add(street);
+    if (postalCode != null && postalCode.isNotEmpty) {
+      parts.add(city != null && city.isNotEmpty ? '$postalCode $city' : postalCode);
+    } else if (city != null && city.isNotEmpty) {
+      parts.add(city);
+    }
+
+    return parts.isEmpty ? null : parts.join(', ');
+  }
+
+  /// Liest einen Zellwert als String (null wenn leer)
   String? _getCellValue(List<Data?> row, int columnIndex) {
     try {
-      if (columnIndex < 0 || columnIndex >= row.length) {
-        return null;
-      }
-
+      if (columnIndex < 0 || columnIndex >= row.length) return null;
       final cell = row[columnIndex];
-      if (cell == null || cell.value == null) {
-        return null;
-      }
-
+      if (cell == null || cell.value == null) return null;
       final value = cell.value.toString().trim();
       return value.isEmpty ? null : value;
     } catch (e) {
-      AppLogger.error('[ExcelImport] Error reading cell at column $columnIndex', error: e);
+      AppLogger.error('[ExcelImport] Fehler beim Lesen von Spalte $columnIndex', error: e);
       return null;
     }
   }
 
-  /// Parse date from Excel cell (handles DateCellValue, DateTimeCellValue, numeric serial, and string formats)
+  /// Parst das Datum aus einer Excel-Zelle (DateCellValue, DateTimeCellValue, numerisch, Text)
   DateTime _parseDateFromCell(Data cell) {
     final value = cell.value;
 
@@ -476,7 +335,7 @@ class ExcelImportService {
       return DateTime(value.year, value.month, value.day);
     }
 
-    // Excel serial date number (days since 1899-12-30)
+    // Excel-Seriennummer (Tage seit 1899-12-30)
     if (value is IntCellValue || value is DoubleCellValue) {
       final numValue = value is IntCellValue ? value.value.toDouble() : (value as DoubleCellValue).value;
       final excelEpoch = DateTime(1899, 12, 30);
@@ -490,7 +349,7 @@ class ExcelImportService {
     return _parseDate(value.toString());
   }
 
-  /// Parse date string (supports DD.MM.YYYY, YYYY-MM-DD, DD/MM/YYYY)
+  /// Parst einen Datumsstring (DD.MM.YYYY, YYYY-MM-DD, DD/MM/YYYY)
   DateTime _parseDate(String dateStr) {
     final s = dateStr.trim();
 
@@ -522,13 +381,11 @@ class ExcelImportService {
     throw ExcelImportException('Ungültiges Datumsformat: $dateStr');
   }
 
-
-  /// Generate Excel template for participant import
+  /// Erstellt eine Excel-Vorlage für den Teilnehmer-Import
   Future<String> generateImportTemplate(String outputPath) async {
     final excel = Excel.createExcel();
     final sheet = excel['Teilnehmer'];
 
-    // Header row
     final headers = [
       'Vorname *',
       'Nachname *',
@@ -554,7 +411,6 @@ class ExcelImportService {
           TextCellValue(headers[i]);
     }
 
-    // Example rows (family with 2 members + 1 single person)
     final exampleData = [
       ['Max', 'Mustermann', '15.06.2010', 'Männlich', '1', 'Musterstraße 42', '12345', 'Musterstadt', 'max@example.com', '0123456789', 'Maria Mustermann', '0123456789', 'Erdnüsse', 'Keine', 'Vegetarisch', 'Schwimmer', 'Spielt gerne Fußball'],
       ['Anna', 'Mustermann', '10.03.2012', 'Weiblich', '1', 'Musterstraße 42', '12345', 'Musterstadt', 'anna@example.com', '0123456789', 'Maria Mustermann', '0123456789', '', 'Keine', '', 'Seepferdchen', ''],
@@ -568,7 +424,6 @@ class ExcelImportService {
       }
     }
 
-    // Save file
     final fileBytes = excel.save();
     if (fileBytes != null) {
       File(outputPath)
@@ -581,10 +436,22 @@ class ExcelImportService {
   }
 }
 
-/// Result of Excel import operation
+/// Interne Exception zum kontrollierten Abbrechen der Transaktion bei Zeilenfehlern.
+/// Wird NICHT an den Aufrufer weitergegeben – das `rolledBack`-Flag im Result übernimmt die Kommunikation.
+class _ImportRollbackException implements Exception {
+  const _ImportRollbackException();
+}
+
+/// Ergebnis eines Excel-Imports
 class ExcelImportResult {
   int totalRows = 0;
+
+  /// Zeilen die ohne Fehler verarbeitet wurden (bei rolledBack=true trotzdem nicht in der DB)
   int successCount = 0;
+
+  /// true = Transaktion wurde zurückgesetzt, keine Daten wurden gespeichert
+  bool rolledBack = false;
+
   List<String> errors = [];
 
   bool get hasErrors => errors.isNotEmpty;
@@ -593,6 +460,9 @@ class ExcelImportResult {
 
   @override
   String toString() {
+    if (rolledBack) {
+      return 'ZURÜCKGESETZT – Gesamt: $totalRows, Verarbeitet: $successCount, Fehler: $errorCount';
+    }
     return 'Gesamt: $totalRows, Erfolgreich: $successCount, Fehler: $errorCount';
   }
 }
